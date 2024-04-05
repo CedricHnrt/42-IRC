@@ -1,0 +1,10 @@
+#IDE
+.idea
+.vscode
+
+#EXECUTABLE
+ircserv
+
+#DEPENDENCIES
+*.o
+*.d
