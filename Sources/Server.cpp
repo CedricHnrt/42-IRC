@@ -18,40 +18,65 @@ static bool parsePassword(const std::string &password)
 {
 	for (size_t i = 0; i < password.length(); i++)
 	{
-		if (!isascii(password[i]) || isblank(password[i]))
-		{
-			//throw
+		//ajouter le :
+		if (!isalnum(password[i]))
 			return 1;
-		}
 	}
 	return 0;
 }
 
 Server::Server(char *port, char *password)
 {
+	//creation du socket (fd / interface)
 	this->_socketfd = socket(AF_INET, SOCK_STREAM, 0);
+
 	std::cout << "socketfd = "<< this->_socketfd << std::endl;
+
 	if (this->_socketfd < 0)
 	{
-		//throw
-		exit(1);
+		this->exit();
+		throw SocketFDException();
 	}
-	if (parsePort(std::string(port) )|| parsePassword(std::string(password)))
-	{
-		//throw
-		exit(1);
+	if (parsePort(std::string(port) ) || parsePassword(std::string(password))) {
+		this->exit();
+		throw wrongArgumentException();
 	}
+
 	this->_password = password;
+
+	/*remplir la struct sockaddr_in
+	 * qui contient le duo IP + port*/
 	this->_serverSocket.sin_family = AF_INET;
 	this->_serverSocket.sin_port = htons(atoi(port));
 	std::cout << "sin_port = "<< this->_serverSocket.sin_port << std::endl;
+	/* traduit en binaire l'adresse IP */
 	inet_pton(AF_INET, "127.0.0.1", &this->_serverSocket.sin_addr);
+
+	/*associer le socket a l'adresse et port dans sockaddr_in*/
 	int res = bind(this->_socketfd, reinterpret_cast<sockaddr *>(&(this->_serverSocket)), sizeof(_serverSocket));
 
 	std::cout << res << std::endl;
+
+	/*mettre le socket en ecoute passive*/
+	int lis = listen(this->_socketfd, 10);
+	std::cout << "lis = " << lis << std::endl;
+
+	/*permet de surveiller un fd (ou socket en l'occurence)
+	 * selon des events
+	 * */
+	pollfd fds;
+	fds.fd = this->_socketfd;
+
+	//surveiller entree
+	fds.events = POLLIN;
+}
+
+void Server::exit()
+{
+	close(this->_socketfd);
 }
 
 Server::~Server()
 {
-
+	close(this->_socketfd);
 }

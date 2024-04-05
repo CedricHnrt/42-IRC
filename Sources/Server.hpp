@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+#include <poll.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -24,12 +26,19 @@ class Server
 		int _socketfd;
 		sockaddr_in _serverSocket;
 		std::string _password;
+
 	public:
 		Server(char *port, char *password);
 		~Server();
+
+		void exit();
 	class SocketFDException : public std::exception
 	{
 		const char *what() const throw() { return ("Error: Could not create the socket"); }
+	};
+	class wrongArgumentException : public std::exception
+	{
+		const char *what() const throw() { return ("Error: Wrong arguments\nUsage: ./ircserv <port> <password>"); }
 	};
 
 
