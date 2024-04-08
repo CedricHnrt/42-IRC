@@ -21,12 +21,16 @@ _BOLD = \033[1m
 
 NAME = ircserv
 CC = @c++
-C++FLAGS = -Wall -Wextra -Werror -std=c++98 -MD -g3
+C++FLAGS = -Wall -Wextra -Werror -IIncludes -std=c++98 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-FILES = main \
-		Server
+FILES = main								\
+		Server								\
+		Models/User/UserProperties			\
+		Models/User/User					\
+		Models/Channel/ChannelProperties	\
+	#	Models/Channel/Channel
 OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
 DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
 
@@ -36,7 +40,7 @@ $(NAME): $(OBJS)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects
+	$(DIR) Objects Objects/Models
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 	$(CC) -c $(C++FLAGS) $< -o $@
 
