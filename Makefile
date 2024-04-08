@@ -25,7 +25,8 @@ C++FLAGS = -Wall -Wextra -Werror -std=c++98 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-#FILES =
+FILES = main \
+		Server
 OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
 DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
 
