@@ -72,6 +72,10 @@ Server::Server(char *port, char *password)
 	//surveiller entree
 	fds.events = POLLIN;
 	socklen_t len = sizeof(this->_serverSocket);
+	 /*Enregistrer FD de tous les clients, regarder si le fd qui me ping est deja connu
+	  * Si oui : recevoir un msg
+	  * enregistrer new user
+	  * */
 	while (1)
 	{
 		int client_sock = accept(this->_socketfd, reinterpret_cast<sockaddr *>(&(this->_serverSocket)), &len);
