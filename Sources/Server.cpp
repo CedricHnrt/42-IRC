@@ -8,7 +8,8 @@ static bool parsePort(const std::string &port)
 {
 	if (port.find_first_not_of("0123456789") != std::string::npos)
 		return 1;
-	long nb = stol(port, 0, 10);
+	const char *temp = port.c_str();
+	long nb = strtol(temp, NULL, 10);
 	if (nb < 1024 || nb > 49151)
 		return 1;
 	return 0;
@@ -66,10 +67,29 @@ Server::Server(char *port, char *password)
 	 * */
 	pollfd fds;
 	fds.fd = this->_socketfd;
+	std::cout << fds.fd << std::endl;
 
 	//surveiller entree
 	fds.events = POLLIN;
+	socklen_t len = sizeof(this->_serverSocket);
+	while (1)
+	{
+		int client_sock = accept(this->_socketfd, reinterpret_cast<sockaddr *>(&(this->_serverSocket)), &len);
+		if (client_sock < 0)
+		{
+			std::cout << "client sock failed" << std::endl;
+			this->exit();
+		}
+		else {
+			std::cout << "connection OK" << std::endl;
+			char buffer[512];
+			size_t size = recv(client_sock, buffer, 512, 0);
+			buffer[size] = '\0';
+			std::cout << buffer << std::endl;
+		}
+	}
 }
+
 
 void Server::exit()
 {

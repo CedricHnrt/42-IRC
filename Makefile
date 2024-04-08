@@ -25,8 +25,8 @@ C++FLAGS = -Wall -Wextra -Werror -std=c++98 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-FILES = Sources/main \
-		Sources/Server
+FILES = main \
+		Server
 OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
 DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
 
@@ -35,7 +35,7 @@ $(NAME): $(OBJS)
 	$(CC) $(OBJS) -o $(NAME)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
-Objects/%.o: %.cpp Makefile
+Objects/%.o: Sources/%.cpp Makefile
 	$(DIR) Objects
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 	$(CC) -c $(C++FLAGS) $< -o $@
