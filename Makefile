@@ -34,7 +34,7 @@ $(NAME): $(OBJS)
 	$(CC) $(OBJS) -o $(NAME)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
-Objects/%.o: %.cpp Makefile
+Objects/%.o: Sources/%.cpp Makefile
 	$(DIR) Objects
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 	$(CC) -c $(C++FLAGS) $< -o $@
