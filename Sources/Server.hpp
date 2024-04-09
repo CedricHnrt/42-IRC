@@ -9,9 +9,13 @@
 #include <unistd.h>
 #include <poll.h>
 #include <stdlib.h>
+#include <fcntl.h>
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #ifndef PORT
 #define PORT 7777
@@ -27,12 +31,13 @@ class Server
 		int _socketfd;
 		sockaddr_in _serverSocket;
 		std::string _password;
+		std::vector<struct pollfd> _fds;
 
 	public:
 		Server(char *port, char *password);
 		~Server();
 
-		void exit();
+		void quit();
 	class SocketFDException : public std::exception
 	{
 		const char *what() const throw() { return ("Error: Could not create the socket"); }
