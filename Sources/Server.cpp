@@ -107,18 +107,45 @@ void Server::serverUp()
 void Server::getNewClientInfos(int incomingFD)
 {
 	char buffer[512];
+	int bytes;
+	std::string infos;
+	std::string password;
+	std::string nickname;
+	std::string user;
 
 	std::cout << "got in new client infos" << std::endl;
-	size_t size = recv(incomingFD, buffer, 512, 0);
-	buffer[size] = '\0';
-	std::cout << buffer << std::endl;
+	while (1)
+	{
+		bytes = recv(incomingFD, buffer, 512, 0);
+		if (bytes < 1)
+			throw CommunicationException();
+		infos += buffer;
+		if (strstr(buffer, "\r\n") && strstr(buffer, ":realname"))
+			break;
+		memset(buffer, 0, bytes);
+	}
+	std::cout << "infos = " << infos << std::endl;
 
-	std::string infos(buffer);
+	size_t j = 0;
+	size_t i = infos.find('\n', j);
+	j = i + 1;
+	i = infos.find('\n', j);
+	password = infos.substr(j, i);
+	j = i + 1;
+	i = infos.find('\n', j);
+	nickname = infos.substr(j, i);
+	j = i + 1;
+	i = infos.find('\n', j);
+	user = infos.substr(j, i);
 
+	std::cout << "PW: " << password << std::endl;
+	std::cout << "nick :" << nickname << std::endl;
+	std::cout << "user :" << user << std::endl;
 }
 
 void Server::handleIncomingRequest(int incomingFD)
 {
+	std::cout << "IN INCOMING REQUEST" << std::endl;
 	char buffer[512];
 	size_t size = recv(incomingFD, buffer, 512, 0);
 	buffer[size] = '\0';
