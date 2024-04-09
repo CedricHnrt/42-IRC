@@ -26,10 +26,6 @@
 			void removePermission(std::string permission);
 			bool hasPermission(const std::string& permission);
 
-			bool containsUser(std::list<size_t> list, User& target);
-			bool addTargetToList(std::list<size_t> list, User& target);
-			bool removeTargetFromList(std::list<size_t> list, User& target);
-
 			std::list<size_t> getIgnoredUsers();
 			std::list<size_t> getBlockedUsers();
 			std::list<size_t> getJoinedChannels();

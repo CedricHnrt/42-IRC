@@ -43,28 +43,6 @@ bool UserProperties::hasPermission(const std::string& permission)
 	return std::find_if(getPermissions().begin(), getPermissions().end(), StringPredicate(permission)) != getPermissions().end();
 }
 
-
-bool UserProperties::containsUser(std::list<size_t> list, User &target)
-{
-	return std::find_if(list.begin(), list.end(), SizeTPredicate(target.getUniqueId())) != list.end();;
-}
-
-bool UserProperties::addTargetToList(std::list<size_t> list, User &target)
-{
-	if (containsUser(list, target))
-		return false;
-	list.push_back(target.getUniqueId());
-	return true;
-}
-
-bool UserProperties::removeTargetFromList(std::list<size_t> list, User &target)
-{
-	if (!containsUser(list, target))
-		return false;
-	list.remove_if(SizeTPredicate(target.getUniqueId()));
-	return true;
-}
-
 std::list<std::string> UserProperties::getPermissions()
 {
 	return permissions;
