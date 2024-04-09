@@ -1,16 +1,18 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <ChannelExceptions.hpp>
 
 #include "doctest.h"
 #include "../Includes/Channel/Channel.hpp"
 #include "../Includes/Channel/ChannelManager.hpp"
+#include "../Includes/User/User.hpp"
 
 TEST_SUITE("CHANNELS")
 {
 	TEST_CASE("Channel Tests")
 	{
 		ChannelManager *channelManager = ChannelManager::getInstance();
-		Channel channel1("Channel1", "Channel1 Description", "Channel1 Password");
-		Channel channel2("Channel2", "Channel2 Description", "Channel2 Password");
+		Channel channel1 = Channel("Channel1", "Channel1 Description", "Channel1 Password");
+		Channel channel2 = Channel("Channel2", "Channel2 Description", "Channel2 Password");
 
 		SUBCASE("Channel Creation")
 		{
@@ -23,23 +25,28 @@ TEST_SUITE("CHANNELS")
 			CHECK(channel2.getTopic() == "Channel2 Description");
 			CHECK(channel2.getPassword() == "Channel2 Password");
 			CHECK(channel2.getProperties().getUsersInChannel().size() == 0);
+
 		}
 
-		SUBCASE("Channel Publisher")
+		SUBCASE("Channel Manager")
 		{
 			channelManager->publishChannel(channel1);
 			channelManager->publishChannel(channel2);
+
 			CHECK(channelManager->getChannels().size() == 2);
 			CHECK(channelManager->getChannel(channel1.getUniqueId()).getName() == "Channel1");
 			CHECK(channelManager->getChannel(channel2.getUniqueId()).getName() == "Channel2");
-		}
-
-		SUBCASE("Channel Remover")
-		{
 			channelManager->deleteChannel(channel1.getUniqueId());
 			CHECK(channelManager->getChannels().size() == 1);
-			REQUIRE_THROWS(channelManager->getChannel(channel1.getUniqueId()).getName());
-			CHECK(channelManager->getChannel(channel2.getUniqueId()).getName() == "Channel2");
+			CHECK_THROWS_AS(channelManager->getChannel(channel1.getUniqueId()), ChannelNotFoundException);
+			CHECK_NOTHROW(channelManager->getChannel(channel2.getUniqueId()));
+			channelManager->deleteChannel(channel2.getUniqueId());
+			CHECK(channelManager->getChannels().size() == 0);
 		}
 	}
 }
+
+
+
+
+
