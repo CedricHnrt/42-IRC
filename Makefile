@@ -26,11 +26,18 @@ RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
 FILES = main								\
-		Server								\
-		Models/User/UserProperties			\
+ 		Server								\
+		Exceptions/ChannelCreationException	\
+		Exceptions/ChannelNotFoundException	\
+		Exceptions/ChannelDeletionException \
+		Exceptions/ChannelModificationException \
+		Utils/PrimitivePredicate			\
+		Utils/IRCPredicate					\
 		Models/User/User					\
+		Models/User/UserProperties			\
 		Models/Channel/ChannelProperties	\
-	#	Models/Channel/Channel
+		Models/Channel/Channel				\
+		Managers/ChannelManager
 OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
 DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
 
@@ -40,7 +47,7 @@ $(NAME): $(OBJS)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects Objects/Models
+	$(DIR) Objects Objects/Exceptions Objects/Models/Channel Objects/Models/User Objects/Managers Objects/Utils Objects/Tests
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 	$(CC) -c $(C++FLAGS) $< -o $@
 
