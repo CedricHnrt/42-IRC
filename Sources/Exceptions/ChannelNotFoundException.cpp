@@ -7,6 +7,5 @@ ChannelNotFoundException::~ChannelNotFoundException() throw() {}
 
 const char* ChannelNotFoundException::what() const throw()
 {
-    std::string msg = channelId + ": " + this->message;
-    return msg.c_str();
+    return message.c_str();
 }
