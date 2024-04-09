@@ -2,7 +2,7 @@
 #include "../../../Includes/User/UserProperties.hpp"
 #include "../../../Includes/User/User.hpp"
 #include <algorithm>
-
+#include <PrimitivePredicate.hpp>
 UserProperties::UserProperties() : isAway(false) {}
 
 void UserProperties::setAway(bool away)
@@ -15,15 +15,15 @@ bool UserProperties::getAway() const
 	return isAway;
 }
 
-void UserProperties::joinChannel(Channel channel)
-{
+//void UserProperties::joinChannel(Channel channel)
+//{
+//
+//}
 
-}
-
-void UserProperties::leaveChannel(Channel channel)
-{
-
-}
+//void UserProperties::leaveChannel(Channel channel)
+//{
+//
+//}
 
 void UserProperties::addPermission(std::string permission)
 {
@@ -34,18 +34,19 @@ void UserProperties::addPermission(std::string permission)
 
 void UserProperties::removePermission(std::string permission)
 {
-	getPermissions().remove_if(permission);
+	permissions.remove_if(StringPredicate(permission));
 }
 
 bool UserProperties::hasPermission(const std::string& permission)
+
 {
-	return std::find(getPermissions().begin(), getPermissions().end(), permission) != getPermissions().end();
+	return std::find_if(getPermissions().begin(), getPermissions().end(), StringPredicate(permission)) != getPermissions().end();
 }
 
 
 bool UserProperties::containsUser(std::list<size_t> list, User &target)
 {
-	return std::find(list.begin(), list.end(), target.getUniqueId()) != list.end();;
+	return std::find_if(list.begin(), list.end(), SizeTPredicate(target.getUniqueId())) != list.end();;
 }
 
 bool UserProperties::addTargetToList(std::list<size_t> list, User &target)
@@ -60,7 +61,7 @@ bool UserProperties::removeTargetFromList(std::list<size_t> list, User &target)
 {
 	if (!containsUser(list, target))
 		return false;
-	list.remove_if(target.getUniqueId());
+	list.remove_if(SizeTPredicate(target.getUniqueId()));
 	return true;
 }
 
