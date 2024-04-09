@@ -1,14 +1,14 @@
 #ifndef COMPARATOR_HPP
 	#define COMPARATOR_HPP
 	#include <string>
-	#include "Channel/Channel.hpp"
+	#include "Channel.hpp"
 	class ChannelPredicate
 	{
 		private:
-			Channel target;
+			size_t channelId;
 		public:
-			explicit ChannelPredicate(const Channel& v);
-			bool operator () (const Channel& a);
-			bool operator == (const Channel& a);
+			explicit ChannelPredicate(size_t channelId);
+			bool operator () (Channel channel);
+			bool operator == (size_t channelID);
 	};
 #endif

@@ -23,26 +23,19 @@ void ChannelManager::publishChannel(Channel& channel)
 
 Channel& ChannelManager::getChannel(size_t channelId)
 {
-	std::list<Channel>::iterator it = channels.begin();
-	while (it != channels.end())
-	{
-		if (it->getUniqueId() == channelId)
-			return *it;
-		it++;
-	}
+	std::list<Channel>::iterator iterator = std::find_if(channels.begin(), channels.end(), ChannelPredicate(channelId));
+	if (iterator != channels.end())
+		return *iterator;
 	throw ChannelNotFoundException(channelId, "Channel not found !");
 }
 
 void ChannelManager::deleteChannel(size_t channelId)
 {
-	std::list<Channel>::iterator it;
-	for (it = channels.begin(); it != channels.end(); ++it)
+	std::list<Channel>::iterator iterator = std::find_if(channels.begin(), channels.end(),  ChannelPredicate(channelId));
+	if (iterator != channels.end())
 	{
-		if (it->getUniqueId() == channelId)
-		{
-			channels.erase(it);
-			return;
-		}
+		channels.erase(iterator);
+		return ;
 	}
 	throw ChannelDeletionException(channelId, "Channel not found");
 }
