@@ -1,4 +1,4 @@
-#include "../../Includes/Channel/Exceptions/ChannelException.hpp"
+#include "ChannelExceptions.hpp"
 
 ChannelNotFoundException::ChannelNotFoundException(size_t channelId, const std::string& message) throw() :
 message(message), channelId(channelId) {}

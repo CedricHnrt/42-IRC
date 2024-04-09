@@ -1,5 +1,5 @@
-#include "../../../Includes/Channel/Channel.hpp"
-#include "../../../Includes/Channel/ChannelProperties.hpp"
+#include "Channel.hpp"
+#include "ChannelProperties.hpp"
 #include <algorithm>
 #include <PrimitivePredicate.hpp>
 

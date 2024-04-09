@@ -1,5 +1,5 @@
-#include "../../../Includes/User/User.hpp"
-#include "../../../Includes/User/UserProperties.hpp"
+#include "User.hpp"
+#include "UserProperties.hpp"
 
 std::string User::getName() const
 {

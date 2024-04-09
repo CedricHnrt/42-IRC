@@ -1,6 +1,6 @@
 
-#include "../../../Includes/User/UserProperties.hpp"
-#include "../../../Includes/User/User.hpp"
+#include "UserProperties.hpp"
+#include "User.hpp"
 #include <algorithm>
 #include <PrimitivePredicate.hpp>
 UserProperties::UserProperties() : isAway(false) {}

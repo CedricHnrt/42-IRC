@@ -1,6 +1,6 @@
-#include "../../../Includes/Channel/Channel.hpp"
-#include "../../../Includes/Channel/ChannelProperties.hpp"
-#include "../../../Includes/Channel/ChannelManager.hpp"
+#include "Channel.hpp"
+#include "ChannelProperties.hpp"
+#include "ChannelManager.hpp"
 
 Channel::Channel(std::string name, std::string topic, std::string password) : name(name), topic(topic), password(password)
 {

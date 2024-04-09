@@ -23,18 +23,19 @@ TEST_SUITE("CHANNELS")
 			CHECK(channel2.getTopic() == "Channel2 Description");
 			CHECK(channel2.getPassword() == "Channel2 Password");
 			CHECK(channel2.getProperties().getUsersInChannel().size() == 0);
-
 		}
 
-		SUBCASE("Channel Manager")
+		SUBCASE("Channel Publisher")
 		{
 			channelManager->publishChannel(channel1);
 			channelManager->publishChannel(channel2);
-
 			CHECK(channelManager->getChannels().size() == 2);
 			CHECK(channelManager->getChannel(channel1.getUniqueId()).getName() == "Channel1");
 			CHECK(channelManager->getChannel(channel2.getUniqueId()).getName() == "Channel2");
+		}
 
+		SUBCASE("Channel Remover")
+		{
 			channelManager->deleteChannel(channel1.getUniqueId());
 			CHECK(channelManager->getChannels().size() == 1);
 			REQUIRE_THROWS(channelManager->getChannel(channel1.getUniqueId()).getName());

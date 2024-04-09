@@ -1,5 +1,5 @@
-#include "../../Includes/Channel/ChannelManager.hpp"
-#include "../../Includes/Channel/Exceptions/ChannelException.hpp"
+#include "ChannelManager.hpp"
+#include "ChannelExceptions.hpp"
 #include <limits>
 #include <algorithm>
 #include <IRCPredicate.hpp>

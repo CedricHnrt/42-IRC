@@ -21,7 +21,12 @@ _BOLD = \033[1m
 
 NAME = ircserv
 CC = @c++
-C++FLAGS = -Wall -Wextra -Werror -IIncludes -std=c++98 -MD -g3
+C++FLAGS = -Wall -Wextra -Werror		\
+ -I ./Includes/							\
+ -I ./Includes/Channel					\
+ -I ./Includes/Commands					\
+ -I ./Includes/User						\
+ -std=c++98 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
@@ -43,7 +48,7 @@ DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
 
 $(NAME): $(OBJS)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(OBJS) -o $(NAME)
+	$(CC) -I ./Includes/ $(OBJS) -o $(NAME)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 Objects/%.o: Sources/%.cpp Makefile

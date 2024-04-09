@@ -1,4 +1,4 @@
-#include "../../Includes/Channel/Exceptions/ChannelException.hpp"
+#include "ChannelExceptions.hpp"
 
 ChannelCreationException::ChannelCreationException(const std::string& message) throw() :
 message(message) {}
