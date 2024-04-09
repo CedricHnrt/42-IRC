@@ -12,20 +12,21 @@
 			std::string topic;
 			std::string password;
 			ChannelProperties properties;
-
+			Channel();
 		public:
-			Channel(std::string name, std::string topic, std::string password);
 			std::string getName() const;
 			std::string getTopic() const;
 			std::string getPassword() const;
 			size_t getUniqueId() const;
 			ChannelProperties getProperties() const;
-
-			Channel& setName(const std::string& name);
-			Channel& setTopic(const std::string& topic);
-			Channel& setPassword(const std::string& password);
-			Channel& setUniqueId(size_t uniqueId);
-			Channel& setProperties(const ChannelProperties& properties);
+		private:
+			friend class ChannelCacheManager;
+			friend class ChannelBuilder;
+			void setName(const std::string& name);
+			void setTopic(const std::string& topic);
+			void setPassword(const std::string& password);
+			void setUniqueId(size_t uniqueId);
+			void setProperties(const ChannelProperties& properties);
 
 	};
 

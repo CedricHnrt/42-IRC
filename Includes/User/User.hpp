@@ -6,6 +6,7 @@
 
 	class User {
 		private:
+			User();
 			std::string name;
 			std::string realName;
 			std::string nickname;
@@ -21,14 +22,17 @@
 			int getUserSocketId() const;
 			size_t getUniqueId() const;
 			UserProperties getProperties() const;
+			void setNickname(const std::string& nickname);
 
-			User& setName(const std::string& name);
-			User& setNickname(const std::string& nickname);
-			User& setRealName(const std::string& realName);
-			User& setIpAddr(const std::string& ipAddr);
-			User& setUserSocketId(int userSocketFd);
-			User& setUniqueId(const size_t& uniqueId);
-			User& setProperties(const UserProperties& properties);
+		private:
+			friend class UserBuilder;
+			friend class UsersCacheManager;
+			void setName(const std::string& name);
+			void setRealName(const std::string& realName);
+			void setIpAddr(const std::string& ipAddr);
+			void setUserSocketId(int userSocketFd);
+			void setUniqueId(const size_t& uniqueId);
+			void setProperties(const UserProperties& properties);
 	};
 
 #endif

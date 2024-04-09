@@ -1,27 +1,24 @@
-#include "ChannelManager.hpp"
-#include "ChannelExceptions.hpp"
+#include "ChannelCacheManager.hpp"
+#include "../Exceptions/ChannelExceptions.hpp"
 #include <limits>
 #include <algorithm>
 #include <iostream>
 #include <IRCPredicate.hpp>
 #include <PrimitivePredicate.hpp>
 
-ChannelManager* ChannelManager::instance = NULL;
+ChannelCacheManager* ChannelCacheManager::instance = NULL;
 
-ChannelManager::ChannelManager()
-{
-	this->uniqueIdCounter = 0;
-}
+ChannelCacheManager::ChannelCacheManager() {}
 
-void ChannelManager::publishChannel(Channel& channel)
+void ChannelCacheManager::addToCache(Channel& channel)
 {
 	if (this->uniqueIdCounter == std::numeric_limits<size_t>::max())
 		throw ChannelCreationException("Maximum number of channels reached !");
-	channel.setUniqueId(this->uniqueIdCounter++);
+	channel.setUniqueId(++this->uniqueIdCounter);
 	this->channels.push_back(channel);
 }
 
-Channel& ChannelManager::getChannel(size_t channelId)
+Channel& ChannelCacheManager::getFromCache(size_t channelId)
 {
 	std::list<Channel>::iterator iterator = std::find_if(channels.begin(), channels.end(), ChannelPredicate(channelId));
 	if (iterator != channels.end())
@@ -29,7 +26,7 @@ Channel& ChannelManager::getChannel(size_t channelId)
 	throw ChannelNotFoundException(channelId, "Channel not found !");
 }
 
-void ChannelManager::deleteChannel(size_t channelId)
+void ChannelCacheManager::deleteFromCache(size_t channelId)
 {
 	std::list<Channel>::iterator iterator = std::find_if(channels.begin(), channels.end(),  ChannelPredicate(channelId));
 	if (iterator != channels.end())
@@ -40,15 +37,18 @@ void ChannelManager::deleteChannel(size_t channelId)
 	throw ChannelDeletionException(channelId, "Channel not found");
 }
 
-std::list<Channel> ChannelManager::getChannels()
+std::list<Channel> ChannelCacheManager::getCache()
 {
 	return this->channels;
 }
 
-ChannelManager* ChannelManager::getInstance()
+ChannelCacheManager* ChannelCacheManager::getInstance()
 {
 	if (instance == NULL)
-		instance = new ChannelManager();
+	{
+		instance = new ChannelCacheManager();
+		instance->uniqueIdCounter = 0;
+		instance->channels = std::list<Channel>();
+	}
 	return instance;
 }
-

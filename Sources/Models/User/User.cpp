@@ -1,6 +1,8 @@
 #include "User.hpp"
 #include "UserProperties.hpp"
 
+User::User() {}
+
 std::string User::getName() const
 {
 	return name;
@@ -26,33 +28,48 @@ UserProperties User::getProperties() const
 	return *properties;
 }
 
-User& User::setName(const std::string& name)
+void User::setName(const std::string& name)
 {
 	this->name = name;
-	return *this;
 }
 
-User& User::setNickname(const std::string& nickname)
+void User::setNickname(const std::string& nickname)
 {
 	this->nickname = nickname;
-	return *this;
 }
 
-User& User::setIpAddr(const std::string& ipAddr)
+void User::setIpAddr(const std::string& ipAddr)
 {
 	this->ipAddr = ipAddr;
-	return *this;
 }
 
-User& User::setUniqueId(const size_t& uniqueId)
+void User::setUniqueId(const size_t& uniqueId)
 {
 	this->uniqueId = uniqueId;
-	return *this;
 }
 
-User& User::setProperties(const UserProperties& properties)
+void User::setProperties(const UserProperties& properties)
 {
 	*this->properties = properties;
-	return *this;
+}
+
+void User::setUserSocketId(int userSocketFd)
+{
+	this->userSocketFd = userSocketFd;
+}
+
+int User::getUserSocketId() const
+{
+	return userSocketFd;
+}
+
+void User::setRealName(const std::string& realName)
+{
+	this->realName = realName;
+}
+
+std::string User::getRealName() const
+{
+	return realName;
 }
 
