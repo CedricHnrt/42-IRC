@@ -58,6 +58,9 @@ fclean:
 
 re: fclean all
 
+exec : all
+		./ircserv 7777 434
+
 .PHONY: all clean fclean re
 
 -include $(DPDS)
