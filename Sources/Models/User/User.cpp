@@ -26,31 +26,31 @@ UserProperties User::getProperties() const
 	return *properties;
 }
 
-User User::setName(const std::string& name)
+User& User::setName(const std::string& name)
 {
 	this->name = name;
 	return *this;
 }
 
-User User::setNickname(const std::string& nickname)
+User& User::setNickname(const std::string& nickname)
 {
 	this->nickname = nickname;
 	return *this;
 }
 
-User User::setIpAddr(const std::string& ipAddr)
+User& User::setIpAddr(const std::string& ipAddr)
 {
 	this->ipAddr = ipAddr;
 	return *this;
 }
 
-User User::setUniqueId(const size_t& uniqueId)
+User& User::setUniqueId(const size_t& uniqueId)
 {
 	this->uniqueId = uniqueId;
 	return *this;
 }
 
-User User::setProperties(const UserProperties& properties)
+User& User::setProperties(const UserProperties& properties)
 {
 	*this->properties = properties;
 	return *this;

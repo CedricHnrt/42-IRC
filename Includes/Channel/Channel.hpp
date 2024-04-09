@@ -21,11 +21,11 @@
 			size_t getUniqueId() const;
 			ChannelProperties getProperties() const;
 
-			Channel setName(const std::string& name);
-			Channel setTopic(const std::string& topic);
-			Channel setPassword(const std::string& password);
-			Channel setUniqueId(size_t uniqueId);
-			Channel setProperties(const ChannelProperties& properties);
+			Channel& setName(const std::string& name);
+			Channel& setTopic(const std::string& topic);
+			Channel& setPassword(const std::string& password);
+			Channel& setUniqueId(size_t uniqueId);
+			Channel& setProperties(const ChannelProperties& properties);
 
 	};
 

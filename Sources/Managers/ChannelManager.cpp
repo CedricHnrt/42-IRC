@@ -2,10 +2,16 @@
 #include "ChannelExceptions.hpp"
 #include <limits>
 #include <algorithm>
+#include <iostream>
 #include <IRCPredicate.hpp>
 #include <PrimitivePredicate.hpp>
 
 ChannelManager* ChannelManager::instance = NULL;
+
+ChannelManager::ChannelManager()
+{
+	this->uniqueIdCounter = 0;
+}
 
 void ChannelManager::publishChannel(Channel& channel)
 {
@@ -17,11 +23,12 @@ void ChannelManager::publishChannel(Channel& channel)
 
 Channel& ChannelManager::getChannel(size_t channelId)
 {
-	std::list<Channel>::iterator it;
-	for (it = channels.begin(); it != channels.end(); ++it)
+	std::list<Channel>::iterator it = channels.begin();
+	while (it != channels.end())
 	{
 		if (it->getUniqueId() == channelId)
 			return *it;
+		it++;
 	}
 	throw ChannelNotFoundException(channelId, "Channel not found !");
 }

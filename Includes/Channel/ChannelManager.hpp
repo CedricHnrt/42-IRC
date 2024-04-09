@@ -10,7 +10,7 @@
 			std::list<Channel> channels;
 			size_t uniqueIdCounter;
 			static ChannelManager* instance;
-			ChannelManager() : uniqueIdCounter(0) {}
+			ChannelManager();
 
 		public:
 			void publishChannel(Channel& channel);

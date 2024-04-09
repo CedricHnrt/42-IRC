@@ -2,10 +2,7 @@
 #include "ChannelProperties.hpp"
 #include "ChannelManager.hpp"
 
-Channel::Channel(std::string name, std::string topic, std::string password) : name(name), topic(topic), password(password)
-{
-	this->uniqueId = 1;
-}
+Channel::Channel(std::string name, std::string topic, std::string password) : name(name), topic(topic), password(password) {}
 
 std::string Channel::getName() const
 {
@@ -32,31 +29,31 @@ ChannelProperties Channel::getProperties() const
 	return this->properties;
 }
 
-Channel Channel::setName(const std::string &name)
+Channel& Channel::setName(const std::string &name)
 {
 	this->name = name;
 	return *this;
 }
 
-Channel Channel::setTopic(const std::string &topic)
+Channel& Channel::setTopic(const std::string &topic)
 {
 	this->topic = topic;
 	return *this;
 }
 
-Channel Channel::setPassword(const std::string &password)
+Channel& Channel::setPassword(const std::string &password)
 {
 	this->password = password;
 	return *this;
 }
 
-Channel Channel::setUniqueId(size_t uniqueId)
+Channel& Channel::setUniqueId(size_t uniqueId)
 {
 	this->uniqueId = uniqueId;
 	return *this;
 }
 
-Channel Channel::setProperties(const ChannelProperties &properties)
+Channel& Channel::setProperties(const ChannelProperties &properties)
 {
 	ChannelManager::getInstance()->getChannels();
 	this->properties = properties;
