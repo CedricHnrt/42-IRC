@@ -19,7 +19,7 @@ _RED = \033[31m
 _END = \033[0m
 _BOLD = \033[1m
 
-NAME = irc_server
+NAME = ircserv
 CC = @c++
 INCLUDES=	-I ./Includes/				\
 			-I ./Includes/Builders		\
@@ -32,7 +32,7 @@ C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-FILES = Server								\
+FILES = Server/Server						\
 		Exceptions/ChannelCreationException	\
 		Exceptions/ChannelNotFoundException	\
 		Exceptions/ChannelDeletionException \
@@ -52,7 +52,7 @@ FILES = Server								\
 		Builders/UserBuilder				\
 		Builders/ChannelBuilder				\
 		Helpers/UserListHelper				\
-		Tests/Tests
+		main
 OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
 DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
 
@@ -62,7 +62,7 @@ $(NAME): $(OBJS)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects/Builders Objects/Exceptions Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Tests Objects/Helpers
+	$(DIR) Objects/Builders Objects/Exceptions Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Tests Objects/Helpers Objects/Server
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 	$(CC) -c $(C++FLAGS) $< -o $@
 

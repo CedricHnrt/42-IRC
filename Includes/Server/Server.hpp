@@ -10,6 +10,7 @@
 #include <poll.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include "../../Includes/Builders/UserBuilder.hpp"
 
 
 #include <iostream>
@@ -17,6 +18,8 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <map>
+#include <algorithm>
 
 #ifndef PORT
 #define PORT 7777
@@ -33,7 +36,10 @@ class Server
 		sockaddr_in _serverSocket;
 		std::string _password;
 		std::vector<struct pollfd> _fds;
-		int _lastClientFD;
+
+		//key = userSocketFd
+		std::map<int, UserBuilder> _danglingUsers;
+		std::vector <User> _allUsers;
 
 	public:
 		Server(char *port, char *password);

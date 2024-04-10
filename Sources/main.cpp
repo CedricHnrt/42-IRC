@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../Includes/Server/Server.hpp"
 
 int main(int argc, char **argv)
 {

@@ -4,10 +4,14 @@
 #include <UserExceptions.hpp>
 #include "User.hpp"
 
-UserBuilder::UserBuilder() : userSocketFd(-1) {}
+#include <iostream>
+
+#define PASSWORD "test"
+
+UserBuilder::UserBuilder() : userSocketFd(-1), isComplete(false) {}
 
 UserBuilder& UserBuilder::setName(const std::string& name) {
-	this->name = name;
+	this->userName = name;
 	return *this;
 }
 
@@ -45,7 +49,7 @@ static bool isValid(std::string str) {
 }
 
 void UserBuilder::clearBuilder() {
-	this->name.clear();
+	this->userName.clear();
 	this->realName.clear();
 	this->nickname.clear();
 	this->ipAddr.clear();
@@ -60,7 +64,7 @@ void UserBuilder::clearBuilder() {
 
 User& UserBuilder::build() {
 
-	if (!isValid(this->name))
+	if (!isValid(this->userName))
 	{
 		clearBuilder();
 		throw UserBuildException("Invalid Name");
@@ -82,8 +86,8 @@ User& UserBuilder::build() {
 	}
 
 	User* user = new User();
-	if (this->name.c_str())
-		user->setName(this->name);
+	if (this->userName.c_str())
+		user->setName(this->userName);
 	if (this->realName.c_str())
 		user->setRealName(this->realName);
 	if (this->nickname.c_str())
@@ -97,4 +101,81 @@ User& UserBuilder::build() {
 	clearBuilder();
 
 	return (*user);
+}
+
+UserBuilder	&UserBuilder::fillBuffer(const std::string data)
+{
+//	std::cout << "got in fillBuffer, data = " << data << std::endl;
+
+	std::string line;
+	size_t i = 0;
+	size_t j = 0;
+
+	while (data[i] && data[i + 1])
+	{
+		i = data.find('\n', j);
+		line = data.substr(j, i - j);
+		i++;
+		j = i;
+//		std::cout << "line: " << line << std::endl;
+		this->connectionInfos.push_back(line);
+	}
+//	std::cout << "end of fill buffer, size=" << this->connectionInfos.size() << std::endl;
+	return *this;
+}
+
+bool UserBuilder::isBuilderComplete()
+{
+	std::string line;
+
+	std::cout << "in BUILDER COMPLETE\n" << std::endl;
+//
+//	std::cout << "in builder complete, last info in vector: " << this->connectionInfos.back().substr(0, 4) << std::endl;
+
+	if (this->connectionInfos.size() >= 3 && this->connectionInfos.back().substr(0, 4) == "USER")
+	{
+		this->connectionInfos.erase(this->connectionInfos.begin());
+
+		/*handle the password*/
+		if (this->connectionInfos[0].substr(0, 4) != "PASS")
+			return false;
+		std::string password = this->connectionInfos[0].substr(5, this->connectionInfos[0].length());
+		password.erase(password.find(13));
+		std::cout << "password: " << password << ", size: " << password.size() << std::endl;
+		if (password != PASSWORD)
+			return false;
+
+		this->connectionInfos.erase(this->connectionInfos.begin());
+
+		/*handle the nickname*/
+		std::string nickname = this->connectionInfos[0].substr(5, this->connectionInfos[0].length());
+		nickname.erase(nickname.find(13));
+		this->nickname = nickname;
+
+		std::cout << "nickname =" << nickname << std::endl;
+
+		this->connectionInfos.erase(this->connectionInfos.begin());
+
+		/*handle username*/
+		std::cout << "username line= " << this->connectionInfos[0] << std::endl;
+		std::vector<std::string> temp;
+
+		size_t i = 0;
+		size_t j = 0;
+
+		while (this->connectionInfos[0][i] && this->connectionInfos[0][i + 1])
+	{
+		i = this->connectionInfos[0].find('\n', j);
+		line = this->connectionInfos[0].substr(j, i - j);
+		i++;
+		j = i;
+//		std::cout << "line: " << line << std::endl;
+		this->connectionInfos.push_back(line);
+	}
+
+		std::cout << "username: " << this->userName << std::endl;
+
+		return true;
+	}
+	return false;
 }

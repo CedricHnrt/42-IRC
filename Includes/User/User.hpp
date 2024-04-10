@@ -7,7 +7,7 @@
 	class User {
 		private:
 			User();
-			std::string name;
+			std::string userName;
 			std::string realName;
 			std::string nickname;
 			std::string ipAddr;
