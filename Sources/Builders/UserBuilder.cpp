@@ -103,13 +103,15 @@ User& UserBuilder::build() {
 	return (*user);
 }
 
-UserBuilder	&UserBuilder::fillBuffer(const std::string data)
+UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)
 {
 //	std::cout << "got in fillBuffer, data = " << data << std::endl;
 
 	std::string line;
 	size_t i = 0;
 	size_t j = 0;
+
+	this->userSocketFd = incomingFD;
 
 	while (data[i] && data[i + 1])
 	{
@@ -164,13 +166,13 @@ bool UserBuilder::isBuilderComplete()
 		size_t j = 0;
 
 		while (this->connectionInfos[0][i] && this->connectionInfos[0][i + 1])
-	{
-		i = this->connectionInfos[0].find('\n', j);
-		line = this->connectionInfos[0].substr(j, i - j);
-		i++;
-		j = i;
-//		std::cout << "line: " << line << std::endl;
-		this->connectionInfos.push_back(line);
+		{
+			i = this->connectionInfos[0].find('\n', j);
+			line = this->connectionInfos[0].substr(j, i - j);
+			i++;
+			j = i;
+	//		std::cout << "line: " << line << std::endl;
+			this->connectionInfos.push_back(line);
 	}
 
 		std::cout << "username: " << this->userName << std::endl;

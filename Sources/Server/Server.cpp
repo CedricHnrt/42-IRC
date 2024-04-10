@@ -113,7 +113,7 @@ void Server::handleIncomingRequest(int incomingFD)
 	//	std::cout << buffer << std::endl;
 	if (this->_danglingUsers.contains(incomingFD))
 	{
-		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer));
+		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete()) {
 			std::cout << "BUILDER COMPLETE" << std::endl;
 			this->_allUsers.push_back(this->_danglingUsers.at(incomingFD).build());

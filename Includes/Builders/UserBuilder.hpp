@@ -94,7 +94,7 @@
 			 */
 			User &build();
 
-			UserBuilder &fillBuffer(const std::string data);
+			UserBuilder &fillBuffer(const std::string data, int incomingFD);
 
 			bool 	isBuilderComplete();
 	};
