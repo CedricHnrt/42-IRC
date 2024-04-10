@@ -6,7 +6,7 @@
 #    By: chonorat <chonorat@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/05 13:40:10 by chonorat          #+#    #+#              #
-#    Updated: 2024/04/10 16:27:00 by chonorat         ###   ########.fr        #
+#    Updated: 2024/04/10 16:51:34 by chonorat         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ INCLUDES=	-I ./Includes/				\
 			-I ./Includes/Commands		\
 			-I ./Includes/Exceptions	\
 			-I ./Includes/User
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -g3
 C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
