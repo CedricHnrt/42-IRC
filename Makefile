@@ -23,6 +23,7 @@ NAME = irc_server
 CC = @c++
 INCLUDES=	-I ./Includes/				\
 			-I ./Includes/Builders		\
+			-I ./Includes/Configuration	\
 			-I ./Includes/CacheManager	\
 			-I ./Includes/Channel		\
 			-I ./Includes/Commands		\
@@ -34,25 +35,27 @@ RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
 DEBUG_FILES = Server								\
-			Exceptions/ChannelCreationException	\
-			Exceptions/ChannelNotFoundException	\
-			Exceptions/ChannelDeletionException \
-			Exceptions/ChannelModificationException \
-			Exceptions/UserBuildException \
-			Exceptions/UserCacheException		\
-			Exceptions/UserConnectionException	\
-			Utils/PrimitivePredicate			\
-			Utils/IRCPredicate					\
-			Utils/StringUtils					\
-			Models/User/User					\
-			Models/User/UserProperties			\
-			Models/Channel/ChannelProperties	\
-			Models/Channel/Channel				\
-			CacheManager/ChannelCacheManager	\
-			CacheManager/UsersCacheManager		\
-			Builders/UserBuilder				\
-			Builders/ChannelBuilder				\
-			Helpers/UserListHelper				\
+			Exceptions/ChannelCreationException		\
+			Exceptions/ChannelNotFoundException		\
+			Exceptions/ChannelDeletionException		\
+			Exceptions/ChannelModificationException	\
+			Exceptions/UserBuildException			\
+			Exceptions/UserCacheException			\
+			Exceptions/UserConnectionException		\
+			Configuration/Configuration				\
+			Configuration/ConfigurationSection		\
+			Utils/PrimitivePredicate				\
+			Utils/IRCPredicate						\
+			Utils/StringUtils						\
+			Models/User/User						\
+			Models/User/UserProperties				\
+			Models/Channel/ChannelProperties		\
+			Models/Channel/Channel					\
+			CacheManager/ChannelCacheManager		\
+			CacheManager/UsersCacheManager			\
+			Builders/UserBuilder					\
+			Builders/ChannelBuilder					\
+			Helpers/UserListHelper					\
 			Tests/Tests
 FILES = main									\
 			Server								\
@@ -62,10 +65,13 @@ FILES = main									\
 			Exceptions/ChannelModificationException \
 			Exceptions/UserBuildException \
 			Exceptions/UserCacheException		\
+			Configuration/Configuration				\
+			Configuration/ConfigurationSection		\
 			Exceptions/UserConnectionException	\
 			Utils/PrimitivePredicate			\
 			Utils/IRCPredicate					\
 			Utils/StringUtils					\
+			Utils/FileUtils						\
 			Models/User/User					\
 			Models/User/UserProperties			\
 			Models/Channel/ChannelProperties	\
@@ -98,7 +104,7 @@ else
 endif
 
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects/Builders Objects/Exceptions Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers
+	$(DIR) Objects/Builders Objects/Exceptions Objects/Configuration Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 ifeq ($(DEBUG), true)
 	$(DIR) Objects/Tests
