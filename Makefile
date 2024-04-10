@@ -6,7 +6,7 @@
 #    By: chonorat <chonorat@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/05 13:40:10 by chonorat          #+#    #+#              #
-#    Updated: 2024/04/10 16:51:34 by chonorat         ###   ########.fr        #
+#    Updated: 2024/04/10 17:07:32 by chonorat         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,7 @@ _BOLD = \033[1m
 
 NAME = irc_server
 CC = @c++
-INCLUDES=	-I ./Includes/				\
+INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Builders		\
 			-I ./Includes/CacheManager	\
 			-I ./Includes/Channel		\
@@ -33,50 +33,32 @@ C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-DEBUG_FILES = Server								\
-			Exceptions/ChannelCreationException	\
-			Exceptions/ChannelNotFoundException	\
-			Exceptions/ChannelDeletionException \
-			Exceptions/ChannelModificationException \
-			Exceptions/UserBuildException \
-			Exceptions/UserCacheException		\
-			Exceptions/UserConnectionException	\
-			Utils/PrimitivePredicate			\
-			Utils/IRCPredicate					\
-			Utils/StringUtils					\
-			Models/User/User					\
-			Models/User/UserProperties			\
-			Models/Channel/ChannelProperties	\
-			Models/Channel/Channel				\
-			CacheManager/ChannelCacheManager	\
-			CacheManager/UsersCacheManager		\
-			Builders/UserBuilder				\
-			Builders/ChannelBuilder				\
-			Helpers/UserListHelper				\
-			Tests/Tests
-FILES = main									\
-			Server								\
-			Exceptions/ChannelCreationException	\
-			Exceptions/ChannelNotFoundException	\
-			Exceptions/ChannelDeletionException \
-			Exceptions/ChannelModificationException \
-			Exceptions/UserBuildException \
-			Exceptions/UserCacheException		\
-			Exceptions/UserConnectionException	\
-			Utils/PrimitivePredicate			\
-			Utils/IRCPredicate					\
-			Utils/StringUtils					\
-			Models/User/User					\
-			Models/User/UserProperties			\
-			Models/Channel/ChannelProperties	\
-			Models/Channel/Channel				\
-			CacheManager/ChannelCacheManager	\
-			CacheManager/UsersCacheManager		\
-			Builders/UserBuilder				\
-			Builders/ChannelBuilder				\
-			Helpers/UserListHelper
-OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
-DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
+FILES =	Server								\
+		Exceptions/ChannelCreationException	\
+		Exceptions/ChannelNotFoundException	\
+		Exceptions/ChannelDeletionException \
+		Exceptions/ChannelModificationException \
+		Exceptions/UserBuildException \
+		Exceptions/UserCacheException		\
+		Exceptions/UserConnectionException	\
+		Utils/PrimitivePredicate			\
+		Utils/IRCPredicate					\
+		Utils/StringUtils					\
+		Models/User/User					\
+		Models/User/UserProperties			\
+		Models/Channel/ChannelProperties	\
+		Models/Channel/Channel				\
+		CacheManager/ChannelCacheManager	\
+		CacheManager/UsersCacheManager		\
+		Builders/UserBuilder				\
+		Builders/ChannelBuilder				\
+		Helpers/UserListHelper
+MAIN_FILES =	$(FILES)	\
+				main
+DEBUG_FILES =	$(FILES)	\
+				Tests/Tests
+OBJS = $(addsuffix .o, $(addprefix Objects/, $(MAIN_FILES)))
+DPDS = $(addsuffix .d, $(addprefix Objects/, $(MAIN_FILES)))
 DEBUG_OBJS = $(addsuffix .o, $(addprefix Objects/, $(DEBUG_FILES)))
 DEBUG_DPDS = $(addsuffix .d, $(addprefix Objects/, $(DEBUG_FILES)))
 
