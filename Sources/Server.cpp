@@ -59,7 +59,7 @@ Server::Server(char *port, char *password) {
 	int temp = 1;
 	if (setsockopt(this->_socketfd, SOL_SOCKET, SO_REUSEADDR, &temp, sizeof(temp)) == -1)
 		throw ServerInitializationException();
-	if (fcntl(this->_socketfd, F_SETFL, O_NONBLOCK) == -1)
+	if (fcntl(this->_socketfd, F_SETFL, 0) == -1)
 		throw ServerInitializationException();
 
 	/*associer le socket a l'adresse et port dans sockaddr_in*/
@@ -104,43 +104,82 @@ void Server::serverUp()
 	}
 }
 
+//static std::string receiveData(int incomingFD)
+//{
+//	char buffer[512];
+//	int bytes;
+//	std::string result;
+//
+//	while (1)
+//	{
+//		bytes = recv(incomingFD, buffer, 512, 0);
+//		if (bytes < 1)
+//			throw Server::CommunicationException();
+//		result += buffer;
+//		if (strstr(buffer, "\r\n\0"))
+//			break;
+//		memset(buffer, 0, bytes);
+//	}
+//	return result;
+//}
+
 void Server::getNewClientInfos(int incomingFD)
 {
-	char buffer[512];
 	int bytes;
+	char buffer[512];
 	std::string infos;
 	std::string password;
 	std::string nickname;
 	std::string user;
 
 	std::cout << "got in new client infos" << std::endl;
-	while (1)
-	{
-		bytes = recv(incomingFD, buffer, 512, 0);
-		if (bytes < 1)
-			throw CommunicationException();
-		infos += buffer;
-		if (strstr(buffer, "\r\n") && strstr(buffer, ":realname"))
-			break;
-		memset(buffer, 0, bytes);
-	}
-	std::cout << "infos = " << infos << std::endl;
+//	bytes = recv(incomingFD, buffer, 512, 0);
+	memset(buffer, 0, 512);
+	bytes = recv(incomingFD, buffer, 512, 0);
+	std::cout << "all char :" << std::endl;
 
-	size_t j = 0;
-	size_t i = infos.find('\n', j);
-	j = i + 1;
-	i = infos.find('\n', j);
-	password = infos.substr(j, i);
-	j = i + 1;
-	i = infos.find('\n', j);
-	nickname = infos.substr(j, i);
-	j = i + 1;
-	i = infos.find('\n', j);
-	user = infos.substr(j, i);
+	for (size_t i = 0; buffer[i]; i++)
+		std::cout << "buffer[" << i << "] = " << (int)buffer[i] << std::endl;
 
-	std::cout << "PW: " << password << std::endl;
-	std::cout << "nick :" << nickname << std::endl;
-	std::cout << "user :" << user << std::endl;
+	std::cout << "whole buffer: " << buffer << std::endl;
+	if (bytes < 1)
+		throw CommunicationException();
+	infos += buffer;
+//	if (infos.find("\r\n"))
+//		break;
+	memset(buffer, 0, bytes);
+	std::cout << "1st buffer:\n" << buffer << "EOB\n" << std::endl;
+	std::cout << "1st infos:\n" << infos << "EOB\n" << std::endl;
+
+//		while (1)
+//	{
+//		bytes = recv(incomingFD, buffer, 512, 0);
+//		if (bytes < 1)
+//			throw CommunicationException();
+//		infos += buffer;
+//		if (strstr(buffer, "\r\n\0"))
+//			break;
+//		memset(buffer, 0, bytes);
+//	}
+
+//	infos = receiveData(incomingFD);
+//	std::cout << "2nd buffer infos:\n" << infos << "EOB\n" << std::endl;
+//
+//	size_t j = 0;
+//	size_t i = infos.find('\n', j);
+//	j = i + 1;
+//	i = infos.find('\n', j);
+//	password = infos.substr(j, i);
+//	j = i + 1;
+//	i = infos.find('\n', j);
+//	nickname = infos.substr(j, i);
+//	j = i + 1;
+//	i = infos.find('\n', j);
+//	user = infos.substr(j, i);
+
+//	std::cout << "PW: " << password << std::endl;
+//	std::cout << "nick :" << nickname << std::endl;
+//	std::cout << "user :" << user << std::endl;
 }
 
 void Server::handleIncomingRequest(int incomingFD)
