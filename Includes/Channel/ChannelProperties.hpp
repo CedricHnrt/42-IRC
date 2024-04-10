@@ -2,6 +2,8 @@
 	#define CHANNELPROPERTIES_HPP
 	#include <list>
 
+#include <stdlib.h>
+
 	class ChannelProperties {
 		private:
 			std::list<size_t> usersInChannel;
