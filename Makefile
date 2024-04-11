@@ -6,7 +6,7 @@
 #    By: chonorat <chonorat@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/05 13:40:10 by chonorat          #+#    #+#              #
-#    Updated: 2024/04/05 13:42:25 by chonorat         ###   ########.fr        #
+#    Updated: 2024/04/10 17:07:32 by chonorat         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,31 +19,36 @@ _RED = \033[31m
 _END = \033[0m
 _BOLD = \033[1m
 
-NAME = ircserv
+NAME = irc_server
 CC = @c++
-INCLUDES=	-I ./Includes/				\
-			-I ./Includes/Server		\
+INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Builders		\
 			-I ./Includes/CacheManager	\
 			-I ./Includes/Channel		\
 			-I ./Includes/Commands		\
 			-I ./Includes/Exceptions	\
-			-I ./Includes/User
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
+			-I ./Includes/User			\
+			-I ./Includes/Configuration
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -g3
+C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-FILES = Server/Server						\
-		Exceptions/ChannelCreationException	\
-		Exceptions/ChannelNotFoundException	\
-		Exceptions/ChannelDeletionException \
-		Exceptions/ChannelModificationException \
+FILES =	Server								\
+		Configuration/Configuration			\
+		Configuration/ConfigurationSection	\
+		Exceptions/ChannelCacheException	\
+		Exceptions/ChannelBuildException	\
 		Exceptions/UserBuildException \
 		Exceptions/UserCacheException		\
 		Exceptions/UserConnectionException	\
+		Exceptions/ConfigurationIOException	\
 		Utils/PrimitivePredicate			\
 		Utils/IRCPredicate					\
 		Utils/StringUtils					\
+		Utils/IrcLogger						\
+		Utils/Colors						\
+		Utils/FileUtils						\
 		Models/User/User					\
 		Models/User/UserProperties			\
 		Models/Channel/ChannelProperties	\
@@ -52,20 +57,42 @@ FILES = Server/Server						\
 		CacheManager/UsersCacheManager		\
 		Builders/UserBuilder				\
 		Builders/ChannelBuilder				\
-		Helpers/UserListHelper				\
-		main
-OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
-DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
+		Helpers/UserListHelper
+MAIN_FILES =	$(FILES)	\
+				main
+DEBUG_FILES =	$(FILES)	\
+				Tests/Tests
+OBJS = $(addsuffix .o, $(addprefix Objects/, $(MAIN_FILES)))
+DPDS = $(addsuffix .d, $(addprefix Objects/, $(MAIN_FILES)))
+DEBUG_OBJS = $(addsuffix .o, $(addprefix Objects/, $(DEBUG_FILES)))
+DEBUG_DPDS = $(addsuffix .d, $(addprefix Objects/, $(DEBUG_FILES)))
+
+DEBUG = false
 
 $(NAME): $(OBJS)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
 	$(CC) $(OBJS) -o $(NAME)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
+debug: fclean $(DEBUG_OBJS)
+ifeq ($(DEBUG), true)
+	$(PRINT) "\n${_BOLD}${_YELLOW}DEBUG${_END}"
+	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
+	$(CC) $(DEBUG_OBJS) -o $(NAME)
+	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
+else
+	$(PRINT) "${_RED}DEBUG USAGE: make debug DEBUG=true${_END}"
+endif
+
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects/Builders Objects/Exceptions Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Tests Objects/Helpers Objects/Server
+	$(DIR) Objects/Builders Objects/Exceptions Objects/Configuration Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
+ifeq ($(DEBUG), true)
+	$(DIR) Objects/Tests
+	$(CC) -c $(C++DFLAGS) $< -o $@
+else
 	$(CC) -c $(C++FLAGS) $< -o $@
+endif
 
 all: $(NAME)
 

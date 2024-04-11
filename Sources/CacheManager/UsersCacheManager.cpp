@@ -8,9 +8,9 @@
 
 UsersCacheManager* UsersCacheManager::instance = NULL;
 
-UsersCacheManager::UsersCacheManager() {}
+UsersCacheManager::UsersCacheManager() : users(std::list<User>()), uniqueIdCounter(0)  {}
 
-void UsersCacheManager::addToCache(User& user)
+void UsersCacheManager::addToCache(User& user) throw (UserCacheException)
 {
 	if (this->uniqueIdCounter == std::numeric_limits<size_t>::max())
 		throw UserCacheException(this->uniqueIdCounter, "Maximum number of users reached !");
@@ -18,7 +18,7 @@ void UsersCacheManager::addToCache(User& user)
 	this->users.push_back(user);
 }
 
-User& UsersCacheManager::getFromCache(size_t userId)
+User& UsersCacheManager::getFromCache(size_t userId) throw (UserCacheException)
 {
 	std::list<User>::iterator iterator = std::find_if(users.begin(), users.end(), UserPredicate(userId));
 	if (iterator != users.end())
@@ -26,7 +26,7 @@ User& UsersCacheManager::getFromCache(size_t userId)
 	throw UserCacheException(userId, "User not found !");
 }
 
-User& UsersCacheManager::getFromCacheSocketFD(int socketFD)
+User& UsersCacheManager::getFromCacheSocketFD(int socketFD) throw (UserCacheException)
 {
 	std::list<User>::iterator iterator = std::find_if(users.begin(), users.end(), UserPredicateFD(socketFD));
 	if (iterator != users.end())
@@ -34,7 +34,7 @@ User& UsersCacheManager::getFromCacheSocketFD(int socketFD)
 	throw UserCacheException(socketFD, "User not found !");
 }
 
-void UsersCacheManager::deleteFromCache(size_t userId)
+void UsersCacheManager::deleteFromCache(size_t userId) throw (UserCacheException)
 {
 	std::list<User>::iterator iterator = std::find_if(users.begin(), users.end(),  UserPredicate(userId));
 	if (iterator != users.end())
@@ -57,11 +57,5 @@ size_t UsersCacheManager::getUniqueIdCounter() const
 
 UsersCacheManager* UsersCacheManager::getInstance()
 {
-	if (instance == NULL)
-	{
-		instance = new UsersCacheManager();
-		instance->uniqueIdCounter = 0;
-		instance->users = std::list<User>();
-	}
-	return instance;
+	return instance == NULL ? instance = new UsersCacheManager() : instance;
 }
