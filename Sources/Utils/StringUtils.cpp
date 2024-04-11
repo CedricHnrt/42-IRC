@@ -90,3 +90,23 @@ void StringUtils::toLower(std::string &str)
 		character = static_cast<char> (std::tolower(character));
 	}
 }
+
+std::vector<std::string> StringUtils::split(const std::string &input, int c)
+{
+	std::vector<std::string> result;
+
+	size_t i = input.find(c);
+	size_t j = 0;
+	std::string line;
+
+	while (input[i] && input[i + 1])
+	{
+		i = input.find(c, j);
+		line = input.substr(j, i - j);
+		i++;
+		j = i;
+		result.push_back(line);
+		line.clear();
+	}
+	return result;
+}
