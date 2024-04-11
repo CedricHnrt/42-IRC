@@ -52,7 +52,7 @@ std::vector<std::string> ConfigurationSection::getVectorValue(const std::string 
 		vector.push_back(value.substr(0, pos));
 		value.erase(0, pos + 1);
 	}
-	StringUtils::trim(value, ' ');
+	StringUtils::trim(value, " ");
 	vector.push_back(value);
 	return vector;
 }

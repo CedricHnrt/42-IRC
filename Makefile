@@ -22,6 +22,7 @@ _BOLD = \033[1m
 NAME = irc_server
 CC = @c++
 INCLUDES =	-I ./Includes/				\
+			-I ./Includes/Server		\
 			-I ./Includes/Builders		\
 			-I ./Includes/CacheManager	\
 			-I ./Includes/Channel		\
@@ -34,7 +35,7 @@ C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-FILES =	Server								\
+FILES =	Server/Server						\
 		Configuration/Configuration			\
 		Configuration/ConfigurationSection	\
 		Exceptions/ChannelCacheException	\
@@ -85,7 +86,7 @@ else
 endif
 
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects/Builders Objects/Exceptions Objects/Configuration Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers
+	$(DIR) Objects/Builders Objects/Exceptions Objects/Server Objects/Configuration Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 ifeq ($(DEBUG), true)
 	$(DIR) Objects/Tests

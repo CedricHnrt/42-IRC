@@ -114,7 +114,8 @@ void Server::handleIncomingRequest(int incomingFD)
 
 	size_t size = recv(incomingFD, buffer, 512, 0);
 	buffer[size] = '\0';
-	if (this->_danglingUsers.contains(incomingFD))
+	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
+	if (it != this->_danglingUsers.end())
 	{
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete()) {
@@ -143,7 +144,7 @@ bool Server::handleNewClient() {
 	newPoll.revents = 0;
 
 	UserBuilder newClient;
-	this->_danglingUsers.insert({newPoll.fd, newClient});
+	this->_danglingUsers[newPoll.fd] = newClient;
 	this->_fds.push_back(newPoll);
 	return true;
 }
