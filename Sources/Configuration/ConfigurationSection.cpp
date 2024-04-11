@@ -1,6 +1,8 @@
 #include "ConfigurationSection.hpp"
 #include <cstdlib>
 #include <cerrno>
+#include <StringUtils.hpp>
+#include <vector>
 
 ConfigurationSection::ConfigurationSection(const std::string &name) : name(name) {}
 
@@ -36,6 +38,23 @@ bool ConfigurationSection::getBooleanValue(const std::string &key, bool defaultV
 	if (this->map.find(key) == this->map.end())
 		return defaultValue;
 	return this->map[key] == "true";
+}
+
+std::vector<std::string> ConfigurationSection::getVectorValue(const std::string &key)
+{
+	std::vector<std::string> vector;
+	if (this->map.find(key) == this->map.end())
+		return vector;
+	std::string value = this->map[key];
+	size_t pos;
+	while ((pos = value.find(',')) != std::string::npos)
+	{
+		vector.push_back(value.substr(0, pos));
+		value.erase(0, pos + 1);
+	}
+	StringUtils::trim(value, ' ');
+	vector.push_back(value);
+	return vector;
 }
 
 std::map<std::string, std::string> &ConfigurationSection::getValues()
