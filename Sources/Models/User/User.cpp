@@ -5,7 +5,7 @@ User::User() {}
 
 std::string User::getName() const
 {
-	return name;
+	return userName;
 }
 
 std::string User::getNickname() const
@@ -30,7 +30,7 @@ UserProperties User::getProperties() const
 
 void User::setName(const std::string& name)
 {
-	this->name = name;
+	this->userName = name;
 }
 
 void User::setNickname(const std::string& nickname)

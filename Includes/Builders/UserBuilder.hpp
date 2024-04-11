@@ -1,6 +1,7 @@
 #ifndef USERBUILDER_HPP
 	#define USERBUILDER_HPP
 	#include <string>
+	#include <vector>
 	#include "User.hpp"
 	#include "UserProperties.hpp"
 /**
@@ -15,13 +16,15 @@
 	class UserBuilder
 	{
 		private:
-			std::string name;
+			std::string userName;
 			std::string realName;
 			std::string nickname;
 			std::string ipAddr;
+			std::string password;
 			int userSocketFd;
 			size_t uniqueId;
 			UserProperties properties;
+			std::vector<std::string> connectionInfos;
 
 		public:
 			UserBuilder();
@@ -87,5 +90,13 @@
 			 * @author jbadaire
 			 */
 			User &build();
+
+			UserBuilder &fillBuffer(const std::string data, int incomingFD);
+
+			bool 	isBuilderComplete();
 	};
+
+//	std::ostream  &operator<<(std::ostream &os, const UserBuilder &obj);
+
+	
 #endif

@@ -4,10 +4,14 @@
 #include <UserExceptions.hpp>
 #include "User.hpp"
 
+#include <iostream>
+
+#define PASSWORD "testpassword"
+
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
 
 UserBuilder& UserBuilder::setName(const std::string& name) {
-	this->name = name;
+	this->userName = name;
 	return *this;
 }
 
@@ -45,7 +49,7 @@ static bool isValid(std::string str) {
 }
 
 void UserBuilder::clearBuilder() {
-	this->name.clear();
+	this->userName.clear();
 	this->realName.clear();
 	this->nickname.clear();
 	this->ipAddr.clear();
@@ -60,7 +64,7 @@ void UserBuilder::clearBuilder() {
 
 User& UserBuilder::build() {
 
-	if (!isValid(this->name))
+	if (!isValid(this->userName))
 	{
 		clearBuilder();
 		throw UserBuildException("Invalid Name");
@@ -82,8 +86,8 @@ User& UserBuilder::build() {
 	}
 
 	User* user = new User();
-	if (this->name.c_str())
-		user->setName(this->name);
+	if (this->userName.c_str())
+		user->setName(this->userName);
 	if (this->realName.c_str())
 		user->setRealName(this->realName);
 	if (this->nickname.c_str())
@@ -98,3 +102,60 @@ User& UserBuilder::build() {
 
 	return (*user);
 }
+
+UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)
+{
+	this->userSocketFd = incomingFD;
+	this->uniqueId = incomingFD;
+	std::vector<std::string> incomingData = StringUtils::split(data, '\n');
+
+	for (std::vector<std::string>::iterator it  = incomingData.begin(); it != incomingData.end(); ++it) {
+		this->connectionInfos.push_back(*it);
+	}
+	return *this;
+}
+
+bool UserBuilder::isBuilderComplete()
+{
+	if (this->connectionInfos.size() >= 3 && this->connectionInfos.back().substr(0, 4) == "USER")
+	{
+		this->connectionInfos.erase(this->connectionInfos.begin());
+
+		/*handle the password*/
+		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos.front(), ' ');
+		if (passwordV.size() != 2 || passwordV[1] != PASSWORD) {
+			return false;
+		}
+
+		this->connectionInfos.erase(this->connectionInfos.begin());
+
+		/*handle the nickname*/
+		std::vector<std::string> nickname = StringUtils::split(this->connectionInfos.front(), ' ');
+		this->nickname = nickname[1];
+
+		this->connectionInfos.erase(this->connectionInfos.begin());
+
+		/*handle username*/
+		std::vector<std::string> username =  StringUtils::split(this->connectionInfos.front(), ' ');
+		if (username.size() != 5) {
+			return false;
+		}
+		this->userName = username[1];
+		StringUtils::trim(username[4], " :\n");
+		this->realName = username[4];
+
+		std::cout << "password: " << passwordV[1] << std::endl;
+		std::cout << "nickname: " << this->nickname << std::endl;
+		std::cout << "username: " << this->userName << std::endl;
+		std::cout << "realname: " << this->realName << std::endl;
+
+		return true;
+	}
+	return false;
+}
+
+//std::ostream &operator<<(std::ostream &os, const UserBuilder &obj)
+//{
+//	os << "Nickname: " << obj.nickname <<  ;
+//	return os;
+//}

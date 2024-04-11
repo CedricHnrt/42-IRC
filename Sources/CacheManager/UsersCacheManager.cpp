@@ -26,6 +26,14 @@ User& UsersCacheManager::getFromCache(size_t userId) throw (UserCacheException)
 	throw UserCacheException(userId, "User not found !");
 }
 
+User& UsersCacheManager::getFromCacheSocketFD(int socketFD) throw (UserCacheException)
+{
+	std::list<User>::iterator iterator = std::find_if(users.begin(), users.end(), UserPredicateFD(socketFD));
+	if (iterator != users.end())
+		return *iterator;
+	throw UserCacheException(socketFD, "User not found !");
+}
+
 void UsersCacheManager::deleteFromCache(size_t userId) throw (UserCacheException)
 {
 	std::list<User>::iterator iterator = std::find_if(users.begin(), users.end(),  UserPredicate(userId));
