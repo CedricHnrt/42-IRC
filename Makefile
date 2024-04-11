@@ -42,6 +42,7 @@ DEBUG_FILES = Server								\
 			Exceptions/UserBuildException			\
 			Exceptions/UserCacheException			\
 			Exceptions/UserConnectionException		\
+			Exceptions/LoadConfigurationException	\
 			Configuration/Configuration				\
 			Configuration/ConfigurationSection		\
 			Utils/PrimitivePredicate				\
@@ -63,6 +64,7 @@ FILES = main									\
 			Exceptions/ChannelNotFoundException	\
 			Exceptions/ChannelDeletionException \
 			Exceptions/ChannelModificationException \
+			Exceptions/ConfigurationIOException	\
 			Exceptions/UserBuildException \
 			Exceptions/UserCacheException		\
 			Configuration/Configuration				\

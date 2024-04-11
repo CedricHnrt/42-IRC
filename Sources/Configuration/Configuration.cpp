@@ -2,6 +2,7 @@
 #include "FileUtils.hpp"
 #include "StringUtils.hpp"
 #include "Colors.hpp"
+#include "ConfigurationExceptions.hpp"
 #include <iostream>
 
 Configuration::Configuration(const std::string &file) : file(file) {}
@@ -17,20 +18,17 @@ Configuration::~Configuration()
 	sections.clear();
 }
 
-void Configuration::load()
+void Configuration::load() throw(ConfigurationIOException)
 {
 	if (file.empty() || StringUtils::isOnlyWhitespace(file) || !StringUtils::isPrintable(file))
-		throw std::invalid_argument("Filename is invalid !");
+		throw ConfigurationIOException("Filename is invalid !");
 	if (FileUtils::isDirectory(file))
-		throw std::invalid_argument("File can't be a folder");
+		throw ConfigurationIOException("Filename is a directory !");
 
 	std::ifstream configurationFileStream(file.c_str());
 
 	if (!configurationFileStream.is_open())
-	{
-		std::cout << "Error: " << file << " could not be opened" << std::endl;
-		return;
-	}
+		throw ConfigurationIOException(file + " could not be opened");
 
 	size_t linesCount = FileUtils::countLines(configurationFileStream);
 	std::list<std::string> lines;
@@ -62,7 +60,7 @@ void Configuration::load()
 				}
 				if (line[0] == '[' && line[line.size() - 1] == ']')
 					break;
-				size_t equalPos = line.find("=");
+				size_t equalPos = line.find('=');
 				if (equalPos != std::string::npos)
 				{
 					std::string key = line.substr(0, equalPos -1);
