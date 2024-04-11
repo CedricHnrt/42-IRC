@@ -22,4 +22,14 @@
 				bool operator () (User user);
 				bool operator == (size_t userId);
 	};
+
+	class UserPredicateFD
+	{
+			private:
+				int socketFD;
+			public:
+				explicit UserPredicateFD(int fd);
+				bool operator () (User user);
+				bool operator == (int fd);
+	};
 #endif

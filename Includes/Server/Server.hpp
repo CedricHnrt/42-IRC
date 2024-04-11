@@ -10,6 +10,7 @@
 #include <poll.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include "../../Includes/User/User.hpp"
 #include "../../Includes/Builders/UserBuilder.hpp"
 #include "../../Includes/CacheManager/UsersCacheManager.hpp"
 
@@ -51,7 +52,7 @@ class Server
 		bool handleNewClient();
 		void handleIncomingRequest(int incomingFD);
 		void getNewClientInfos(int incomingFD);
-		void handleKnownClient(int incomingFD);
+		void handleKnownClient(int incomingFD, std::string buffer);
 
 	class SocketFDException : public std::exception
 	{

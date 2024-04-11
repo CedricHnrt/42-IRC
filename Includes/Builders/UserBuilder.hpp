@@ -20,14 +20,11 @@
 			std::string realName;
 			std::string nickname;
 			std::string ipAddr;
+			std::string password;
 			int userSocketFd;
 			size_t uniqueId;
 			UserProperties properties;
 			std::vector<std::string> connectionInfos;
-
-			bool isComplete;
-			std::string password;
-			std::string inBuffer;
 
 		public:
 			UserBuilder();

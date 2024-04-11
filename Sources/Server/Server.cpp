@@ -4,13 +4,6 @@
 
 #include "../../Includes/Server/Server.hpp"
 
-//#define username "bruh"
-//#define nickname "bruh"
-
-#define user_id (":" + nickname + "!" + username + "@localhost")
-
-#define RPL_WELCOME (":localhost 001 bruh :Welcome to the Internet Relay Network :bruh!bruh@localhost\r\n")
-
 static bool parsePort(const std::string &port)
 {
 	if (port.find_first_not_of("0123456789") != std::string::npos)
@@ -24,9 +17,10 @@ static bool parsePort(const std::string &port)
 
 static bool parsePassword(const std::string &password)
 {
+	if (password.length() > 510)
+		return false ;
 	for (size_t i = 0; i < password.length(); i++)
 	{
-		//ajouter le :
 		if (!isalnum(password[i]))
 			return 1;
 	}
@@ -103,17 +97,21 @@ void Server::serverUp()
 	}
 }
 
-void Server::handleKnownClient(int incomingFD)
+void Server::handleKnownClient(int incomingFD, std::string buffer)
 {
 	(void)incomingFD;
+	(void)buffer;
 
 	std::cout << "in known client" << std::endl;
+	std::cout << "new message :" << buffer << std::endl;
+//	std::cout << UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD).getNickname() << std::endl;
+
 }
 
 void Server::handleIncomingRequest(int incomingFD)
 {
-	std::cout << "IN INCOMING REQUEST" << std::endl;
 	char buffer[512];
+
 	size_t size = recv(incomingFD, buffer, 512, 0);
 	buffer[size] = '\0';
 	if (this->_danglingUsers.contains(incomingFD))
@@ -126,7 +124,7 @@ void Server::handleIncomingRequest(int incomingFD)
 	}
 	else
 	{
-		this->handleKnownClient(incomingFD);
+		this->handleKnownClient(incomingFD, buffer);
 	}
 }
 

@@ -1,4 +1,5 @@
 #include "../../Includes/IRCPredicate.hpp"
+#include <iostream>
 #include <string>
 
 ChannelPredicate::ChannelPredicate(size_t channelId) : channelId(channelId) {}
@@ -22,4 +23,17 @@ bool UserPredicate::operator () (User user)
 bool UserPredicate::operator == (size_t userId)
 {
 	return userId == this->userId;
+}
+
+UserPredicateFD::UserPredicateFD(int fd) : socketFD(fd) {}
+
+bool UserPredicateFD::operator () (User user)
+{
+	return user.getUserSocketId() == this->socketFD;
+}
+
+bool UserPredicateFD::operator == (int userId)
+{
+	std::cout << "fd: " << this->socketFD << std::endl;
+	return userId == this->socketFD;
 }

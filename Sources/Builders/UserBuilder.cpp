@@ -8,7 +8,7 @@
 
 #define PASSWORD "testpassword"
 
-UserBuilder::UserBuilder() : userSocketFd(-1), isComplete(false) {}
+UserBuilder::UserBuilder() : userSocketFd(-1) {}
 
 UserBuilder& UserBuilder::setName(const std::string& name) {
 	this->userName = name;
@@ -106,6 +106,7 @@ User& UserBuilder::build() {
 UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)
 {
 	this->userSocketFd = incomingFD;
+	this->uniqueId = incomingFD;
 	std::vector<std::string> incomingData = StringUtils::split(data, '\n');
 
 	for (std::vector<std::string>::iterator it  = incomingData.begin(); it != incomingData.end(); ++it) {

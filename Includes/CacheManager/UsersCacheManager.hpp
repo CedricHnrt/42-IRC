@@ -15,6 +15,7 @@
 		public:
 			void addToCache(User& user);
 			User& getFromCache(size_t uniqueId);
+			User& getFromCacheSocketFD(int socketFD);
 			void deleteFromCache(size_t uniqueId);
 			std::list<User> getCache();
 			size_t getUniqueIdCounter() const;
