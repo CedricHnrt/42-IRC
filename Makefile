@@ -72,6 +72,7 @@ FILES = main									\
 			Utils/IRCPredicate					\
 			Utils/StringUtils					\
 			Utils/FileUtils						\
+			Utils/Colors						\
 			Models/User/User					\
 			Models/User/UserProperties			\
 			Models/Channel/ChannelProperties	\

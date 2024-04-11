@@ -1,6 +1,7 @@
 #include "Configuration.hpp"
 #include "FileUtils.hpp"
 #include "StringUtils.hpp"
+#include "Colors.hpp"
 #include <iostream>
 
 Configuration::Configuration(const std::string &file) : file(file) {}
@@ -83,21 +84,26 @@ void Configuration::addSection(ConfigurationSection *section)
 
 void Configuration::printSections()
 {
-	std::cout << "CONFIGURATION FILE: " << file << std::endl;
-	std::cout << "                    " << sections.size() << " SECTIONS WAS FOUNDED" << std::endl;
+
+	Colors yellow(Colors::FG_LYELLOW);
+	Colors green(Colors::FG_GREEN);
+	Colors reset(Colors::FG_DEFAULT);
+	std::cout << yellow << "CONFIGURATION FILE: " << green << file << reset << std::endl;
+	std::cout << "                    " << green << sections.size() << yellow << " SECTIONS WAS FOUNDED" << std::endl;
 	std::list<ConfigurationSection *>::iterator sectionIterator = sections.begin();
 	while (sectionIterator != sections.end())
 	{
-		std::cout << "                    SECTION: " << (*sectionIterator)->getName() << std::endl;
-		std::cout << "                     ENTRIES: " << (*sectionIterator)->getValues().size() << " WAS LOADED" << std::endl;
+		std::cout << yellow << "                    SECTION: " << green << (*sectionIterator)->getName() << reset << std::endl;
+		std::cout << yellow << "                     ENTRIES: " << green << (*sectionIterator)->getValues().size() << yellow << " WAS LOADED" << reset << std::endl;
 		std::map<std::string, std::string>::iterator entryIterator = (*sectionIterator)->getValues().begin();
 		while (entryIterator != (*sectionIterator)->getValues().end())
 		{
-			std::cout << "                      " << entryIterator->first << "=" << entryIterator->second << std::endl;
+			std::cout << "                      " << yellow << entryIterator->first << ": " << green <<'[' << entryIterator->second << ']' << std::endl;
 			entryIterator++;
 		}
 		sectionIterator++;
 	}
+	std::cout << reset << std::endl;
 }
 
 ConfigurationSection *Configuration::getSection(const std::string &name)
