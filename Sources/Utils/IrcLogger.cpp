@@ -29,6 +29,22 @@ void IrcLogger::setLogLevel(LogLevel level)
 	this->logLevel = level;
 }
 
+IrcLogger::LogLevel IrcLogger::getLogLevelFromString(const std::string& value)
+{
+	if (value == "TRACE")
+		return TRACE;
+	if (value == "DEBUG")
+		return DEBUG;
+	if (value == "INFO")
+		return INFO;
+	if (value == "WARN")
+		return WARN;
+	if (value == "ERROR")
+		return ERROR;
+	log(IrcLogger::ERROR, "Invalid log level, defaulting to TRACE");
+	return TRACE;
+}
+
 
 void IrcLogger::log(LogLevel level, const std::string& message)
 {

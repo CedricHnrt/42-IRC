@@ -29,6 +29,7 @@
 			~IrcLogger();
 			void open(const std::string& file);
 			void setLogLevel(LogLevel level);
+			LogLevel getLogLevelFromString(const std::string &value);
 			void close();
 			std::string getCurrentTime();
 			static IrcLogger* getLogger();

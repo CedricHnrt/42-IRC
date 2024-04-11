@@ -4,7 +4,7 @@
 #include "Colors.hpp"
 #include "ConfigurationExceptions.hpp"
 #include <iostream>
-
+#include <IrcLogger.hpp>
 Configuration* Configuration::instance = NULL;
 
 Configuration::Configuration(const std::string &file) : file(file) {}
@@ -115,7 +115,7 @@ ConfigurationSection *Configuration::getSection(const std::string &name)
 			return *sectionIterator;
 		sectionIterator++;
 	}
-	std::cerr << "Error: Section " << name << " not found" << std::endl;
+	IrcLogger::getLogger()->log(IrcLogger::ERROR, "Section: " + name + " is not present in: " + file);
 	return NULL;
 }
 

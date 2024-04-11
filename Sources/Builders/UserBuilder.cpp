@@ -5,7 +5,7 @@
 #include "User.hpp"
 
 #include <iostream>
-
+#include <IrcLogger.hpp>
 #define PASSWORD "testpassword"
 
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
@@ -144,11 +144,12 @@ bool UserBuilder::isBuilderComplete()
 		StringUtils::trim(username[4], " :\n");
 		this->realName = username[4];
 
-		std::cout << "password: " << passwordV[1] << std::endl;
-		std::cout << "nickname: " << this->nickname << std::endl;
-		std::cout << "username: " << this->userName << std::endl;
-		std::cout << "realname: " << this->realName << std::endl;
-
+		IrcLogger *logger = IrcLogger::getLogger();
+		logger->log(IrcLogger::DEBUG, "UserBuilder is complete !");
+		logger->log(IrcLogger::DEBUG, "Username: " + this->userName);
+		logger->log(IrcLogger::DEBUG, "Nickname: " + this->nickname);
+		logger->log(IrcLogger::DEBUG, "RealName: " + this->realName);
+		logger->log(IrcLogger::DEBUG, "Password: " + passwordV[1]);
 		return true;
 	}
 	return false;

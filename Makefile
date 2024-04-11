@@ -19,7 +19,7 @@ _RED = \033[31m
 _END = \033[0m
 _BOLD = \033[1m
 
-NAME = irc_server
+NAME = ircserv
 CC = @c++
 INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Server		\
@@ -40,10 +40,12 @@ FILES =	Server/Server						\
 		Configuration/ConfigurationSection	\
 		Exceptions/ChannelCacheException	\
 		Exceptions/ChannelBuildException	\
-		Exceptions/UserBuildException \
+		Exceptions/UserBuildException		\
 		Exceptions/UserCacheException		\
 		Exceptions/UserConnectionException	\
 		Exceptions/ConfigurationIOException	\
+		Exceptions/ServerStartingException	\
+		Exceptions/ServerInitializationException	\
 		Utils/PrimitivePredicate			\
 		Utils/IRCPredicate					\
 		Utils/StringUtils					\
