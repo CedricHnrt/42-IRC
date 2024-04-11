@@ -1,5 +1,4 @@
 #include "ChannelCacheManager.hpp"
-#include "../Exceptions/ChannelExceptions.hpp"
 #include <limits>
 #include <algorithm>
 #include <iostream>
@@ -8,25 +7,25 @@
 
 ChannelCacheManager* ChannelCacheManager::instance = NULL;
 
-ChannelCacheManager::ChannelCacheManager() {}
+ChannelCacheManager::ChannelCacheManager() : channels(std::list<Channel>()), uniqueIdCounter(0){}
 
-void ChannelCacheManager::addToCache(Channel& channel)
+void ChannelCacheManager::addToCache(Channel& channel) throw (ChannelCacheException)
 {
 	if (this->uniqueIdCounter == std::numeric_limits<size_t>::max())
-		throw ChannelCreationException("Maximum number of channels reached !");
+		throw ChannelCacheException(this->uniqueIdCounter, "Maximum number of channels reached !");
 	channel.setUniqueId(++this->uniqueIdCounter);
 	this->channels.push_back(channel);
 }
 
-Channel& ChannelCacheManager::getFromCache(size_t channelId)
+Channel& ChannelCacheManager::getFromCache(size_t channelId) throw (ChannelCacheException)
 {
 	std::list<Channel>::iterator iterator = std::find_if(channels.begin(), channels.end(), ChannelPredicate(channelId));
 	if (iterator != channels.end())
 		return *iterator;
-	throw ChannelNotFoundException(channelId, "Channel not found !");
+	throw ChannelCacheException(channelId, "Channel not found !");
 }
 
-void ChannelCacheManager::deleteFromCache(size_t channelId)
+void ChannelCacheManager::deleteFromCache(size_t channelId) throw (ChannelCacheException)
 {
 	std::list<Channel>::iterator iterator = std::find_if(channels.begin(), channels.end(),  ChannelPredicate(channelId));
 	if (iterator != channels.end())
@@ -34,7 +33,7 @@ void ChannelCacheManager::deleteFromCache(size_t channelId)
 		channels.erase(iterator);
 		return ;
 	}
-	throw ChannelDeletionException(channelId, "Channel not found");
+	throw ChannelCacheException(channelId, "Channel not found");
 }
 
 std::list<Channel> ChannelCacheManager::getCache()
@@ -44,11 +43,5 @@ std::list<Channel> ChannelCacheManager::getCache()
 
 ChannelCacheManager* ChannelCacheManager::getInstance()
 {
-	if (instance == NULL)
-	{
-		instance = new ChannelCacheManager();
-		instance->uniqueIdCounter = 0;
-		instance->channels = std::list<Channel>();
-	}
-	return instance;
+	return instance == NULL ? instance = new ChannelCacheManager() : instance;
 }

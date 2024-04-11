@@ -2,6 +2,7 @@
 #define USERCACHEMANAGER_HPP
 
 	#include "User.hpp"
+	#include "UserExceptions.hpp"
 	#include <list>
 
 	class UsersCacheManager
@@ -13,9 +14,9 @@
 			UsersCacheManager();
 
 		public:
-			void addToCache(User& user);
-			User& getFromCache(size_t uniqueId);
-			void deleteFromCache(size_t uniqueId);
+			void addToCache(User& user) throw(UserCacheException);
+			User& getFromCache(size_t uniqueId) throw(UserCacheException);
+			void deleteFromCache(size_t uniqueId) throw(UserCacheException);
 			std::list<User> getCache();
 			size_t getUniqueIdCounter() const;
 			static UsersCacheManager* getInstance();

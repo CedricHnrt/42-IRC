@@ -27,23 +27,27 @@ INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Channel		\
 			-I ./Includes/Commands		\
 			-I ./Includes/Exceptions	\
-			-I ./Includes/User
+			-I ./Includes/User			\
+			-I ./Includes/Configuration
 C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -g3
 C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
 FILES =	Server								\
-		Exceptions/ChannelCreationException	\
-		Exceptions/ChannelNotFoundException	\
-		Exceptions/ChannelDeletionException \
-		Exceptions/ChannelModificationException \
+		Configuration/Configuration			\
+		Configuration/ConfigurationSection	\
+		Exceptions/ChannelCacheException	\
+		Exceptions/ChannelBuildException	\
 		Exceptions/UserBuildException \
 		Exceptions/UserCacheException		\
 		Exceptions/UserConnectionException	\
+		Exceptions/ConfigurationIOException	\
 		Utils/PrimitivePredicate			\
 		Utils/IRCPredicate					\
 		Utils/StringUtils					\
+		Utils/Colors						\
+		Utils/FileUtils						\
 		Models/User/User					\
 		Models/User/UserProperties			\
 		Models/Channel/ChannelProperties	\
@@ -80,7 +84,7 @@ else
 endif
 
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects/Builders Objects/Exceptions Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers
+	$(DIR) Objects/Builders Objects/Exceptions Objects/Configuration Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 ifeq ($(DEBUG), true)
 	$(DIR) Objects/Tests
