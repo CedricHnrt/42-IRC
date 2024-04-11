@@ -66,10 +66,10 @@ bool StringUtils::isPrintable(const std::string str)
 	return true;
 }
 
-void StringUtils::trim(std::string &str, const char character)
+void StringUtils::trim(std::string &str, const char *characters)
 {
-	const size_t first = str.find_first_not_of(character);
-	const size_t last = str.find_last_not_of(character);
+	const size_t first = str.find_first_not_of(characters);
+	const size_t last = str.find_last_not_of(characters);
 	str = str.substr(first, (last - first + 1));
 }
 
@@ -95,18 +95,31 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 {
 	std::vector<std::string> result;
 
+	if (input.find(c) == std::string::npos) {
+		result.push_back(input);
+		return result;
+	}
+
 	size_t i = input.find(c);
 	size_t j = 0;
 	std::string line;
 
-	while (input[i] && input[i + 1])
+	while (input[i])
 	{
 		i = input.find(c, j);
+		if (i == std::string::npos) {
+			result.push_back(input.substr(j, i - j));
+			break;
+		}
 		line = input.substr(j, i - j);
 		i++;
 		j = i;
 		result.push_back(line);
 		line.clear();
+	}
+	for (std::vector<std::string>::iterator it = result.begin(); it != result.end(); ++it)
+	{
+		StringUtils::trim(*it,"\r\n ");
 	}
 	return result;
 }

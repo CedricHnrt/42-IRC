@@ -2,7 +2,7 @@
 // Created by pgouasmi on 4/5/24.
 //
 
-#include "Server/Server.hpp"
+#include "../../Includes/Server/Server.hpp"
 
 //#define username "bruh"
 //#define nickname "bruh"
@@ -90,7 +90,6 @@ void Server::serverUp()
 
 		for (size_t i = 0;  i < this->_fds.size(); i++)
 		{
-//			std::cout << i << std::endl;
 			if (this->_fds[i].revents & POLLIN)
 			{
 				if (this->_fds[i].fd == this->_socketfd)
@@ -104,21 +103,30 @@ void Server::serverUp()
 	}
 }
 
+void Server::handleKnownClient(int incomingFD)
+{
+	(void)incomingFD;
+
+	std::cout << "in known client" << std::endl;
+}
+
 void Server::handleIncomingRequest(int incomingFD)
 {
 	std::cout << "IN INCOMING REQUEST" << std::endl;
 	char buffer[512];
 	size_t size = recv(incomingFD, buffer, 512, 0);
 	buffer[size] = '\0';
-	//	std::cout << buffer << std::endl;
 	if (this->_danglingUsers.contains(incomingFD))
 	{
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete()) {
-			std::cout << "BUILDER COMPLETE" << std::endl;
-			this->_allUsers.push_back(this->_danglingUsers.at(incomingFD).build());
+			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
 			this->_danglingUsers.erase(incomingFD);
 		}
+	}
+	else
+	{
+		this->handleKnownClient(incomingFD);
 	}
 }
 

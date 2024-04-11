@@ -22,6 +22,7 @@ _BOLD = \033[1m
 NAME = ircserv
 CC = @c++
 INCLUDES=	-I ./Includes/				\
+			-I ./Includes/Server		\
 			-I ./Includes/Builders		\
 			-I ./Includes/CacheManager	\
 			-I ./Includes/Channel		\

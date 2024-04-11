@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#define PASSWORD "test"
+#define PASSWORD "testpassword"
 
 UserBuilder::UserBuilder() : userSocketFd(-1), isComplete(false) {}
 
@@ -105,79 +105,56 @@ User& UserBuilder::build() {
 
 UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)
 {
-//	std::cout << "got in fillBuffer, data = " << data << std::endl;
-
-	std::string line;
-	size_t i = 0;
-	size_t j = 0;
-
 	this->userSocketFd = incomingFD;
+	std::vector<std::string> incomingData = StringUtils::split(data, '\n');
 
-	while (data[i] && data[i + 1])
-	{
-		i = data.find('\n', j);
-		line = data.substr(j, i - j);
-		i++;
-		j = i;
-//		std::cout << "line: " << line << std::endl;
-		this->connectionInfos.push_back(line);
+	for (std::vector<std::string>::iterator it  = incomingData.begin(); it != incomingData.end(); ++it) {
+		this->connectionInfos.push_back(*it);
 	}
-//	std::cout << "end of fill buffer, size=" << this->connectionInfos.size() << std::endl;
 	return *this;
 }
 
 bool UserBuilder::isBuilderComplete()
 {
-	std::string line;
-
-	std::cout << "in BUILDER COMPLETE\n" << std::endl;
-//
-//	std::cout << "in builder complete, last info in vector: " << this->connectionInfos.back().substr(0, 4) << std::endl;
-
 	if (this->connectionInfos.size() >= 3 && this->connectionInfos.back().substr(0, 4) == "USER")
 	{
 		this->connectionInfos.erase(this->connectionInfos.begin());
 
 		/*handle the password*/
-		if (this->connectionInfos[0].substr(0, 4) != "PASS")
+		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos.front(), ' ');
+		if (passwordV.size() != 2 || passwordV[1] != PASSWORD) {
 			return false;
-		std::string password = this->connectionInfos[0].substr(5, this->connectionInfos[0].length());
-		password.erase(password.find(13));
-		std::cout << "password: " << password << ", size: " << password.size() << std::endl;
-		if (password != PASSWORD)
-			return false;
+		}
 
 		this->connectionInfos.erase(this->connectionInfos.begin());
 
 		/*handle the nickname*/
-		std::string nickname = this->connectionInfos[0].substr(5, this->connectionInfos[0].length());
-		nickname.erase(nickname.find(13));
-		this->nickname = nickname;
-
-		std::cout << "nickname =" << nickname << std::endl;
+		std::vector<std::string> nickname = StringUtils::split(this->connectionInfos.front(), ' ');
+		this->nickname = nickname[1];
 
 		this->connectionInfos.erase(this->connectionInfos.begin());
 
 		/*handle username*/
-		std::cout << "username line= " << this->connectionInfos[0] << std::endl;
-		std::vector<std::string> temp;
+		std::vector<std::string> username =  StringUtils::split(this->connectionInfos.front(), ' ');
+		if (username.size() != 5) {
+			return false;
+		}
+		this->userName = username[1];
+		StringUtils::trim(username[4], " :\n");
+		this->realName = username[4];
 
-		size_t i = 0;
-		size_t j = 0;
-
-		while (this->connectionInfos[0][i] && this->connectionInfos[0][i + 1])
-		{
-			i = this->connectionInfos[0].find('\n', j);
-			line = this->connectionInfos[0].substr(j, i - j);
-			i++;
-			j = i;
-	//		std::cout << "line: " << line << std::endl;
-			this->connectionInfos.push_back(line);
-	}
-
+		std::cout << "password: " << passwordV[1] << std::endl;
+		std::cout << "nickname: " << this->nickname << std::endl;
 		std::cout << "username: " << this->userName << std::endl;
+		std::cout << "realname: " << this->realName << std::endl;
 
 		return true;
 	}
 	return false;
 }
+
+//std::ostream &operator<<(std::ostream &os, const UserBuilder &obj)
+//{
+//	os << "Nickname: " << obj.nickname <<  ;
+//	return os;
+//}

@@ -98,4 +98,8 @@
 
 			bool 	isBuilderComplete();
 	};
+
+//	std::ostream  &operator<<(std::ostream &os, const UserBuilder &obj);
+
+	
 #endif

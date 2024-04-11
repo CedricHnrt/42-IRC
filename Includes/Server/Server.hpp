@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include "../../Includes/Builders/UserBuilder.hpp"
+#include "../../Includes/CacheManager/UsersCacheManager.hpp"
 
 
 #include <iostream>
@@ -50,6 +51,7 @@ class Server
 		bool handleNewClient();
 		void handleIncomingRequest(int incomingFD);
 		void getNewClientInfos(int incomingFD);
+		void handleKnownClient(int incomingFD);
 
 	class SocketFDException : public std::exception
 	{
