@@ -46,6 +46,7 @@ FILES =	Server								\
 		Utils/PrimitivePredicate			\
 		Utils/IRCPredicate					\
 		Utils/StringUtils					\
+		Utils/IrcLogger						\
 		Utils/Colors						\
 		Utils/FileUtils						\
 		Models/User/User					\
