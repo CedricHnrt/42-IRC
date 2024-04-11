@@ -37,10 +37,8 @@ PRINT = @echo
 FILES =	Server								\
 		Configuration/Configuration			\
 		Configuration/ConfigurationSection	\
-		Exceptions/ChannelCreationException	\
-		Exceptions/ChannelNotFoundException	\
-		Exceptions/ChannelDeletionException \
-		Exceptions/ChannelModificationException \
+		Exceptions/ChannelCacheException	\
+		Exceptions/ChannelBuildException	\
 		Exceptions/UserBuildException \
 		Exceptions/UserCacheException		\
 		Exceptions/UserConnectionException	\

@@ -8,7 +8,8 @@ class UserConnectionException : public std::exception
 	private:
 		std::string message;
 	public:
-		UserConnectionException(const std::string& str) throw() ;
+		UserConnectionException(const std::string& str) throw();
+		UserConnectionException(const UserConnectionException& other) throw();
 		~UserConnectionException() throw();
 		const char *what() const throw();
 };
@@ -18,7 +19,8 @@ class UserBuildException : public std::exception
 	private:
 		std::string message;
 	public:
-		UserBuildException(const std::string& str) throw() ;
+		UserBuildException(const std::string& str) throw();
+		UserBuildException(const UserBuildException& other) throw();
 		~UserBuildException() throw();
 		const char *what() const throw();
 };
@@ -29,7 +31,8 @@ class UserCacheException : public std::exception
 		size_t userId;
 		std::string message;
 	public:
-		UserCacheException(size_t userId, const std::string& str) throw() ;
+		UserCacheException(size_t userId, const std::string& str) throw();
+		UserCacheException(const UserCacheException& other) throw();
 		~UserCacheException() throw();
 		const char *what() const throw();
 };

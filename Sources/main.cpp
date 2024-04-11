@@ -5,7 +5,8 @@
 int main(int argc, char **argv)
 {
 
-	Configuration *configuration = new Configuration("config.conf");
+	Configuration::getInstance("config.conf");
+	Configuration *configuration = Configuration::getInstance();
 	configuration->load();
 	configuration->printSections();
 	ConfigurationSection *section = configuration->getSection("SERVER");

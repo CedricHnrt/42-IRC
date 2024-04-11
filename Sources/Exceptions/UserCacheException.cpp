@@ -1,7 +1,8 @@
 #include <string>
-#include <Exceptions/UserExceptions.hpp>
-UserCacheException::UserCacheException(size_t userId, const std::string& message) throw() : userId(userId), message(message) {}
+#include <UserExceptions.hpp>
 
+UserCacheException::UserCacheException(size_t userId, const std::string& message) throw() : userId(userId), message(message) {}
+UserCacheException::UserCacheException(const UserCacheException& other) throw() : userId(other.userId), message(other.message) {}
 UserCacheException::~UserCacheException() throw() {}
 
 const char* UserCacheException::what() const throw()

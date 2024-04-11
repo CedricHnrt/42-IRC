@@ -5,6 +5,8 @@
 #include "ConfigurationExceptions.hpp"
 #include <iostream>
 
+Configuration* Configuration::instance = NULL;
+
 Configuration::Configuration(const std::string &file) : file(file) {}
 
 Configuration::~Configuration()
@@ -115,4 +117,9 @@ ConfigurationSection *Configuration::getSection(const std::string &name)
 	}
 	std::cerr << "Error: Section " << name << " not found" << std::endl;
 	return NULL;
+}
+
+Configuration* Configuration::getInstance(const std::string& file)
+{
+	return instance == NULL ? instance = new Configuration(file) : instance;
 }

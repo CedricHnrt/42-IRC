@@ -14,8 +14,11 @@
 			void addSection(ConfigurationSection *section);
 			void printSections();
 			ConfigurationSection* getSection(const std::string& name);
+			static Configuration* getInstance(const std::string& file = "");
 		private:
 			std::string file;
 			std::list<ConfigurationSection*> sections;
+			static Configuration* instance;
+
 	};
 #endif

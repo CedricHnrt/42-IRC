@@ -2,6 +2,7 @@
 #define CHANNELMANAGER_HPP
 
 	#include "Channel.hpp"
+	#include "ChannelExceptions.hpp"
 	#include <list>
 
 	class ChannelCacheManager
@@ -13,9 +14,9 @@
 			ChannelCacheManager();
 
 		public:
-			void addToCache(Channel& channel);
-			Channel& getFromCache(size_t uniqueId);
-			void deleteFromCache(size_t uniqueId);
+			void addToCache(Channel& channel) throw(ChannelCacheException);
+			Channel& getFromCache(size_t uniqueId) throw(ChannelCacheException);
+			void deleteFromCache(size_t uniqueId) throw(ChannelCacheException);
 			std::list<Channel> getCache();
 			static ChannelCacheManager* getInstance();
 	};
