@@ -1,12 +1,5 @@
 #include "UserBuilder.hpp"
 
-#include <StringUtils.hpp>
-#include <UserExceptions.hpp>
-#include "User.hpp"
-
-#include <iostream>
-#include <IrcLogger.hpp>
-#include "UsersCacheManager.hpp"
 #define PASSWORD "testpassword"
 
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
@@ -134,8 +127,10 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 		std::vector<std::string> nickname = StringUtils::split(this->connectionInfos.front(), ' ');
 		this->nickname = nickname[1];
 
-		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname))
+		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname)) {
+			sendServerReply(this->userSocketFd, ERR_ALREADYREGISTERED(this->nickname));
 			throw UserBuildException("Nickname already exists");
+		}
 
 
 		this->connectionInfos.erase(this->connectionInfos.begin());
@@ -159,9 +154,3 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 	}
 	return false;
 }
-
-//std::ostream &operator<<(std::ostream &os, const UserBuilder &obj)
-//{
-//	os << "Nickname: " << obj.nickname <<  ;
-//	return os;
-//}

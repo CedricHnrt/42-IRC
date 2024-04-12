@@ -26,6 +26,7 @@ static bool parsePassword(const std::string &password)
 
 Server::Server() throw(ServerInitializationException)
 {
+	this->version = "3";
 	/* grab the port and password from the configuration */
 	ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
 	std::string portStr = section->getStringValue("port", "25565");
@@ -136,6 +137,15 @@ void Server::handleIncomingRequest(int incomingFD)
 			User CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
 
 			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()));
+			ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
+			if (section == NULL)
+				return;
+			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")));
+			sendServerReply(incomingFD, RPL_CREATED(CurrentUser.getNickname(), IrcLogger::getCurrentTime()));
+			sendServerReply(incomingFD, RPL_MYINFO(CurrentUser.getNickname(), section->getStringValue("servername"), section->getStringValue("version"), "io", "kost", "k"));
+			sendServerReply(incomingFD, RPL_ISUPPORT(CurrentUser.getNickname(), "CHANNELLEN=32 NICKLEN=9 TOPICLEN=307"));
+
+
 		}
 	}
 	catch (UserBuildException &exception)
