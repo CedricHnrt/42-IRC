@@ -1,7 +1,8 @@
 #ifndef USERBUILDER_HPP
 	#define USERBUILDER_HPP
 	#include <string>
-	#include <vector>
+#include <UserExceptions.hpp>
+#include <vector>
 	#include "User.hpp"
 	#include "UserProperties.hpp"
 /**
@@ -93,7 +94,7 @@
 
 			UserBuilder &fillBuffer(const std::string data, int incomingFD);
 
-			bool 	isBuilderComplete();
+			bool 	isBuilderComplete() throw (UserBuildException);
 	};
 
 //	std::ostream  &operator<<(std::ostream &os, const UserBuilder &obj);

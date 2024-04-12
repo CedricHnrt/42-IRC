@@ -42,6 +42,7 @@ FILES =	Server/Server						\
 		Exceptions/ChannelBuildException	\
 		Exceptions/UserBuildException		\
 		Exceptions/UserCacheException		\
+		Exceptions/UserCacheExceptionString		\
 		Exceptions/UserConnectionException	\
 		Exceptions/ConfigurationIOException	\
 		Exceptions/ServerStartingException	\

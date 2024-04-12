@@ -37,3 +37,15 @@ bool UserPredicateFD::operator == (int userId)
 	std::cout << "fd: " << this->socketFD << std::endl;
 	return userId == this->socketFD;
 }
+
+UserPredicateNickname::UserPredicateNickname(const std::string &value) : nickname(value) {}
+
+bool UserPredicateNickname::operator () (User user)
+{
+	return user.getNickname() == this->nickname;
+}
+
+bool UserPredicateNickname::operator == (const std::string &value)
+{
+	return value == this->nickname;
+}

@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <IrcLogger.hpp>
+#include "UsersCacheManager.hpp"
 #define PASSWORD "testpassword"
 
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
@@ -115,7 +116,7 @@ UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)
 	return *this;
 }
 
-bool UserBuilder::isBuilderComplete()
+bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 {
 	if (this->connectionInfos.size() >= 3 && this->connectionInfos.back().substr(0, 4) == "USER")
 	{
@@ -124,7 +125,7 @@ bool UserBuilder::isBuilderComplete()
 		/*handle the password*/
 		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos.front(), ' ');
 		if (passwordV.size() != 2 || passwordV[1] != PASSWORD) {
-			return false;
+			throw UserBuildException("Invalid Password");
 		}
 
 		this->connectionInfos.erase(this->connectionInfos.begin());
@@ -132,6 +133,10 @@ bool UserBuilder::isBuilderComplete()
 		/*handle the nickname*/
 		std::vector<std::string> nickname = StringUtils::split(this->connectionInfos.front(), ' ');
 		this->nickname = nickname[1];
+
+		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname))
+			throw UserBuildException("Nickname already exists");
+
 
 		this->connectionInfos.erase(this->connectionInfos.begin());
 

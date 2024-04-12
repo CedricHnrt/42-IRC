@@ -3,6 +3,8 @@
 //
 #include "Server.hpp"
 
+#include <cmath>
+
 static int parsePort(const std::string &port)
 {
 	if (port.find_first_not_of("0123456789") != std::string::npos)
@@ -84,7 +86,7 @@ void Server::serverUp() throw (ServerStartingException)
 	while (true)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
-			logger->log(IrcLogger::DEBUG, "Poll error");
+			throw ServerStartingException("poll failed");
 
 		for (size_t i = 0; i < this->_fds.size(); i++)
 		{
@@ -118,10 +120,20 @@ void Server::handleIncomingRequest(int incomingFD)
 		this->handleKnownClient(incomingFD, buffer);
 		return;
 	}
-	this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
-	if (this->_danglingUsers.at(incomingFD).isBuilderComplete())
+	try
 	{
-		UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
+		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
+		if (this->_danglingUsers.at(incomingFD).isBuilderComplete())
+		{
+			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
+			this->_danglingUsers.erase(incomingFD);
+		}
+	}
+	catch (UserBuildException &exception)
+	{
+		IrcLogger *logger = IrcLogger::getLogger();
+		logger->log(IrcLogger::ERROR, "An error occurred during user building !");
+		logger->log(IrcLogger::ERROR, exception.what());
 		this->_danglingUsers.erase(incomingFD);
 	}
 }

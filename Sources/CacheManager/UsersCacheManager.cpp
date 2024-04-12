@@ -34,6 +34,23 @@ User& UsersCacheManager::getFromCacheSocketFD(int socketFD) throw (UserCacheExce
 	throw UserCacheException(socketFD, "User not found !");
 }
 
+User& UsersCacheManager::getFromNickname(std::string &nickname) throw (UserCacheExceptionString)
+{
+	std::list<User>::iterator iterator = std::find_if(users.begin(), users.end(), UserPredicateNickname(nickname));
+	if (iterator != users.end())
+		return *iterator;
+	throw UserCacheExceptionString(nickname, "User not found !");
+}
+
+bool UsersCacheManager::doesNicknameAlreadyExist(const std::string &nickname) const
+{
+	std::list<User>::const_iterator it = std::find_if(this->users.begin(), this->users.end(), UserPredicateNickname(nickname));
+	if (it != users.end())
+		return true;
+	return false;
+}
+
+
 void UsersCacheManager::deleteFromCache(size_t userId) throw (UserCacheException)
 {
 	std::list<User>::iterator iterator = std::find_if(users.begin(), users.end(),  UserPredicate(userId));
