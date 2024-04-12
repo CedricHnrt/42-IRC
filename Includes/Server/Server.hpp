@@ -22,8 +22,7 @@
 #include "IrcLogger.hpp"
 #include "UsersCacheManager.hpp"
 #include "ServerExceptions.hpp"
-
-#define RPL_WELCOME(USERNAME, NICKNAME) (":server 001" + USERNAME + ":Welcome to the Internet Relay Network" + NICKNAME + "\r\n")
+#include "NumericReplies.hpp"
 
 class Server
 {

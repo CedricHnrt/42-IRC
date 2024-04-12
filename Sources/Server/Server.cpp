@@ -125,8 +125,17 @@ void Server::handleIncomingRequest(int incomingFD)
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete())
 		{
-			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
+//			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
+
+			UsersCacheManager * UManager = UsersCacheManager::getInstance();
+
+			UManager->addToCache(this->_danglingUsers.at(incomingFD).build());
+
 			this->_danglingUsers.erase(incomingFD);
+
+			User CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
+
+			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()));
 		}
 	}
 	catch (UserBuildException &exception)

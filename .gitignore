@@ -8,3 +8,6 @@ ircserv
 #DEPENDENCIES
 *.o
 *.d
+
+#LOG
+irc_server.log
