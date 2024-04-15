@@ -1,14 +1,5 @@
 #include "UserBuilder.hpp"
 
-#include <StringUtils.hpp>
-#include <UserExceptions.hpp>
-#include "User.hpp"
-
-#include <iostream>
-#include <IrcLogger.hpp>
-#include "UsersCacheManager.hpp"
-#define PASSWORD "testpassword"
-
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
 
 UserBuilder& UserBuilder::setName(const std::string& name) {
@@ -124,7 +115,7 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 
 		/*handle the password*/
 		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos.front(), ' ');
-		if (passwordV.size() != 2 || passwordV[1] != PASSWORD) {
+		if (passwordV.size() != 2 || passwordV[1] != Configuration::getInstance()->getSection("SERVER")->getStringValue("password")) {
 			throw UserBuildException("Invalid Password");
 		}
 
@@ -134,8 +125,10 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 		std::vector<std::string> nickname = StringUtils::split(this->connectionInfos.front(), ' ');
 		this->nickname = nickname[1];
 
-		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname))
+		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname)) {
+			sendServerReply(this->userSocketFd, ERR_ALREADYREGISTERED(this->nickname), RED, BOLDR);
 			throw UserBuildException("Nickname already exists");
+		}
 
 
 		this->connectionInfos.erase(this->connectionInfos.begin());
@@ -159,9 +152,3 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 	}
 	return false;
 }
-
-//std::ostream &operator<<(std::ostream &os, const UserBuilder &obj)
-//{
-//	os << "Nickname: " << obj.nickname <<  ;
-//	return os;
-//}

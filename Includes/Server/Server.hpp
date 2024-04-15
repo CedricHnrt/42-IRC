@@ -22,8 +22,7 @@
 #include "IrcLogger.hpp"
 #include "UsersCacheManager.hpp"
 #include "ServerExceptions.hpp"
-
-#define RPL_WELCOME(USERNAME, NICKNAME) (":server 001" + USERNAME + ":Welcome to the Internet Relay Network" + NICKNAME + "\r\n")
+#include "NumericReplies.hpp"
 
 class Server
 {
@@ -32,6 +31,7 @@ class Server
 		Server &operator=(const Server &obj);
 
 		int _socketfd;
+		std::string version;
 		sockaddr_in _serverSocket;
 		std::string _password;
 		std::vector<pollfd> _fds;

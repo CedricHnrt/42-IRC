@@ -1,10 +1,19 @@
 #ifndef USERBUILDER_HPP
 	#define USERBUILDER_HPP
 	#include <string>
-#include <UserExceptions.hpp>
-#include <vector>
+	#include <vector>
+
+	#include "UserExceptions.hpp"
 	#include "User.hpp"
 	#include "UserProperties.hpp"
+	#include "IrcLogger.hpp"
+	#include "StringUtils.hpp"
+	#include "UsersCacheManager.hpp"
+
+	#include "Configuration.hpp"
+
+	#include "NumericReplies.hpp"
+
 /**
  * @class UserBuilder
  * @brief A builder class for creating User objects.

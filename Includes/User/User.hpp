@@ -15,7 +15,7 @@
 			size_t uniqueId;
 			UserProperties* properties;
 		public:
-			std::string getName() const;
+			std::string getUserName() const;
 			std::string getRealName() const;
 			std::string getNickname() const;
 			std::string getIpAddr() const;

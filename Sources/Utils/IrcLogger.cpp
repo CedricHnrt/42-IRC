@@ -121,8 +121,8 @@ std::string IrcLogger::getCurrentTime()
 	std::time_t now = std::time(0);
 	std::tm* localTime = std::localtime(&now);
 
-	char buffer[80];
-	std::strftime(buffer, sizeof(buffer), "[%H:%M:%S] ", localTime);
+	char buffer[255];
+	std::strftime(buffer, sizeof(buffer), "%D-%H:%M:%S ", localTime);
 	return std::string(buffer);
 }
 
