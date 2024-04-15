@@ -126,7 +126,7 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 		this->nickname = nickname[1];
 
 		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname)) {
-			sendServerReply(this->userSocketFd, ERR_ALREADYREGISTERED(this->nickname));
+			sendServerReply(this->userSocketFd, ERR_ALREADYREGISTERED(this->nickname), RED, BOLDR);
 			throw UserBuildException("Nickname already exists");
 		}
 

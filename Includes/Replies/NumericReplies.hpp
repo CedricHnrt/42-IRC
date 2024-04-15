@@ -8,8 +8,31 @@
 #include <string>
 #include <sys/socket.h>
 #include <iostream>
+#include <sstream>
 
-void	sendServerReply(int const client_fd, std::string client_buffer);
+enum COLORS
+{
+	WHITE,
+	BLACK,
+	BLUE,
+	GREEN,
+	RED,
+	PURPLE,
+	ORANGE,
+	YELLOW,
+	LIME,
+	TEAL,
+	CYAN,
+	LBLUE,
+	PINK,
+	GREY,
+	LGREY
+};
+
+#define DEFAULTCOLOR 99
+#define BOLDR "\x02"
+
+void	sendServerReply(int const client_fd, std::string client_buffer, int color, std::string mode);
 
 # define user_id(nickname, username) (":" + nickname + "!" + username + "@localhost")
 
