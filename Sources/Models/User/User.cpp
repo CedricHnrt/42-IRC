@@ -3,7 +3,7 @@
 
 User::User() {}
 
-std::string User::getName() const
+std::string User::getUserName() const
 {
 	return userName;
 }

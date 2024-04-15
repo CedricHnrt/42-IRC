@@ -26,6 +26,7 @@ static bool parsePassword(const std::string &password)
 
 Server::Server() throw(ServerInitializationException)
 {
+	this->version = "3";
 	/* grab the port and password from the configuration */
 	ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
 	std::string portStr = section->getStringValue("port", "25565");
@@ -125,8 +126,22 @@ void Server::handleIncomingRequest(int incomingFD)
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete())
 		{
-			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
+//			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
+
+			UsersCacheManager * UManager = UsersCacheManager::getInstance();
+
+			UManager->addToCache(this->_danglingUsers.at(incomingFD).build());
+
 			this->_danglingUsers.erase(incomingFD);
+
+			User CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
+
+			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()), GREEN, BOLDR);
+			ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
+			if (section == NULL)
+				return;
+			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, ITALIC);
+			sendServerReply(incomingFD, RPL_CREATED(CurrentUser.getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
 		}
 	}
 	catch (UserBuildException &exception)
