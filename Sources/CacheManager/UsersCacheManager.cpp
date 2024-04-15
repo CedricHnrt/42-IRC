@@ -10,6 +10,17 @@ UsersCacheManager* UsersCacheManager::instance = NULL;
 
 UsersCacheManager::UsersCacheManager() : users(std::list<User>()), uniqueIdCounter(0)  {}
 
+UsersCacheManager::~UsersCacheManager()
+{
+	std::list<User>::iterator sectionIterator = users.begin();
+	while (sectionIterator != users.end())
+	{
+		//delete &(*sectionIterator);
+		sectionIterator++;
+	}
+	users.clear();
+}
+
 void UsersCacheManager::addToCache(User& user) throw (UserCacheException)
 {
 	if (this->uniqueIdCounter == std::numeric_limits<size_t>::max())

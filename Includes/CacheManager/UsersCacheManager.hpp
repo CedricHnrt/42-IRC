@@ -14,6 +14,7 @@
 			UsersCacheManager();
 
 		public:
+			~UsersCacheManager();
 			void addToCache(User& user) throw(UserCacheException);
 			User& getFromCache(size_t uniqueId) throw(UserCacheException);
 			User& getFromCacheSocketFD(int socketFD) throw(UserCacheException);

@@ -84,11 +84,22 @@ void Server::serverUp() throw (ServerStartingException)
 
 	IrcLogger *logger =IrcLogger::getLogger();
 	logger->log(IrcLogger::INFO, "Server is up !");
-	while (true)
+	this->_servUp = true;
+	this->sigHandler();
+	while (this->_servUp)
 	{
-		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
+		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1) {
+			if (errno == EINTR) {
+				this->_servUp = false;
+				this->closeOpenedSockets();
+				this->_fds.clear();
+				this->_danglingUsers.clear();
+				UsersCacheManager *uMan = UsersCacheManager::getInstance();
+				delete uMan;
+				continue;
+			}
 			throw ServerStartingException("poll failed");
-
+		}
 		for (size_t i = 0; i < this->_fds.size(); i++)
 		{
 			if (this->_fds[i].revents & POLLIN)
@@ -142,6 +153,7 @@ void Server::handleIncomingRequest(int incomingFD)
 				return;
 			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, ITALIC);
 			sendServerReply(incomingFD, RPL_CREATED(CurrentUser.getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
+//			delete UManager;
 		}
 	}
 	catch (UserBuildException &exception)
@@ -178,6 +190,21 @@ void Server::closeOpenedSockets()
 	for (size_t i = 0; i < this->_fds.size(); i++)
 		close(this->_fds[i].fd);
 }
+
+static void sig(int signal)
+{
+	if (signal == SIGINT)
+		std::cout << "SIGINT" << std::endl;
+	if (signal == SIGQUIT)
+		std::cout << "SIGQUIT" << std::endl;
+}
+
+void Server::sigHandler()
+{
+	std::signal(SIGINT, sig);
+	std::signal(SIGQUIT, sig);
+}
+
 
 Server::~Server()
 {

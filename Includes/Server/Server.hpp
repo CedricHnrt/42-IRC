@@ -8,6 +8,7 @@
 #include <poll.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <cerrno>
 #include <iostream>
 #include <fstream>
@@ -28,6 +29,7 @@
 class Server
 {
 	private:
+		static Server *_instance;
 		Server(const Server &obj);
 		Server &operator=(const Server &obj);
 
@@ -36,6 +38,7 @@ class Server
 		sockaddr_in _serverSocket;
 		std::string _password;
 		std::vector<pollfd> _fds;
+		bool _servUp;
 
 		//key = userSocketFd
 		std::map<int, UserBuilder> _danglingUsers;
