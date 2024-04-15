@@ -6,7 +6,7 @@
 #    By: chonorat <chonorat@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/05 13:40:10 by chonorat          #+#    #+#              #
-#    Updated: 2024/04/10 17:07:32 by chonorat         ###   ########.fr        #
+#    Updated: 2024/04/15 17:18:53 by chonorat         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -53,6 +53,7 @@ FILES =	Server/Server						\
 		Utils/IrcLogger						\
 		Utils/Colors						\
 		Utils/FileUtils						\
+		Utils/sigHandler					\
 		Models/User/User					\
 		Models/User/UserProperties			\
 		Models/Channel/ChannelProperties	\

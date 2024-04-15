@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <csignal>
 
 #include "User.hpp"
 #include "UserBuilder.hpp"
@@ -50,6 +51,7 @@ class Server
 		void getNewClientInfos(int incomingFD);
 		void handleKnownClient(int incomingFD, std::string buffer);
 		void closeOpenedSockets();
+		void sigHandler();
 };
 
 
