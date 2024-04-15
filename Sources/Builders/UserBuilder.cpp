@@ -1,7 +1,5 @@
 #include "UserBuilder.hpp"
 
-#define PASSWORD "testpassword"
-
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
 
 UserBuilder& UserBuilder::setName(const std::string& name) {
