@@ -136,16 +136,12 @@ void Server::handleIncomingRequest(int incomingFD)
 
 			User CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
 
-			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()), RED, BOLDR);
+			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()), GREEN, BOLDR);
 			ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
 			if (section == NULL)
 				return;
-			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), RED, BOLDR);
-			sendServerReply(incomingFD, RPL_CREATED(CurrentUser.getNickname(), IrcLogger::getCurrentTime()), CYAN, BOLDR);
-//			sendServerReply(incomingFD, RPL_MYINFO(CurrentUser.getNickname(), section->getStringValue("servername"), section->getStringValue("version"), "io", "kost", "k"), RED, BOLDR);
-//			sendServerReply(incomingFD, RPL_ISUPPORT(CurrentUser.getNickname(), "CHANNELLEN=32 NICKLEN=9 TOPICLEN=307"), RED, BOLDR);
-
-
+			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, ITALIC);
+			sendServerReply(incomingFD, RPL_CREATED(CurrentUser.getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
 		}
 	}
 	catch (UserBuildException &exception)

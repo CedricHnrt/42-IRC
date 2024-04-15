@@ -17,7 +17,8 @@ enum COLORS
 	BLUE,
 	GREEN,
 	RED,
-	PURPLE,
+	BROWN,
+	MAGENTA,
 	ORANGE,
 	YELLOW,
 	LIME,
@@ -31,6 +32,11 @@ enum COLORS
 
 #define DEFAULTCOLOR 99
 #define BOLDR "\x02"
+#define ITALIC "\x1D"
+#define UNDERLINE "\x1F"
+#define STRIKETHROUGH "\x1E"
+#define MONOSPACE "\x11"
+
 
 void	sendServerReply(int const client_fd, std::string client_buffer, int color, std::string mode);
 
