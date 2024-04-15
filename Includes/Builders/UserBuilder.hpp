@@ -10,6 +10,8 @@
 	#include "StringUtils.hpp"
 	#include "UsersCacheManager.hpp"
 
+	#include "Configuration.hpp"
+
 	#include "NumericReplies.hpp"
 
 /**

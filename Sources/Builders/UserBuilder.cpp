@@ -117,7 +117,7 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 
 		/*handle the password*/
 		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos.front(), ' ');
-		if (passwordV.size() != 2 || passwordV[1] != PASSWORD) {
+		if (passwordV.size() != 2 || passwordV[1] != Configuration::getInstance()->getSection("SERVER")->getStringValue("password")) {
 			throw UserBuildException("Invalid Password");
 		}
 
