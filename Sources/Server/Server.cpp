@@ -2,6 +2,7 @@
 // Created by pgouasmi on 4/5/24.
 //
 #include "Server.hpp"
+#include "CommandManager.hpp"
 
 #include <cmath>
 
@@ -84,6 +85,7 @@ void Server::serverUp() throw (ServerStartingException)
 
 	IrcLogger *logger =IrcLogger::getLogger();
 	logger->log(IrcLogger::INFO, "Server is up !");
+	CommandManager::getInstance();
 	while (true)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
@@ -107,6 +109,52 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "In Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD).getNickname());
+
+	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
+	if (splitted.front()[0] == '/')
+	{
+		splitted.front().erase(0);
+		StringUtils::toUpper(splitted.front());
+	}
+//	std::cout << "splitted[0] = " << splitted.front() << std::endl;
+	CommandManager *CManager = CommandManager::getInstance();
+	ICommand *Command = CManager->getCommand(splitted.front());
+	if (!Command)
+	{
+		std::cout << "unknown command" << std::endl;
+		return ;
+	}
+	std::cout << "command found" << std::endl;
+	splitted.erase(splitted.begin());
+	std::vector<ArgumentsType> ExpectedArgs = Command->getArgs();
+
+	if (ExpectedArgs.size() > splitted.size())
+	{
+		//Not enough arguments were provided
+		return ;
+	}
+
+	std::vector<std::string>::iterator splittedIterator = splitted.begin();
+
+	for (std::vector<ArgumentsType>::iterator ExpectedIt = ExpectedArgs.begin() ; ExpectedIt != ExpectedArgs.end() ; ++ExpectedIt)
+	{
+		if (*ExpectedIt == STRING)
+			continue ;
+		if (*ExpectedIt == NUMBER)
+		{
+			if (!StringUtils::isOnlyDigits(*splittedIterator))
+			{
+				//Wrong argument
+				return ;
+			}
+		}
+		//etc...
+		splittedIterator++;
+	}
+
+	User currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+	(void) currentUser;
+//	Command->execute(&currentUser, )
 }
 
 void Server::handleIncomingRequest(int incomingFD)
@@ -136,11 +184,11 @@ void Server::handleIncomingRequest(int incomingFD)
 
 			User CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
 
-			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()), GREEN, BOLDR);
+			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()), RED, BOLDR);
 			ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
 			if (section == NULL)
 				return;
-			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, ITALIC);
+			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, UNDERLINE);
 			sendServerReply(incomingFD, RPL_CREATED(CurrentUser.getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
 		}
 	}

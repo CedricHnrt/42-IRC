@@ -5,13 +5,24 @@
 	#include "../Channel/Channel.hpp"
 	#include "ArgumentsTypes.hpp"
 
+#include <vector>
+
 	class ICommand {
 		public:
-			virtual std::string getName() const = 0;
-			virtual std::string getDescription() const = 0;
-			virtual std::string getUsage() const = 0;
-			virtual void getArgs(ArgumentsType* args) const = 0;
-			virtual std::string getPermission() const = 0;
-			virtual void execute(User user, Channel channel) const = 0;
+			 std::string getName() const;
+			 std::string getDescription() const;
+			 std::string getUsage() const;
+			 std::vector<ArgumentsType> getArgs() const;
+			 int getPermission() const;
+			 virtual void execute(User *user, Channel *channel, std::vector<std::string>args) = 0;
+			 virtual ~ICommand();
+
+	protected:
+			//this vector will only contain MANDATORIES arguments for each command
+			std::vector<ArgumentsType> _expectedArgs;
+			std::string	_name;
+			std::string _description;
+			std::string _usage;
+			int			_permissionLevel;
 	};
 #endif
