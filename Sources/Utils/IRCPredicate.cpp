@@ -13,6 +13,22 @@ bool ChannelPredicate::operator == (size_t channelId)
 	return channelId == this->channelId;
 }
 
+
+
+
+ChannelPredicateName::ChannelPredicateName(const std::string &channelName) : channelName(channelName) {}
+bool ChannelPredicateName::operator () (Channel channel)
+{
+	return channel.getName() == this->channelName;
+}
+
+bool ChannelPredicateName::operator == (const std::string &channelName)
+{
+	return channelName == this->channelName;
+}
+
+
+
 UserPredicate::UserPredicate(size_t userId) : userId(userId) {}
 
 bool UserPredicate::operator () (User user)

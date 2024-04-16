@@ -94,6 +94,8 @@ void StringUtils::toLower(std::string &str)
 std::vector<std::string> StringUtils::split(const std::string &input, int c)
 {
 	std::vector<std::string> result;
+	if (input.empty())
+		return result;
 
 	if (input.find(c) == std::string::npos) {
 		result.push_back(input);

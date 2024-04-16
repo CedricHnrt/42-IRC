@@ -126,6 +126,9 @@ re: fclean all
 exec : all
 		./ircserv 7777 434
 
+val : all
+		valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes ./ircserv 7777 434
+
 .PHONY: all clean fclean re
 
 -include $(DPDS)

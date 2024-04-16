@@ -153,8 +153,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	}
 
 	User currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
-	(void) currentUser;
-//	Command->execute(&currentUser, )
+	Command->execute(&currentUser, NULL, splitted);
 }
 
 void Server::handleIncomingRequest(int incomingFD)

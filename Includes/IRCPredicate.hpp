@@ -13,6 +13,16 @@
 			bool operator == (size_t channelID);
 	};
 
+	class ChannelPredicateName
+	{
+		private:
+			std::string channelName;
+		public:
+			explicit ChannelPredicateName(const std::string &channelName);
+			bool operator () (Channel channel);
+			bool operator == (const std::string &channelName);
+	};
+
 	class UserPredicate
 	{
 			private:
