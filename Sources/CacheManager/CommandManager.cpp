@@ -10,6 +10,7 @@ CommandManager* CommandManager::instance = NULL;
 CommandManager::CommandManager()
 {
 	//NEED TO ADD
+	//creer kick
 	this->_commandsMap["JOIN"] = new Join();
 }
 
@@ -34,5 +35,5 @@ ICommand *CommandManager::getCommand(const std::string &key) const
 
 bool CommandManager::doesCommandExist(const std::string &key) const
 {
-	return this->_commandsMap.at(key) ? true : false;
+	return this->_commandsMap.find(key) != _commandsMap.end() ? true : false;
 }
