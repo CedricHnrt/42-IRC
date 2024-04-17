@@ -3,9 +3,9 @@
 #include <string>
 
 ChannelPredicate::ChannelPredicate(size_t channelId) : channelId(channelId) {}
-bool ChannelPredicate::operator () (Channel channel)
+bool ChannelPredicate::operator () (Channel *channel)
 {
-	return channel.getUniqueId() == this->channelId;
+	return channel->getUniqueId() == this->channelId;
 }
 
 bool ChannelPredicate::operator == (size_t channelId)
@@ -17,9 +17,9 @@ bool ChannelPredicate::operator == (size_t channelId)
 
 
 ChannelPredicateName::ChannelPredicateName(const std::string &channelName) : channelName(channelName) {}
-bool ChannelPredicateName::operator () (Channel channel)
+bool ChannelPredicateName::operator () (Channel *channel)
 {
-	return channel.getName() == this->channelName;
+	return channel->getName() == this->channelName;
 }
 
 bool ChannelPredicateName::operator == (const std::string &channelName)

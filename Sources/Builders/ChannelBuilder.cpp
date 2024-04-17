@@ -26,9 +26,9 @@ ChannelBuilder& ChannelBuilder::setProperties(const ChannelProperties& propertie
 }
 
 static bool isValid(bool authorizeEmpty, std::string str) {
-	if ((authorizeEmpty && str.empty()) || str.length() > 255)
+	if ((!authorizeEmpty && str.empty()) || str.length() > 255)
 		return false;
-	if (StringUtils::isOnlyWhitespace(str) || !StringUtils::isPrintable(str))
+	if ((!authorizeEmpty && StringUtils::isOnlyWhitespace(str)) || (!authorizeEmpty && !StringUtils::isPrintable(str)))
 		return false;
 	return true;
 }
@@ -44,7 +44,7 @@ void ChannelBuilder::clearBuilder() {
 	this->properties.getUsersInChannel().clear();
 }
 
-Channel& ChannelBuilder::build() {
+Channel *ChannelBuilder::build() {
 
 	//TODO: FIX NULL POINTER EXCEPTION WHEN PROPERTIES IS NOT SET
 	//TODO: ADD GOOD EXCEPTIONS
@@ -64,5 +64,5 @@ Channel& ChannelBuilder::build() {
 	//user->setProperties(this->properties);
 	clearBuilder();
 
-	return (*channel);
+	return (channel);
 }

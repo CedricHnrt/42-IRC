@@ -9,7 +9,7 @@
 			size_t channelId;
 		public:
 			explicit ChannelPredicate(size_t channelId);
-			bool operator () (Channel channel);
+			bool operator () (Channel *channel);
 			bool operator == (size_t channelID);
 	};
 
@@ -19,7 +19,7 @@
 			std::string channelName;
 		public:
 			explicit ChannelPredicateName(const std::string &channelName);
-			bool operator () (Channel channel);
+			bool operator () (Channel *channel);
 			bool operator == (const std::string &channelName);
 	};
 

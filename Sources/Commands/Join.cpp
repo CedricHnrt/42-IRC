@@ -37,6 +37,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 
 	std::vector<std::string>::iterator passIt = Passwords.begin();
 
+	//create a map with key = channelName et value = password
 	for (std::vector<std::string>::iterator chanIt = Channels.begin() ; chanIt != Channels.end() ; ++chanIt)
 	{
 		std::pair<std::string, std::string> result;
@@ -49,8 +50,9 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	}
 
 	ChannelCacheManager *ChanManager = ChannelCacheManager::getInstance();
-	ChannelBuilder Builder;
+	ChannelBuilder *Builder = new ChannelBuilder();
 
+	//chek the channel cache manager, if !exist->add new, else to implement(join existing channel with pword if necessary)
 	for (std::vector<std::pair<std::string, std::string> >::iterator it = ChannelsPasswords.begin() ; it != ChannelsPasswords.end() ; ++it)
 	{
 		if (ChanManager->getFromCacheString(it->first))
@@ -59,15 +61,23 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 		}
 		else
 		{
-			Builder.setName(it->first);
-			Builder.setPassword("");
-			Builder.setTopic("");
-			ChanManager->addToCache(Builder.build());
+			//create new channel
+			std::cout << "it->first: " << it->first << std::endl;
+			Builder->setName(it->first);
+			Builder->setPassword(it->second);
+			Builder->setTopic("");
+			try {
+				ChanManager->addToCache(Builder->build());
+			}
+			catch (std::exception &e)
+			{
+				std::cout << e.what() << std::endl;
+			}
 		}
 	}
 
-	std::list<Channel> test = ChanManager->getCache();
-	std::cout << "front: " << test.front().getName() << std::endl;
+	std::list<Channel *> test = ChanManager->getCache();
+	std::cout << "front: " << test.front()->getName() << std::endl;
 
 	if (ChanManager->getFromCacheString(Channels.front()))
 	{
