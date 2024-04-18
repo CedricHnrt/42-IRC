@@ -6,8 +6,10 @@
 #define COMMANDMANAGER_HPP
 
 #include <vector>
-#include "ICommand.hpp"
 #include <map>
+#include "ICommand.hpp"
+#include "Join.hpp"
+#include "Message.hpp"
 
 
 class CommandManager {

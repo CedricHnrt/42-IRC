@@ -67,7 +67,8 @@ FILES =	Server/Server						\
 		Helpers/UserListHelper				\
 		Replies/NumericReplies				\
 		Commands/ICommand					\
-		Commands/Join
+		Commands/Join						\
+		Commands/Message
 
 MAIN_FILES =	$(FILES)	\
 				main

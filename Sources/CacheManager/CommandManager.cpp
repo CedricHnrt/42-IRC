@@ -3,7 +3,6 @@
 //
 
 #include "CommandManager.hpp"
-#include "Join.hpp"
 
 CommandManager* CommandManager::instance = NULL;
 
@@ -12,6 +11,7 @@ CommandManager::CommandManager()
 	//NEED TO ADD
 	//creer kick
 	this->_commandsMap["JOIN"] = new Join();
+	this->_commandsMap["PRIVMSG"] = new Message();
 }
 
 CommandManager::~CommandManager()
