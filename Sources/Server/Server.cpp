@@ -79,7 +79,6 @@ Server::Server() throw(ServerInitializationException)
 
 void Server::serverUp() throw (ServerStartingException)
 {
-	StringUtils::ltos(112);
 	/*mettre le socket en ecoute passive*/
 	if (listen(this->_socketfd, 10) == -1)
 		throw ServerStartingException("listen failed");
@@ -107,54 +106,55 @@ void Server::serverUp() throw (ServerStartingException)
 
 void Server::handleKnownClient(int incomingFD, std::string buffer)
 {
+	if (buffer.empty())
+		return;
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "In Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD).getNickname());
 
 	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
-	if (splitted.front()[0] == '/')
-	{
-		splitted.front().erase(0);
-		StringUtils::toUpper(splitted.front());
-	}
-//	std::cout << "splitted[0] = " << splitted.front() << std::endl;
-	CommandManager *CManager = CommandManager::getInstance();
-	ICommand *Command = CManager->getCommand(splitted.front());
-	if (!Command)
-	{
-		sendServerReply(incomingFD, ERR_UNKNOWNCOMMAND(Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH"), splitted[0]), RED, BOLDR);
-		return ;
-	}
-	std::cout << "command found" << std::endl;
-	splitted.erase(splitted.begin());
-	std::vector<ArgumentsType> ExpectedArgs = Command->getArgs();
-
-	if (ExpectedArgs.size() > splitted.size())
-	{
-		//Not enough arguments were provided
-		return ;
-	}
-
-	std::vector<std::string>::iterator splittedIterator = splitted.begin();
-
-	for (std::vector<ArgumentsType>::iterator ExpectedIt = ExpectedArgs.begin() ; ExpectedIt != ExpectedArgs.end() ; ++ExpectedIt)
-	{
-		if (*ExpectedIt == STRING)
-			continue ;
-		if (*ExpectedIt == NUMBER)
-		{
-			if (!StringUtils::isOnlyDigits(*splittedIterator))
-			{
-				//Wrong argument
-				return ;
-			}
+	if (!splitted.empty()) {
+		if (splitted.front()[0] == '/') {
+			splitted.front().erase(0);
+			StringUtils::toUpper(splitted.front());
 		}
-		//etc...
-		splittedIterator++;
-	}
+		//	std::cout << "splitted[0] = " << splitted.front() << std::endl;
+		CommandManager *CManager = CommandManager::getInstance();
+		ICommand *Command = CManager->getCommand(splitted.front());
+		if (!Command) {
+			sendServerReply(incomingFD, ERR_UNKNOWNCOMMAND(
+					Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH"),
+					splitted[0]), RED, BOLDR);
+			return;
+		}
+		std::cout << "command found" << std::endl;
+		splitted.erase(splitted.begin());
+		std::vector<ArgumentsType> ExpectedArgs = Command->getArgs();
 
-	User currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
-	Command->execute(&currentUser, NULL, splitted);
+		if (ExpectedArgs.size() > splitted.size()) {
+			//Not enough arguments were provided
+			return;
+		}
+
+		std::vector<std::string>::iterator splittedIterator = splitted.begin();
+
+		for (std::vector<ArgumentsType>::iterator ExpectedIt = ExpectedArgs.begin();
+			 ExpectedIt != ExpectedArgs.end(); ++ExpectedIt) {
+			if (*ExpectedIt == STRING)
+				continue;
+			if (*ExpectedIt == NUMBER) {
+				if (!StringUtils::isOnlyDigits(*splittedIterator)) {
+					//Wrong argument
+					return;
+				}
+			}
+			//etc...
+			splittedIterator++;
+		}
+
+		User currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+		Command->execute(&currentUser, NULL, splitted);
+	}
 }
 
 void Server::handleIncomingRequest(int incomingFD)

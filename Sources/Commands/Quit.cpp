@@ -13,10 +13,10 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void)channel;
 	(void)args;
-	if (!args.empty())
-		sendServerReply(user->getUserSocketId(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), args.front()), GREY, ITALIC);
-	else
-		sendServerReply(user->getUserSocketId(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), ""), GREY, ITALIC);
-//	UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
+//	if (!args.empty())
+//		sendServerReply(user->getUserSocketFd(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), args.front()), GREY, ITALIC);
+//	else
+//		sendServerReply(user->getUserSocketFd(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), ""), GREY, ITALIC);
+	UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
 	UsersCacheManager::getInstance()->addToLeftCache(*user);
 }
