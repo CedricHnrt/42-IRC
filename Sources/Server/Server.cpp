@@ -161,7 +161,9 @@ void Server::handleIncomingRequest(int incomingFD)
 {
 	char buffer[512];
 
-	size_t size = recv(incomingFD, buffer, 512, 0);
+	int size = recv(incomingFD, buffer, 512, 0);
+	if (size == -1)
+		return ;
 	buffer[size] = '\0';
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	if (it == this->_danglingUsers.end())
@@ -197,6 +199,7 @@ void Server::handleIncomingRequest(int incomingFD)
 		IrcLogger *logger = IrcLogger::getLogger();
 		logger->log(IrcLogger::ERROR, "An error occurred during user building !");
 		logger->log(IrcLogger::ERROR, exception.what());
+		close(incomingFD);
 		this->_danglingUsers.erase(incomingFD);
 	}
 }
