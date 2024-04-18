@@ -15,7 +15,6 @@
 #include <vector>
 #include <map>
 
-#include "User.hpp"
 #include "UserBuilder.hpp"
 #include "Configuration.hpp"
 #include "StringUtils.hpp"
@@ -38,7 +37,6 @@ class Server
 
 		//key = userSocketFd
 		std::map<int, UserBuilder> _danglingUsers;
-		std::vector <User> _allUsers;
 
 	public:
 		Server() throw(ServerInitializationException);

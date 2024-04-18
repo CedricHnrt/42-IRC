@@ -1,6 +1,8 @@
 #include "Channel.hpp"
 #include "ChannelProperties.hpp"
 
+#include "User.hpp"
+
 Channel::Channel() {}
 
 std::string Channel::getName() const

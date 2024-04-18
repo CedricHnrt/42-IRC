@@ -1,7 +1,7 @@
 #include "User.hpp"
 #include "UserProperties.hpp"
 
-User::User() {}
+User::User() : currentChannel(NULL) {}
 
 std::string User::getUserName() const
 {
@@ -72,4 +72,21 @@ std::string User::getRealName() const
 {
 	return realName;
 }
+
+Channel *User::getCurrentChannel() const
+{
+	return this->currentChannel;
+}
+
+std::vector<Channel *> User::getChannelList() const
+{
+	return this->channelList;
+}
+
+void User::addChannelToList(Channel *newChannel)
+{
+	this->channelList.push_back(newChannel);
+}
+
+
 

@@ -63,7 +63,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	ChannelBuilder *Builder = new ChannelBuilder();
 
 	//[2]
-	//chek the channel cache manager, if !exist->add new, else to implement(join existing channel with pword if necessary)
+	//check the channel cache manager, if !exist->add new, else to implement(join existing channel with pword if necessary)
 	for (std::vector<std::pair<std::string, std::string> >::iterator it = ChannelsPasswords.begin() ; it != ChannelsPasswords.end() ; ++it)
 	{
 		if (ChanManager->getFromCacheString(it->first))
@@ -71,18 +71,15 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			//[4]
 			Channel *existingChannel = ChanManager->getFromCacheString(it->first);
 			//Channel already exists
-//			std::cout << "channel already exists" << std::endl;
 
 			//is this user already on channel ?
 			if (existingChannel->getUserByName(user->getUserName())) {
-
-//				std::cout << "user is already in channel" << std::endl;
-
 				sendServerReply(user->getUserSocketFd(),
 								ERR_USERONCHANNEL(user->getUserName(), user->getNickname(), existingChannel->getName()),
 								RED, DEFAULT);
 				return;
 			}
+			//is the password correct ?
 			if (it->second != existingChannel->getPassword()) {
 				sendServerReply(user->getUserSocketFd(),
 								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), RED, BOLDR);
@@ -97,8 +94,9 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			Builder->setName(it->first);
 			Builder->setPassword(it->second);
 			Builder->setTopic("");
+			Channel *newChannel;
 			try {
-				Channel *newChannel = Builder->build();
+				newChannel = Builder->build();
 				newChannel->addUserToChannel(user);
 				ChanManager->addToCache(newChannel);
 			}
@@ -107,9 +105,11 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				std::cout << e.what() << std::endl;
 				return ;
 			}
+			user->addChannelToList(newChannel);
+			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getNickname(), user->getUserName()), newChannel->getName()), GREEN, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
 			//[3]
 		}
 	}
 	//[2]
-	sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
 }

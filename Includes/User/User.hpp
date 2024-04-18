@@ -2,6 +2,7 @@
 	#define USER_HPP
 
 	#include <string>
+	#include "Channel.hpp"
 	class UserProperties;
 
 	class User {
@@ -14,6 +15,9 @@
 			int userSocketFd;
 			size_t uniqueId;
 			UserProperties* properties;
+			Channel *currentChannel;
+			std::vector<Channel *> channelList;
+
 		public:
 			std::string getUserName() const;
 			std::string getRealName() const;
@@ -22,6 +26,9 @@
 			int getUserSocketFd() const;
 			size_t getUniqueId() const;
 			UserProperties getProperties() const;
+			Channel *getCurrentChannel() const;
+			std::vector<Channel *> getChannelList() const;
+			void addChannelToList(Channel *newChannel);
 			void setNickname(const std::string& nickname);
 
 		private:
