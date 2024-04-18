@@ -10,16 +10,15 @@ Join::Join()
 	this->_permissionLevel = 0;
 	this->_usage = "/join #<channel> <password>";
 	this->_description = "Used to join an existing channel, or create a new one if no channel corresponds to the given channel name.";
-
 	this->_expectedArgs.push_back(STRING);
 }
+
 
 #include <iostream>
 void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 {
-	(void) user;
-	(void) channel;
-
+	(void)user;
+	(void)channel;
 	std::vector<std::pair<std::string, std::string> > ChannelsPasswords;
 	std::vector<std::string> Channels = StringUtils::split(args.front(), ',');
 	std::vector<std::string> Passwords;
@@ -51,6 +50,8 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 
 	ChannelCacheManager *ChanManager = ChannelCacheManager::getInstance();
 	ChannelBuilder *Builder = new ChannelBuilder();
+
+
 
 	//chek the channel cache manager, if !exist->add new, else to implement(join existing channel with pword if necessary)
 	for (std::vector<std::pair<std::string, std::string> >::iterator it = ChannelsPasswords.begin() ; it != ChannelsPasswords.end() ; ++it)

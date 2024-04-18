@@ -125,3 +125,14 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 	}
 	return result;
 }
+
+std::string StringUtils::ltos(long value)
+{
+	std::string result;
+	while (value)
+	{
+		result = static_cast<char>((value % 10) + '0') + result;
+		value /= 10;
+	}
+	return result;
+}

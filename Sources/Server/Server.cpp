@@ -79,6 +79,7 @@ Server::Server() throw(ServerInitializationException)
 
 void Server::serverUp() throw (ServerStartingException)
 {
+	StringUtils::ltos(112);
 	/*mettre le socket en ecoute passive*/
 	if (listen(this->_socketfd, 10) == -1)
 		throw ServerStartingException("listen failed");

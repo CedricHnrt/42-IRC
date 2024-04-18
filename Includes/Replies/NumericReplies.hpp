@@ -125,7 +125,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_PONG(user_id, token) (user_id + " PONG " + token + "\r\n")
 
 // QUIT
-# define RPL_QUIT(user_id, reason) (user_id + " QUIT :Quit: " + reason + "\r\n")
+# define RPL_QUIT(user_id, reason) (user_id + " QUIT : " + reason + "\r\n")
 # define RPL_ERROR(user_id, reason) (user_id + " ERROR :" + reason + "\r\n")
 
 // PRIVMSG
