@@ -67,7 +67,7 @@ User *Channel::getUserByName(const std::string &name)
 {
 	for (std::vector<User*>::iterator it = this->_usersInChannel.begin() ; it != this->_usersInChannel.end() ; ++it)
 	{
-		if ((*it)->getNickname() == name)
+		if ((*it)->getUserName() == name)
 			return *it;
 	}
 	return NULL;
