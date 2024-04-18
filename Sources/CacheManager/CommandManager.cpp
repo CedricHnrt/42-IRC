@@ -16,6 +16,7 @@ CommandManager::CommandManager()
 	this->_commandsMap["JOIN"] = new Join();
 	this->_commandsMap["PART"] = new Part();
 	this->_commandsMap["QUIT"] = new Quit();
+	this->_commandsMap["PRIVMSG"] = new Message();
 }
 
 CommandManager::~CommandManager()

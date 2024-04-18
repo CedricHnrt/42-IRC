@@ -52,3 +52,23 @@ void Channel::setProperties(const ChannelProperties &properties)
 {
 	this->properties = properties;
 }
+
+void Channel::addUserToChannel(User *user)
+{
+	this->_usersInChannel.push_back(user);
+}
+
+std::vector<User *> Channel::getChannelsUsers() const
+{
+	return this->_usersInChannel;
+}
+
+User *Channel::getUserByName(const std::string &name)
+{
+	for (std::vector<User*>::iterator it = this->_usersInChannel.begin() ; it != this->_usersInChannel.end() ; ++it)
+	{
+		if ((*it)->getUserName() == name)
+			return *it;
+	}
+	return NULL;
+}

@@ -6,7 +6,7 @@
 #    By: chonorat <chonorat@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/05 13:40:10 by chonorat          #+#    #+#              #
-#    Updated: 2024/04/17 17:44:21 by chonorat         ###   ########.fr        #
+#    Updated: 2024/04/10 17:07:32 by chonorat         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -67,6 +67,8 @@ FILES =	Server/Server						\
 		Helpers/UserListHelper				\
 		Replies/NumericReplies				\
 		Commands/ICommand					\
+		Commands/Join						\
+		Commands/Message					\
 		Commands/Join						\
 		Commands/Part						\
 		Commands/Quit
