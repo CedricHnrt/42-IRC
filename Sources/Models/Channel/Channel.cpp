@@ -67,10 +67,15 @@ std::vector<User *> Channel::getChannelsUsers() const
 
 User *Channel::getUserByName(const std::string &name)
 {
-	for (std::vector<User*>::iterator it = this->_usersInChannel.begin() ; it != this->_usersInChannel.end() ; ++it)
-	{
-		if ((*it)->getUserName() == name)
-			return *it;
-	}
+//	for (std::vector<User*>::iterator it = this->_usersInChannel.begin() ; it != this->_usersInChannel.end() ; ++it)
+//	{
+//		if ((*it)->getUserName() == name)
+//			return *it;
+//	}
+//	return NULL;
+	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateUsername(name));
+	if (it != this->_usersInChannel.end())
+		return *it;
 	return NULL;
+
 }

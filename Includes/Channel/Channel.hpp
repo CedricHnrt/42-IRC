@@ -3,7 +3,11 @@
 
 	#include <string>
 	#include <vector>
+	#include <algorithm>
+
 	#include "ChannelProperties.hpp"
+	#include <IRCPredicate.hpp>
+	#include <PrimitivePredicate.hpp>
 
 	class User;
 
