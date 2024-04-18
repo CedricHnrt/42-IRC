@@ -27,5 +27,10 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 //	if (User)
 
 	std::cout << "got in message" << std::endl;
+	std::cout << "recipient: " << recipient << std::endl;
+
+//	message.erase(0);
+
+	std::cout << "message: " << message << std::endl;
 }
 
