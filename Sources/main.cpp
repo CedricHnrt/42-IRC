@@ -2,6 +2,9 @@
 #include <Configuration.hpp>
 #include <IrcLogger.hpp>
 #include "Server.hpp"
+#include "ChannelCacheManager.hpp"
+#include "CommandManager.hpp"
+#include "UsersCacheManager.hpp"
 
 int main(int argc, char **argv)
 {
@@ -82,4 +85,7 @@ int main(int argc, char **argv)
 	}
 	delete configuration;
 	delete logger;
+	delete ChannelCacheManager::getInstance();
+	delete CommandManager::getInstance();
+	delete UsersCacheManager::getInstance();
 }

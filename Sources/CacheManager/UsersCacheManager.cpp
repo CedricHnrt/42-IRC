@@ -81,3 +81,11 @@ UsersCacheManager* UsersCacheManager::getInstance()
 {
 	return instance == NULL ? instance = new UsersCacheManager() : instance;
 }
+
+UsersCacheManager::~UsersCacheManager()
+{
+	for (std::list< User *>::iterator it = this->users.begin() ; it != this->users.end() ; ++it)
+		delete *it;
+	for (std::list< User *>::iterator it = this->leftUsers.begin() ; it != this->leftUsers.end() ; ++it)
+		delete *it;
+}

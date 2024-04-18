@@ -42,3 +42,4 @@ bool CommandManager::doesCommandExist(const std::string &key) const
 {
 	return this->_commandsMap.find(key) != _commandsMap.end() ? true : false;
 }
+
