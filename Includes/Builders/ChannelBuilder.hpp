@@ -65,7 +65,7 @@
 			 * @return A reference to the built Channel object.
 			 * @author jbadaire
 			 */
-			Channel& build();
+			Channel *build();
 	};
 
 #endif

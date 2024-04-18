@@ -9,8 +9,18 @@
 			size_t channelId;
 		public:
 			explicit ChannelPredicate(size_t channelId);
-			bool operator () (Channel channel);
+			bool operator () (Channel *channel);
 			bool operator == (size_t channelID);
+	};
+
+	class ChannelPredicateName
+	{
+		private:
+			std::string channelName;
+		public:
+			explicit ChannelPredicateName(const std::string &channelName);
+			bool operator () (Channel *channel);
+			bool operator == (const std::string &channelName);
 	};
 
 	class UserPredicate
@@ -19,7 +29,7 @@
 				size_t userId;
 			public:
 				explicit UserPredicate(size_t userId);
-				bool operator () (User user);
+				bool operator () (User *user);
 				bool operator == (size_t userId);
 	};
 
@@ -29,7 +39,7 @@
 				int socketFD;
 			public:
 				explicit UserPredicateFD(int fd);
-				bool operator () (User user);
+				bool operator () (User *user);
 				bool operator == (int fd);
 	};
 
@@ -40,7 +50,7 @@
 			std::string nickname;
 		public:
 			explicit UserPredicateNickname(const std::string &value);
-			bool operator () (User user);
+			bool operator () (User *user);
 			bool operator == (const std::string &value);
 	};
 #endif

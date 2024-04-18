@@ -58,7 +58,7 @@ void User::setUserSocketId(int userSocketFd)
 	this->userSocketFd = userSocketFd;
 }
 
-int User::getUserSocketId() const
+int User::getUserSocketFd() const
 {
 	return userSocketFd;
 }
