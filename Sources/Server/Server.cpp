@@ -2,6 +2,7 @@
 // Created by pgouasmi on 4/5/24.
 //
 #include "Server.hpp"
+#include "CommandManager.hpp"
 
 #include <cmath>
 
@@ -84,6 +85,7 @@ void Server::serverUp() throw (ServerStartingException)
 
 	IrcLogger *logger =IrcLogger::getLogger();
 	logger->log(IrcLogger::INFO, "Server is up !");
+	CommandManager::getInstance();
 	this->_servUp = true;
 	this->sigHandler();
 	while (this->_servUp)
@@ -99,7 +101,7 @@ void Server::serverUp() throw (ServerStartingException)
 				continue;
 			}
 			throw ServerStartingException("poll failed");
-		}
+
 		for (size_t i = 0; i < this->_fds.size(); i++)
 		{
 			if (this->_fds[i].revents & POLLIN)
@@ -115,16 +117,65 @@ void Server::serverUp() throw (ServerStartingException)
 
 void Server::handleKnownClient(int incomingFD, std::string buffer)
 {
-	IrcLogger::getLogger()->log(IrcLogger::INFO, "In Known client");
+	if (buffer.empty())
+		return;
+	StringUtils::trim(buffer, "\r\n");
+	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
-	IrcLogger::getLogger()->log(IrcLogger::INFO, "NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD).getNickname());
+	IrcLogger::getLogger()->log(IrcLogger::INFO, "NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD)->getNickname());
+
+	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
+	if (!splitted.empty()) {
+		if (splitted.front()[0] == '/') {
+			splitted.front().erase(0);
+			StringUtils::toUpper(splitted.front());
+		}
+		//	std::cout << "splitted[0] = " << splitted.front() << std::endl;
+		CommandManager *CManager = CommandManager::getInstance();
+		ICommand *Command = CManager->getCommand(splitted.front());
+		if (!Command) {
+			sendServerReply(incomingFD, ERR_UNKNOWNCOMMAND(
+					Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH"),
+					splitted[0]), RED, BOLDR);
+			return;
+		}
+//		std::cout << "command found" << std::endl;
+		splitted.erase(splitted.begin());
+		std::vector<ArgumentsType> ExpectedArgs = Command->getArgs();
+
+		if (ExpectedArgs.size() > splitted.size()) {
+			//Not enough arguments were provided
+			return;
+		}
+
+		std::vector<std::string>::iterator splittedIterator = splitted.begin();
+
+		for (std::vector<ArgumentsType>::iterator ExpectedIt = ExpectedArgs.begin();
+			 ExpectedIt != ExpectedArgs.end(); ++ExpectedIt) {
+			if (*ExpectedIt == STRING)
+				continue;
+			if (*ExpectedIt == NUMBER) {
+				if (!StringUtils::isOnlyDigits(*splittedIterator)) {
+					//Wrong argument
+					return;
+				}
+			}
+			//etc...
+			splittedIterator++;
+		}
+
+		User *currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+		Command->execute(currentUser, NULL, splitted);
+	}
 }
 
 void Server::handleIncomingRequest(int incomingFD)
 {
 	char buffer[512];
 
-	size_t size = recv(incomingFD, buffer, 512, 0);
+	int size = recv(incomingFD, buffer, 512, 0);
+	if (size == -1)
+		return ;
 	buffer[size] = '\0';
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	if (it == this->_danglingUsers.end())
@@ -145,15 +196,14 @@ void Server::handleIncomingRequest(int incomingFD)
 
 			this->_danglingUsers.erase(incomingFD);
 
-			User CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
+			User *CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
 
-			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()), GREEN, BOLDR);
+			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser->getNickname(), CurrentUser->getUserName()), CurrentUser->getUserName()), RED, BOLDR);
 			ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
 			if (section == NULL)
 				return;
-			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, ITALIC);
-			sendServerReply(incomingFD, RPL_CREATED(CurrentUser.getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
-//			delete UManager;
+			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser->getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, UNDERLINE);
+			sendServerReply(incomingFD, RPL_CREATED(CurrentUser->getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
 		}
 	}
 	catch (UserBuildException &exception)
@@ -161,6 +211,7 @@ void Server::handleIncomingRequest(int incomingFD)
 		IrcLogger *logger = IrcLogger::getLogger();
 		logger->log(IrcLogger::ERROR, "An error occurred during user building !");
 		logger->log(IrcLogger::ERROR, exception.what());
+		close(incomingFD);
 		this->_danglingUsers.erase(incomingFD);
 	}
 }

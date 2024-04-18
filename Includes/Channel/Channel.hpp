@@ -3,6 +3,8 @@
 
 	#include <string>
 	#include "ChannelProperties.hpp"
+	#include "User.hpp"
+	#include <vector>
 
 	class Channel {
 
@@ -12,6 +14,7 @@
 			std::string topic;
 			std::string password;
 			ChannelProperties properties;
+			std::vector<User *> _usersInChannel;
 			Channel();
 		public:
 			std::string getName() const;
@@ -19,6 +22,9 @@
 			std::string getPassword() const;
 			size_t getUniqueId() const;
 			ChannelProperties getProperties() const;
+			void addUserToChannel(User *user);
+			std::vector<User *> getChannelsUsers() const;
+			User *getUserByName(const std::string &name);
 		private:
 			friend class ChannelCacheManager;
 			friend class ChannelBuilder;

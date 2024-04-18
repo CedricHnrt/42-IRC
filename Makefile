@@ -20,7 +20,7 @@ _END = \033[0m
 _BOLD = \033[1m
 
 NAME = ircserv
-CC = @c++
+CC = @g++
 INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Server		\
 			-I ./Includes/Builders		\
@@ -61,10 +61,16 @@ FILES =	Server/Server						\
 		Models/Channel/Channel				\
 		CacheManager/ChannelCacheManager	\
 		CacheManager/UsersCacheManager		\
+		CacheManager/CommandManager			\
 		Builders/UserBuilder				\
 		Builders/ChannelBuilder				\
 		Helpers/UserListHelper				\
-		Replies/NumericReplies
+		Replies/NumericReplies				\
+		Commands/ICommand					\
+		Commands/Message					\
+		Commands/Join						\
+		Commands/Part						\
+		Commands/Quit
 
 MAIN_FILES =	$(FILES)	\
 				main
@@ -93,7 +99,7 @@ else
 endif
 
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects/Builders Objects/Exceptions Objects/Server Objects/Configuration Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers Objects/Replies
+	$(DIR) Objects/Builders Objects/Exceptions Objects/Server Objects/Configuration Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers Objects/Replies Objects/Commands
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 ifeq ($(DEBUG), true)
 	$(DIR) Objects/Tests
@@ -122,6 +128,9 @@ re: fclean all
 
 exec : all
 		./ircserv 7777 434
+
+val : all
+		valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes ./ircserv 7777 434
 
 .PHONY: all clean fclean re
 

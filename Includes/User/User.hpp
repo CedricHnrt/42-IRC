@@ -19,7 +19,7 @@
 			std::string getRealName() const;
 			std::string getNickname() const;
 			std::string getIpAddr() const;
-			int getUserSocketId() const;
+			int getUserSocketFd() const;
 			size_t getUniqueId() const;
 			UserProperties getProperties() const;
 			void setNickname(const std::string& nickname);

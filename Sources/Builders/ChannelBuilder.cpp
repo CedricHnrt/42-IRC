@@ -25,11 +25,16 @@ ChannelBuilder& ChannelBuilder::setProperties(const ChannelProperties& propertie
 	return *this;
 }
 
+#include <iostream>
 static bool isValid(bool authorizeEmpty, std::string str) {
-	if ((authorizeEmpty && str.empty()) || str.length() > 255)
+	if ((!authorizeEmpty && str.empty()) || str.length() > 255) {
+		std::cout << "first if KO" << std::endl;
 		return false;
-	if (StringUtils::isOnlyWhitespace(str) || !StringUtils::isPrintable(str))
+	}
+	if ((!authorizeEmpty && StringUtils::isOnlyWhitespace(str)) || (!authorizeEmpty && !StringUtils::isPrintable(str))) {
+		std::cout << "second if KO" << std::endl;
 		return false;
+	}
 	return true;
 }
 
@@ -44,7 +49,7 @@ void ChannelBuilder::clearBuilder() {
 	this->properties.getUsersInChannel().clear();
 }
 
-Channel& ChannelBuilder::build() {
+Channel *ChannelBuilder::build() {
 
 	//TODO: FIX NULL POINTER EXCEPTION WHEN PROPERTIES IS NOT SET
 	//TODO: ADD GOOD EXCEPTIONS
@@ -54,15 +59,12 @@ Channel& ChannelBuilder::build() {
 		clearBuilder();
 
 	Channel* channel = new Channel();
-	if (this->name.c_str())
-		channel->setName(this->name);
-	if (this->topic.c_str())
-		channel->setTopic(this->topic);
-	if (this->password.c_str())
-		channel->setPassword(this->password);
+	channel->setName(this->name);
+	channel->setTopic(this->topic);
+	channel->setPassword(this->password);
 	//TODO: FIX NULL POINTER EXCEPTION WHEN PROPERTIES IS NOT SET
 	//user->setProperties(this->properties);
 	clearBuilder();
 
-	return (*channel);
+	return (channel);
 }

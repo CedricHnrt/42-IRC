@@ -54,7 +54,7 @@ void UserBuilder::clearBuilder() {
 	this->properties.getNotifiedConnectionUsers().clear();
 }
 
-User& UserBuilder::build() {
+User *UserBuilder::build() {
 
 	if (!isValid(this->userName))
 	{
@@ -92,7 +92,7 @@ User& UserBuilder::build() {
 	//user->setProperties(this->properties);
 	clearBuilder();
 
-	return (*user);
+	return (user);
 }
 
 UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)
@@ -113,9 +113,12 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 	{
 		this->connectionInfos.erase(this->connectionInfos.begin());
 
+		std::string newUserName = "New connection";
+
 		/*handle the password*/
 		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos.front(), ' ');
 		if (passwordV.size() != 2 || passwordV[1] != Configuration::getInstance()->getSection("SERVER")->getStringValue("password")) {
+			sendServerReply(this->userSocketFd, ERR_PASSWDMISMATCH(newUserName), RED, BOLDR);
 			throw UserBuildException("Invalid Password");
 		}
 
