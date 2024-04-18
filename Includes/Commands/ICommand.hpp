@@ -1,13 +1,14 @@
 #ifndef ICOMMAND_HPP
 #define ICOMMAND_HPP
 	#include <string>
+	#include <vector>
 	#include "../User/User.hpp"
 	#include "../Channel/Channel.hpp"
 	#include "ArgumentsTypes.hpp"
 	#include "StringUtils.hpp"
 	#include "ChannelBuilder.hpp"
 	#include "ChannelCacheManager.hpp"
-	#include <vector>
+	#include "NumericReplies.hpp"
 
 	class ICommand {
 		public:

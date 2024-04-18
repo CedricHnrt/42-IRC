@@ -45,7 +45,7 @@ UserPredicateFD::UserPredicateFD(int fd) : socketFD(fd) {}
 
 bool UserPredicateFD::operator () (User user)
 {
-	return user.getUserSocketId() == this->socketFD;
+	return user.getUserSocketFd() == this->socketFD;
 }
 
 bool UserPredicateFD::operator == (int userId)

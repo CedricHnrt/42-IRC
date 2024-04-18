@@ -30,7 +30,7 @@ enum COLORS
 	LGREY
 };
 
-#define DEFAULTCOLOR 99
+#define DEFAULT ""
 #define BOLDR "\x02"
 #define ITALIC "\x1D"
 #define UNDERLINE "\x1F"
@@ -135,7 +135,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_PRIVMSG(nick, username, target, message) (":" + nick + "!" + username + "@localhost PRIVMSG " + target + " " + message + "\r\n")
 
 // TOPIC
-# define RPL_TOPIC(client, channel, topic) (":localhost 332 " + client + " #" + channel + " " + topic + "\r\n")
+# define RPL_TOPIC(client, channel, topic) (":localhost 332 " + client + " #" + channel + " : " + topic + "\r\n")
 # define RPL_NOTOPIC(client, channel) (":localhost 331 " + client + " #" + channel + " :No topic is set\r\n")
 
 // USER

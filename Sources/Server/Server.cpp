@@ -121,7 +121,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	ICommand *Command = CManager->getCommand(splitted.front());
 	if (!Command)
 	{
-		std::cout << "unknown command" << std::endl;
+		sendServerReply(incomingFD, ERR_UNKNOWNCOMMAND(Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH"), splitted[0]), RED, BOLDR);
 		return ;
 	}
 	std::cout << "command found" << std::endl;
