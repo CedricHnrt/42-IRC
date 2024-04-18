@@ -18,6 +18,11 @@ void UsersCacheManager::addToCache(User& user) throw (UserCacheException)
 	this->users.push_back(user);
 }
 
+void UsersCacheManager::addToLeftCache(User& user) throw (UserCacheException)
+{
+	this->leftUsers.push_back(user);
+}
+
 User& UsersCacheManager::getFromCache(size_t userId) throw (UserCacheException)
 {
 	std::list<User>::iterator iterator = std::find_if(users.begin(), users.end(), UserPredicate(userId));

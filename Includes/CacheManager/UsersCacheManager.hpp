@@ -10,11 +10,13 @@
 		private:
 			static UsersCacheManager* instance;
 			std::list<User> users;
+			std::list<User> leftUsers;
 			size_t uniqueIdCounter;
 			UsersCacheManager();
 
 		public:
 			void addToCache(User& user) throw(UserCacheException);
+			void addToLeftCache(User& user) throw(UserCacheException);
 			User& getFromCache(size_t uniqueId) throw(UserCacheException);
 			User& getFromCacheSocketFD(int socketFD) throw(UserCacheException);
 			User& getFromNickname(std::string &nickname) throw (UserCacheExceptionString);

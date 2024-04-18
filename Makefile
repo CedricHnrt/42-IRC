@@ -20,7 +20,7 @@ _END = \033[0m
 _BOLD = \033[1m
 
 NAME = ircserv
-CC = @c++
+CC = @g++
 INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Server		\
 			-I ./Includes/Builders		\
@@ -67,8 +67,10 @@ FILES =	Server/Server						\
 		Helpers/UserListHelper				\
 		Replies/NumericReplies				\
 		Commands/ICommand					\
+		Commands/Message					\
 		Commands/Join						\
-		Commands/Message
+		Commands/Part						\
+		Commands/Quit
 
 MAIN_FILES =	$(FILES)	\
 				main

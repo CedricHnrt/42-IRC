@@ -8,6 +8,7 @@
 	#include "StringUtils.hpp"
 	#include "ChannelBuilder.hpp"
 	#include "ChannelCacheManager.hpp"
+	#include "UsersCacheManager.hpp"
 	#include "NumericReplies.hpp"
 
 	class ICommand {

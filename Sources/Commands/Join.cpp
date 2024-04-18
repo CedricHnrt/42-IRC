@@ -27,13 +27,11 @@ Join::Join()
  * 		*/
 void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 {
-	(void) user;
-	(void) channel;
-
+	(void)user;
+	(void)channel;
 	std::vector<std::pair<std::string, std::string> > ChannelsPasswords;
 	std::vector<std::string> Channels = StringUtils::split(args.front(), ',');
 	std::vector<std::string> Passwords;
-
 
 	if (args.size() > 1) {
 		Passwords = StringUtils::split(args[1], ',');
