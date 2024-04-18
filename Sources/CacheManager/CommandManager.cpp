@@ -6,6 +6,7 @@
 #include "Join.hpp"
 #include "Part.hpp"
 #include "Quit.hpp"
+#include "List.hpp"
 
 CommandManager* CommandManager::instance = NULL;
 
@@ -17,6 +18,7 @@ CommandManager::CommandManager()
 	this->_commandsMap["PART"] = new Part();
 	this->_commandsMap["QUIT"] = new Quit();
 	this->_commandsMap["PRIVMSG"] = new Message();
+	this->_commandsMap["LIST"] = new List();
 }
 
 CommandManager::~CommandManager()
@@ -40,5 +42,5 @@ ICommand *CommandManager::getCommand(const std::string &key) const
 
 bool CommandManager::doesCommandExist(const std::string &key) const
 {
-	return this->_commandsMap.find(key) != _commandsMap.end() ? true : false;
+	return this->_commandsMap.find(key) != _commandsMap.end();
 }

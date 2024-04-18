@@ -98,6 +98,7 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 		return result;
 
 	if (input.find(c) == std::string::npos) {
+		StringUtils::trim(const_cast<std::string &>(input),"\r\n ");
 		result.push_back(input);
 		return result;
 	}

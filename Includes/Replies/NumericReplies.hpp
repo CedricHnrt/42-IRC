@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <iostream>
 #include <sstream>
+#include "StringUtils.hpp"
 
 enum COLORS
 {
@@ -140,6 +141,10 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 
 // USER
 # define ERR_ALREADYREGISTERED(client) (":localhost 462 " + client + " :You may not reregister.\r\n")
+
+// LIST
+# define RPL_LIST(client, channel, visible, topic) (":localhost 322 " + client + " " + channel + " " + StringUtils::ltos(visible) + " :" + topic + "\r\n")
+# define RPL_LISTEND(client) (":localhost 323 " + client + " :End of /LIST\r\n")
 
 #endif
 

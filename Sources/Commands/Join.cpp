@@ -110,5 +110,6 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 		}
 	}
 	//[2]
-	sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
+	sendServerReply(user->getUserSocketFd(), RPL_JOIN(user->getNickname(), ChanManager->getCache().back()->getName()), GREEN, BOLDR);
+	sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().back()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
 }
