@@ -31,9 +31,9 @@ bool ChannelPredicateName::operator == (const std::string &channelName)
 
 UserPredicate::UserPredicate(size_t userId) : userId(userId) {}
 
-bool UserPredicate::operator () (User user)
+bool UserPredicate::operator () (User *user)
 {
-	return user.getUniqueId() == this->userId;
+	return user->getUniqueId() == this->userId;
 }
 
 bool UserPredicate::operator == (size_t userId)
@@ -43,9 +43,9 @@ bool UserPredicate::operator == (size_t userId)
 
 UserPredicateFD::UserPredicateFD(int fd) : socketFD(fd) {}
 
-bool UserPredicateFD::operator () (User user)
+bool UserPredicateFD::operator () (User *user)
 {
-	return user.getUserSocketFd() == this->socketFD;
+	return user->getUserSocketFd() == this->socketFD;
 }
 
 bool UserPredicateFD::operator == (int userId)
@@ -56,9 +56,9 @@ bool UserPredicateFD::operator == (int userId)
 
 UserPredicateNickname::UserPredicateNickname(const std::string &value) : nickname(value) {}
 
-bool UserPredicateNickname::operator () (User user)
+bool UserPredicateNickname::operator () (User *user)
 {
-	return user.getNickname() == this->nickname;
+	return user->getNickname() == this->nickname;
 }
 
 bool UserPredicateNickname::operator == (const std::string &value)

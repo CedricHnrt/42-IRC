@@ -17,7 +17,7 @@ Join::Join()
 #include <iostream>
 /*
  * [1] Create a vector of pairs channelName/password
- * [2] Iterate through this vector, if the channel does not exist --> [3], else [4]
+ * [2] Iterate through this vector, if the channel does not exist --> [3], else --> [4]
  *
  * [3] Create a new channel and add it to the channel cache manager
  *
@@ -71,11 +71,13 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			//[4]
 			Channel *existingChannel = ChanManager->getFromCacheString(it->first);
 			//Channel already exists
-			std::cout << "channel already exists" << std::endl;
+//			std::cout << "channel already exists" << std::endl;
 
 			//is this user already on channel ?
 			if (existingChannel->getUserByName(user->getUserName())) {
-				std::cout << "user is already in channel" << std::endl;
+
+//				std::cout << "user is already in channel" << std::endl;
+
 				sendServerReply(user->getUserSocketFd(),
 								ERR_USERONCHANNEL(user->getUserName(), user->getNickname(), existingChannel->getName()),
 								RED, DEFAULT);
@@ -98,7 +100,6 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			try {
 				Channel *newChannel = Builder->build();
 				newChannel->addUserToChannel(user);
-				std::cout << "channel's name: " << newChannel->getName() << std::endl;
 				ChanManager->addToCache(newChannel);
 			}
 			catch (std::exception &e)

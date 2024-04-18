@@ -99,7 +99,7 @@
 			 * @throws UserBuildException if essentials properties for IRC are invalid.
 			 * @author jbadaire
 			 */
-			User &build();
+			User *build();
 
 			UserBuilder &fillBuffer(const std::string data, int incomingFD);
 

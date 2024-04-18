@@ -54,7 +54,7 @@ void UserBuilder::clearBuilder() {
 	this->properties.getNotifiedConnectionUsers().clear();
 }
 
-User& UserBuilder::build() {
+User *UserBuilder::build() {
 
 	if (!isValid(this->userName))
 	{
@@ -92,7 +92,7 @@ User& UserBuilder::build() {
 	//user->setProperties(this->properties);
 	clearBuilder();
 
-	return (*user);
+	return (user);
 }
 
 UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)

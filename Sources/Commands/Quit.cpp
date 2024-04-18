@@ -18,5 +18,5 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 //	else
 //		sendServerReply(user->getUserSocketFd(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), ""), GREY, ITALIC);
 	UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
-	UsersCacheManager::getInstance()->addToLeftCache(*user);
+	UsersCacheManager::getInstance()->addToLeftCache(user);
 }
