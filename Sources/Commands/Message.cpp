@@ -46,7 +46,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 //	std::cout << "recipient: " << recipient << std::endl;
 //	std::cout << "message: " << message << std::endl;
 
-	if (recipient[0] == '#')
+	if (recipient[0] == '#') //msg on a channel
 	{
 		std::cout << "message sent on a server" << std::endl;
 
@@ -60,7 +60,8 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 				this->execute(user, channel, args);
 		}
 	}
-	else {
+	else //private message
+	{
 		try {
 			User *Recipient = UsersCacheManager::getInstance()->getFromNickname(recipient);
 
