@@ -44,6 +44,7 @@ class Server
 		std::vector <User> _allUsers;
 
 	public:
+		static bool servUp;
 		Server() throw(ServerInitializationException);
 		~Server();
 
@@ -54,6 +55,7 @@ class Server
 		void handleKnownClient(int incomingFD, std::string buffer);
 		void closeOpenedSockets();
 		void sigHandler();
+		bool serverIsRunning();
 };
 
 

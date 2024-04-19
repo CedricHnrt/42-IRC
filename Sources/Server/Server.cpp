@@ -3,8 +3,10 @@
 //
 #include "Server.hpp"
 #include "CommandManager.hpp"
+#include "TimeUtils.hpp"
 
 #include <cmath>
+bool Server::servUp = false;
 
 static int parsePort(const std::string &port)
 {
@@ -30,6 +32,8 @@ Server::Server() throw(ServerInitializationException)
 	this->version = "3";
 	/* grab the port and password from the configuration */
 	ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
+	if (section == NULL)
+		throw ServerInitializationException("No SERVER section found in the configuration file.");
 	std::string portStr = section->getStringValue("port", "25565");
 	std::string passwordStr = section->getStringValue("password", "password");
 
@@ -58,7 +62,7 @@ Server::Server() throw(ServerInitializationException)
 	int temp = 1;
 	if (setsockopt(this->_socketfd, SOL_SOCKET, SO_REUSEADDR, &temp, sizeof(temp)) == -1)
 		throw ServerInitializationException("setsockopt failed");
-	if (fcntl(this->_socketfd, F_SETFL, 0) == -1)
+	if (fcntl(this->_socketfd, F_SETFL , O_NONBLOCK) == -1)
 		throw ServerInitializationException("fcntl failed");
 
 	/*associer le socket a l'adresse et port dans sockaddr_in*/
@@ -73,6 +77,7 @@ Server::Server() throw(ServerInitializationException)
 	serverPoll.events = POLLIN;
 	serverPoll.revents = 0;
 	this->_fds.push_back(serverPoll);
+	servUp = true;
 
 	/*ADD the SERVER pollfd*/
 }
@@ -80,21 +85,16 @@ Server::Server() throw(ServerInitializationException)
 void Server::serverUp() throw (ServerStartingException)
 {
 	/*mettre le socket en ecoute passive*/
-	if (listen(this->_socketfd, 10) == -1)
+	if (listen(this->_socketfd, SOMAXCONN) == -1)
 		throw ServerStartingException("listen failed");
 
 	IrcLogger *logger =IrcLogger::getLogger();
 	logger->log(IrcLogger::INFO, "Server is up !");
 	this->sigHandler();
 	CommandManager::getInstance();
-	while (true) {
-		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1) {
-			if (errno == EINTR) {
-				this->closeOpenedSockets();
-				this->_fds.clear();
-				this->_danglingUsers.clear();
-				break;
-			}
+	servUp = true;
+	while (servUp) {
+		if (poll(&this->_fds[0], this->_fds.size(), 0) == -1) {
 			throw ServerStartingException("poll failed");
 		}
 		for (size_t i = 0; i < this->_fds.size(); i++) {
@@ -106,6 +106,7 @@ void Server::serverUp() throw (ServerStartingException)
 			}
 		}
 	}
+	closeOpenedSockets();
 }
 
 void Server::handleKnownClient(int incomingFD, std::string buffer)
@@ -196,7 +197,7 @@ void Server::handleIncomingRequest(int incomingFD)
 			if (section == NULL)
 				return;
 			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser->getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, UNDERLINE);
-			sendServerReply(incomingFD, RPL_CREATED(CurrentUser->getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
+			sendServerReply(incomingFD, RPL_CREATED(CurrentUser->getNickname(), TimeUtils::getCurrentTime()), MAGENTA, ITALIC);
 		}
 	}
 	catch (UserBuildException &exception)
@@ -215,15 +216,31 @@ bool Server::handleNewClient()
 	pollfd newPoll;
 	socklen_t len = sizeof(this->_serverSocket);
 
-	int client_sock = accept(this->_socketfd, reinterpret_cast<sockaddr *>(&newCli), &len);
-	if (client_sock < 0)
+	ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
+	if (section == NULL)
 		return false;
+
+	int client_sock = accept(this->_socketfd, reinterpret_cast<sockaddr *>(&newCli), &len);
+	IrcLogger *logger = IrcLogger::getLogger();
+	if (client_sock < 0)
+	{
+		logger->log(IrcLogger::ERROR, "An error occurred during accept new client !");
+		logger->log(IrcLogger::ERROR, "accept failed, client_sock < 0");
+		return false;
+	}
+
+	if (fcntl(client_sock, F_SETFL, O_NONBLOCK) == -1) //-> set the socket option (O_NONBLOCK) for non-blocking socket
+	{
+		logger->log(IrcLogger::ERROR, "An error occurred during fcntl new client !");
+		logger->log(IrcLogger::ERROR, "fcntl failed");
+		return false;
+	}
 
 	newPoll.fd = client_sock;
 	newPoll.events = POLLIN;
 	newPoll.revents = 0;
 
-	UserBuilder newClient;
+	UserBuilder newClient = UserBuilder().setBuilderTimeout(TimeUtils::getTimeMillisAt(section->getNumericValue("dandling_timeout", 15000)));
 	this->_danglingUsers[newPoll.fd] = newClient;
 	this->_fds.push_back(newPoll);
 	return true;
@@ -233,15 +250,19 @@ void Server::closeOpenedSockets()
 {
 	for (size_t i = 0; i < this->_fds.size(); i++)
 		close(this->_fds[i].fd);
+	this->_fds.clear();
+	this->_danglingUsers.clear();
 }
 
 static void sigMessage(int signal)
 {
 	if (signal == SIGINT) {
 		std::cout << "\b\b  \b\b";
+		Server::servUp = false;
 		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Interrupted. Exiting...");
 	}
 	if (signal == SIGQUIT) {
+		Server::servUp = false;
 		std::cout << "\b\b  \b\b";
 		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Quit. Exiting...");
 	}
@@ -250,13 +271,20 @@ static void sigMessage(int signal)
 void Server::sigHandler()
 {
 	if (std::signal(SIGINT, sigMessage) == SIG_ERR)
+	{
+		servUp = false;
 		throw ServerStartingException("Signal failed");
+	}
 	if (std::signal(SIGQUIT, sigMessage) == SIG_ERR)
+	{
+		servUp = false;
 		throw ServerStartingException("Signal failed");
+	}
 }
 
 
 Server::~Server()
 {
 	close(this->_socketfd);
+	servUp = false;
 }

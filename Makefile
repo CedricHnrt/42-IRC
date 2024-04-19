@@ -55,6 +55,7 @@ FILES =	Server/Server						\
 		Utils/IrcLogger						\
 		Utils/Colors						\
 		Utils/FileUtils						\
+		Utils/TimeUtils						\
 		Models/User/User					\
 		Models/User/UserProperties			\
 		Models/Channel/ChannelProperties	\
@@ -85,7 +86,7 @@ DEBUG = false
 
 $(NAME): $(OBJS)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(OBJS) -o $(NAME)
+	$(CC) $(OBJS) -o $(NAME) -pg
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 debug: fclean $(DEBUG_OBJS)
@@ -131,6 +132,7 @@ exec : all
 
 val : all
 		valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes ./ircserv 7777 434
+
 
 .PHONY: all clean fclean re
 

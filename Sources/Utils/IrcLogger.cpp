@@ -1,7 +1,6 @@
 #include "IrcLogger.hpp"
-
-#include <Colors.hpp>
-#include <ctime>
+#include "Colors.hpp"
+#include "TimeUtils.hpp"
 #include <iostream>
 
 IrcLogger* IrcLogger::instance = NULL;
@@ -66,44 +65,41 @@ void IrcLogger::log(LogLevel level, const std::string& message)
 	}
 }
 
+static const Colors RESET = Colors(Colors::RESET);
+static const Colors GRAY = Colors(Colors::FG_LGRAY);
+static const Colors RED = Colors(Colors::FG_LRED);
+static const Colors BLUE = Colors(Colors::FG_BLUE);
+static const Colors GREEN = Colors(Colors::FG_GREEN);
+static const Colors YELLOW = Colors(Colors::FG_LYELLOW);
+
 void IrcLogger::trace(const std::string& message)
 {
-	Colors gray = Colors(Colors::FG_LGRAY);
-	Colors reset = Colors(Colors::RESET);
-	std::cout << gray << getCurrentTime() << "[TRACE] " << message  << reset << std::endl;
-	*logFile << getCurrentTime() << "[TRACE] " << message << std::endl;
+	std::cout << GRAY << TimeUtils::getCurrentTime() << "[TRACE] " << message  << RESET << std::endl;
+	*logFile << TimeUtils::getCurrentTime() << "[TRACE] " << message << std::endl;
 }
 
 void IrcLogger::debug(const std::string& message)
 {
-	Colors blue = Colors(Colors::FG_BLUE);
-	Colors reset = Colors(Colors::RESET);
-	std::cout << getCurrentTime() << blue << "[DEBUG] " << message << reset << std::endl;
-	*logFile << getCurrentTime() << "[DEBUG] " << message << std::endl;
+	std::cout << BLUE << TimeUtils::getCurrentTime() << "[DEBUG] " << message << RESET << std::endl;
+	*logFile << TimeUtils::getCurrentTime() << "[DEBUG] " << message << std::endl;
 }
 
 void IrcLogger::info(const std::string& message)
 {
-	Colors green = Colors(Colors::FG_GREEN);
-	Colors reset = Colors(Colors::RESET);
-	std::cout << green << getCurrentTime() << "[INFO] " << message << reset << std::endl;
-	*logFile << getCurrentTime() << "[INFO] " << message << std::endl;
+	std::cout << GREEN << TimeUtils::getCurrentTime() << "[INFO] " << message << RESET << std::endl;
+	*logFile << TimeUtils::getCurrentTime() << "[INFO] " << message << std::endl;
 }
 
 void IrcLogger::warn(const std::string& message)
 {
-	Colors yellow = Colors(Colors::FG_LYELLOW);
-	Colors reset = Colors(Colors::RESET);
-	std::cout << yellow << getCurrentTime() << "[WARN] " << message << reset << std::endl;
-	*logFile << getCurrentTime() << "[WARN] " << message << std::endl;
+	std::cout << YELLOW << TimeUtils::getCurrentTime() << "[WARN] " << message << RESET << std::endl;
+	*logFile << TimeUtils::getCurrentTime() << "[WARN] " << message << std::endl;
 }
 
 void IrcLogger::error(const std::string& message)
 {
-	Colors red = Colors(Colors::FG_LRED);
-	Colors reset = Colors(Colors::RESET);
-	std::cout << red << getCurrentTime() << "[ERROR] " << message << reset << std::endl;
-	*logFile << getCurrentTime() << "[ERROR] " << message << std::endl;
+	std::cout << RED << TimeUtils::getCurrentTime() << "[ERROR] " << message << RESET << std::endl;
+	*logFile << TimeUtils::getCurrentTime() << "[ERROR] " << message << std::endl;
 }
 
 void IrcLogger::close()
@@ -114,16 +110,6 @@ void IrcLogger::close()
 		delete logFile;
 		logFile = NULL;
 	}
-}
-
-std::string IrcLogger::getCurrentTime()
-{
-	std::time_t now = std::time(0);
-	std::tm* localTime = std::localtime(&now);
-
-	char buffer[255];
-	std::strftime(buffer, sizeof(buffer), "%D-%H:%M:%S ", localTime);
-	return std::string(buffer);
 }
 
 IrcLogger* IrcLogger::getLogger()

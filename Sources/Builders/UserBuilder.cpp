@@ -27,6 +27,13 @@ UserBuilder& UserBuilder::setUserSocketId(int userSocketFd) {
 	return *this;
 }
 
+UserBuilder &UserBuilder::setBuilderTimeout(size_t timeout)
+{
+	this->builderTimeout = timeout;
+	return *this;
+}
+
+
 UserBuilder& UserBuilder::setProperties(const UserProperties& properties) {
 	this->properties = properties;
 	return *this;
@@ -114,6 +121,7 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 		this->connectionInfos.erase(this->connectionInfos.begin());
 
 		std::string newUserName = "New connection";
+
 
 		/*handle the password*/
 		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos.front(), ' ');

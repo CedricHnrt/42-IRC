@@ -49,10 +49,7 @@ User* UsersCacheManager::getFromNickname(std::string &nickname) throw (UserCache
 
 bool UsersCacheManager::doesNicknameAlreadyExist(const std::string &nickname) const
 {
-	std::list<User *>::const_iterator it = std::find_if(this->users.begin(), this->users.end(), UserPredicateNickname(nickname));
-	if (it != users.end())
-		return true;
-	return false;
+	return std::find_if(this->users.begin(), this->users.end(), UserPredicateNickname(nickname)) == this->users.end() ? false : true;
 }
 
 

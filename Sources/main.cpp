@@ -85,4 +85,5 @@ int main(int argc, char **argv)
 	delete ChannelCacheManager::getInstance();
 	delete CommandManager::getInstance();
 	delete UsersCacheManager::getInstance();
+	return 0;
 }
