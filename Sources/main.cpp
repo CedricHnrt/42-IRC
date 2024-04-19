@@ -1,10 +1,7 @@
-#include <Colors.hpp>
-#include <Configuration.hpp>
-#include <IrcLogger.hpp>
 #include "Server.hpp"
+#include "Colors.hpp"
 #include "ChannelCacheManager.hpp"
 #include "CommandManager.hpp"
-#include "UsersCacheManager.hpp"
 
 int main(int argc, char **argv)
 {

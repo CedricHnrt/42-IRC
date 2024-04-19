@@ -8,12 +8,14 @@
 #include <poll.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <cerrno>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <map>
+#include <csignal>
 
 #include "User.hpp"
 #include "UserBuilder.hpp"
@@ -27,6 +29,7 @@
 class Server
 {
 	private:
+		static Server *_instance;
 		Server(const Server &obj);
 		Server &operator=(const Server &obj);
 
@@ -50,6 +53,7 @@ class Server
 		void getNewClientInfos(int incomingFD);
 		void handleKnownClient(int incomingFD, std::string buffer);
 		void closeOpenedSockets();
+		void sigHandler();
 };
 
 
