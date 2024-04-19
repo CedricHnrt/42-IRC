@@ -3,6 +3,7 @@
 //
 
 #include "Message.hpp"
+#include "IrcLogger.hpp"
 
 Message::Message()
 {
@@ -27,16 +28,25 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 //	std::cout << "got in message" << std::endl;
 //	std::cout << "recipient: " << recipient << std::endl;
 //	std::cout << "message: " << message << std::endl;
-
-	UsersCacheManager *UserManager = UsersCacheManager::getInstance();
-	User *Recipient = UserManager->getFromNickname(recipient);
-
-	//the recipient does not exist
-	if (!Recipient)
+	try
 	{
-		sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), RED, BOLDR);
-		return ;
+		User *Recipient = UsersCacheManager::getInstance()->getFromNickname(recipient);
+
+		//the recipient does not exist
+		if (!Recipient)
+		{
+			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), RED, BOLDR);
+			return ;
+		}
+		sendServerReply(Recipient->getUserSocketFd(), RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), BLACK, DEFAULT);
 	}
-	sendServerReply(Recipient->getUserSocketFd(), RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), BLACK, DEFAULT);
+	catch (UserCacheExceptionString &exception)
+	{
+		IrcLogger *logger = IrcLogger::getLogger();
+		logger->log(IrcLogger::ERROR, "An error occurred during message sending !");
+		logger->log(IrcLogger::ERROR, exception.what());
+		std::string tmp = "Nickname: ";
+		logger->log(IrcLogger::ERROR, tmp.append(exception.getValue()));
+	}
 }
 

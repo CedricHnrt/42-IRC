@@ -8,3 +8,7 @@ const char* UserCacheExceptionString::what() const throw()
 {
 	return message.c_str();
 }
+const std::string UserCacheExceptionString::getValue() const throw()
+{
+	return value;
+}

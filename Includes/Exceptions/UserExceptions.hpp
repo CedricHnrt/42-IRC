@@ -46,6 +46,7 @@ class UserCacheExceptionString : public std::exception
 		UserCacheExceptionString(const std::string &value, const std::string& str) throw();
 		~UserCacheExceptionString() throw();
 		const char *what() const throw();
+		const std::string getValue() const throw();
 };
 
 #endif
