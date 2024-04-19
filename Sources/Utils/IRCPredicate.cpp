@@ -1,4 +1,4 @@
-#include ".IRCPredicate.hpp"
+#include "IRCPredicate.hpp"
 #include <iostream>
 #include <string>
 

@@ -1,5 +1,6 @@
 #include "User.hpp"
 #include "UserProperties.hpp"
+#include "Channel.hpp"
 
 User::User() : currentChannel(NULL) {}
 

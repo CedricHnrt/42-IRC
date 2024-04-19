@@ -1,5 +1,5 @@
-#ifndef COMPARATOR_HPP
-	#define COMPARATOR_HPP
+#ifndef PRIMITIVEPREDICATE_HPP
+	#define PRIMITIVEPREDICATE_HPP
 	#include <string>
 
 	/**

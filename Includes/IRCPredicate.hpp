@@ -4,6 +4,8 @@
 	#include "User.hpp"
 	#include "Channel.hpp"
 
+	#include <vector>
+
 	class ChannelPredicate
 	{
 		private:

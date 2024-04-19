@@ -2,7 +2,11 @@
 	#define USER_HPP
 
 	#include <string>
-	#include "Channel.hpp"
+	#include <vector>
+
+//	#include "Channel.hpp"
+	class Channel;
+
 	class UserProperties;
 
 	class User {
