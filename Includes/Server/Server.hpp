@@ -38,7 +38,6 @@ class Server
 		sockaddr_in _serverSocket;
 		std::string _password;
 		std::vector<pollfd> _fds;
-		bool _servUp;
 
 		//key = userSocketFd
 		std::map<int, UserBuilder> _danglingUsers;

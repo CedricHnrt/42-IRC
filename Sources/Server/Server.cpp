@@ -85,27 +85,20 @@ void Server::serverUp() throw (ServerStartingException)
 
 	IrcLogger *logger =IrcLogger::getLogger();
 	logger->log(IrcLogger::INFO, "Server is up !");
-	CommandManager::getInstance();
-	this->_servUp = true;
 	this->sigHandler();
-	while (this->_servUp)
-	{
+	CommandManager::getInstance();
+	while (true) {
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1) {
 			if (errno == EINTR) {
-				this->_servUp = false;
 				this->closeOpenedSockets();
 				this->_fds.clear();
 				this->_danglingUsers.clear();
-				UsersCacheManager *uMan = UsersCacheManager::getInstance();
-				delete uMan;
-				continue;
+				break;
 			}
 			throw ServerStartingException("poll failed");
-
-		for (size_t i = 0; i < this->_fds.size(); i++)
-		{
-			if (this->_fds[i].revents & POLLIN)
-			{
+		}
+		for (size_t i = 0; i < this->_fds.size(); i++) {
+			if (this->_fds[i].revents & POLLIN) {
 				if (this->_fds[i].fd == this->_socketfd)
 					this->handleNewClient();
 				else
@@ -242,18 +235,24 @@ void Server::closeOpenedSockets()
 		close(this->_fds[i].fd);
 }
 
-static void sig(int signal)
+static void sigMessage(int signal)
 {
-	if (signal == SIGINT)
-		std::cout << "SIGINT" << std::endl;
-	if (signal == SIGQUIT)
-		std::cout << "SIGQUIT" << std::endl;
+	if (signal == SIGINT) {
+		std::cout << "\b\b  \b\b";
+		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Interrupted. Exiting...");
+	}
+	if (signal == SIGQUIT) {
+		std::cout << "\b\b  \b\b";
+		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Quit. Exiting...");
+	}
 }
 
 void Server::sigHandler()
 {
-	std::signal(SIGINT, sig);
-	std::signal(SIGQUIT, sig);
+	if (std::signal(SIGINT, sigMessage) == SIG_ERR)
+		throw ServerStartingException("Signal failed");
+	if (std::signal(SIGQUIT, sigMessage) == SIG_ERR)
+		throw ServerStartingException("Signal failed");
 }
 
 

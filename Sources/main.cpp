@@ -1,7 +1,6 @@
-#include <Colors.hpp>
-#include <Configuration.hpp>
-#include <IrcLogger.hpp>
 #include "Server.hpp"
+#include "Colors.hpp"
+#include "CommandManager.hpp"
 
 int main(int argc, char **argv)
 {
@@ -82,4 +81,5 @@ int main(int argc, char **argv)
 	}
 	delete configuration;
 	delete logger;
+	delete CommandManager::getInstance();
 }
