@@ -25,5 +25,6 @@
 			std::list<User *> getCache();
 			size_t getUniqueIdCounter() const;
 			static UsersCacheManager* getInstance();
+			~UsersCacheManager();
 	};
 #endif

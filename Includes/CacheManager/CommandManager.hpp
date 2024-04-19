@@ -24,7 +24,6 @@ public:
 	static CommandManager *getInstance();
 	ICommand *getCommand(const std::string &key) const;
 	bool doesCommandExist(const std::string &key) const;
-
 };
 
 

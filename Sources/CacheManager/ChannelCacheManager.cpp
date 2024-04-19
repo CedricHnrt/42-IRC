@@ -54,3 +54,9 @@ ChannelCacheManager* ChannelCacheManager::getInstance()
 	return instance == NULL ? instance = new ChannelCacheManager() : instance;
 }
 
+ChannelCacheManager::~ChannelCacheManager()
+{
+	for(std::list<Channel *>::iterator it = this->channels.begin() ; it != this->channels.end() ; ++it)
+		delete *it;
+}
+

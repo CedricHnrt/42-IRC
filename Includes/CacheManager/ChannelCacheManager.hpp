@@ -20,6 +20,7 @@
 			void deleteFromCache(size_t uniqueId) throw(ChannelCacheException);
 			std::list<Channel *> getCache();
 			static ChannelCacheManager* getInstance();
+			~ChannelCacheManager();
 	};
 
 
