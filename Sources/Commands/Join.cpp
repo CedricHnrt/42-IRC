@@ -85,6 +85,8 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), RED, BOLDR);
 				return;
 			}
+			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), existingChannel->getName()), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getUserName(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
 			//[4]
 		}
 		else
@@ -106,7 +108,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				return ;
 			}
 			user->addChannelToList(newChannel);
-			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), GREEN, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), -1, DEFAULT);
 			sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getUserName(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
 			//[3]
 		}

@@ -23,30 +23,58 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 	(void)args;
 
 	std::string recipient = args.front();
-	std::string message = args[1];
+	args.erase(args.begin());
+
+	std::string message;
+
+	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
+	{
+		message += *it;
+		message += " ";
+	}
+	StringUtils::trim(message, " ");
+
+//	std::cout << "message: " << message << std::endl;
+
+//	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
+//	{
+//		std::cout << *it << std::endl;
+//	}
+
 
 //	std::cout << "got in message" << std::endl;
 //	std::cout << "recipient: " << recipient << std::endl;
 //	std::cout << "message: " << message << std::endl;
-	try
-	{
-		User *Recipient = UsersCacheManager::getInstance()->getFromNickname(recipient);
 
-		//the recipient does not exist
-		if (!Recipient)
-		{
-			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), RED, BOLDR);
-			return ;
-		}
-		sendServerReply(Recipient->getUserSocketFd(), RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), BLACK, DEFAULT);
-	}
-	catch (UserCacheExceptionString &exception)
+	if (recipient[0] == '#')
 	{
-		IrcLogger *logger = IrcLogger::getLogger();
-		logger->log(IrcLogger::ERROR, "An error occurred during message sending !");
-		logger->log(IrcLogger::ERROR, exception.what());
-		std::string tmp = "Nickname: ";
-		logger->log(IrcLogger::ERROR, tmp.append(exception.getValue()));
+		std::cout << "message sent on a server" << std::endl;
+
+		StringUtils::trim(recipient, "#");
+
+		Channel *currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(recipient);
+		std::vector<User *> usersInChannel = currentChannel->getChannelsUsers();
+		for (std::vector<User *>::iterator it = usersInChannel.begin() ; it != usersInChannel.end(); ++it) {
+			args[0] = (*it)->getUserName();
+			if ((*it)->getUserName() != user->getUserName())
+				this->execute(user, channel, args);
+		}
+	}
+	else {
+		try {
+			User *Recipient = UsersCacheManager::getInstance()->getFromNickname(recipient);
+
+			sendServerReply(Recipient->getUserSocketFd(),
+							RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1, DEFAULT);
+		}
+		catch (UserCacheExceptionString &exception) {
+			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getUserName(), recipient), RED, BOLDR);
+			IrcLogger *logger = IrcLogger::getLogger();
+			logger->log(IrcLogger::ERROR, "An error occurred during message sending !");
+			logger->log(IrcLogger::ERROR, exception.what());
+			std::string tmp = "Nickname: ";
+			logger->log(IrcLogger::ERROR, tmp.append(exception.getValue()));
+		}
 	}
 }
 
