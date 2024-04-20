@@ -86,7 +86,11 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				return;
 			}
 			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), existingChannel->getName()), -1, DEFAULT);
-			sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getUserName(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
+			if (existingChannel->getTopic().empty())
+				sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getUserName(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
+			else
+				sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
+
 			//[4]
 		}
 		else
@@ -109,7 +113,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			}
 			user->addChannelToList(newChannel);
 			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), -1, DEFAULT);
-			sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getUserName(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
+			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
 			//[3]
 		}
 	}
