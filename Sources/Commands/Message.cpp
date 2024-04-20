@@ -54,10 +54,13 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 
 		Channel *currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(recipient);
 		std::vector<User *> usersInChannel = currentChannel->getChannelsUsers();
+
+		std::cout << "Users on channel: " << usersInChannel.size() << std::endl;
+
 		for (std::vector<User *>::iterator it = usersInChannel.begin() ; it != usersInChannel.end(); ++it) {
-			args[0] = (*it)->getUserName();
 			if ((*it)->getUserName() != user->getUserName())
-				this->execute(user, channel, args);
+				sendServerReply((*it)->getUserSocketFd(), RPL_PRIVMSG(user->getNickname(), user->getUserName(), args[0], message), -1, DEFAULT);
+//				send((*it)->getUserSocketFd(), ((":" + user->getUserName() + " PRIVMSG" + currentChannel->getName() + " :" + message + "\r\n").c_str()), 100, 0);
 		}
 	}
 	else //private message
