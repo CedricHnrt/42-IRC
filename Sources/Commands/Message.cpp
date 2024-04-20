@@ -34,32 +34,24 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 	}
 	StringUtils::trim(message, " ");
 
-//	std::cout << "message: " << message << std::endl;
-
-//	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
-//	{
-//		std::cout << *it << std::endl;
-//	}
-
-
-//	std::cout << "got in message" << std::endl;
-//	std::cout << "recipient: " << recipient << std::endl;
-//	std::cout << "message: " << message << std::endl;
-
 	if (recipient[0] == '#') //msg on a channel
 	{
 		std::cout << "message sent on a server" << std::endl;
 
-		StringUtils::trim(recipient, "#");
+//		StringUtils::trim(recipient, "#");
+		std::string channelName = recipient;
+		StringUtils::trim(channelName, "#");
 
-		Channel *currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(recipient);
+		Channel *currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+		if (!currentChannel) //no such channel
+			return ;
 		std::vector<User *> usersInChannel = currentChannel->getChannelsUsers();
 
 		std::cout << "Users on channel: " << usersInChannel.size() << std::endl;
 
 		for (std::vector<User *>::iterator it = usersInChannel.begin() ; it != usersInChannel.end(); ++it) {
 			if ((*it)->getUserName() != user->getUserName())
-				sendServerReply((*it)->getUserSocketFd(), RPL_PRIVMSG(user->getNickname(), user->getUserName(), args[0], message), -1, DEFAULT);
+				sendServerReply((*it)->getUserSocketFd(), RPL_PRIVMSG(user->getUserName(), user->getNickname(), recipient, message), -1, DEFAULT);
 //				send((*it)->getUserSocketFd(), ((":" + user->getUserName() + " PRIVMSG" + currentChannel->getName() + " :" + message + "\r\n").c_str()), 100, 0);
 		}
 	}
