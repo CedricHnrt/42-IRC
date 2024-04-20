@@ -8,6 +8,7 @@
 	#include "ChannelProperties.hpp"
 	#include <IRCPredicate.hpp>
 	#include <PrimitivePredicate.hpp>
+	#include "ChannelExceptions.hpp"
 
 	class User;
 
@@ -29,7 +30,8 @@
 			ChannelProperties getProperties() const;
 			void addUserToChannel(User *user);
 			std::vector<User *> getChannelsUsers() const;
-			User *getUserByName(const std::string &name);
+			User *getUserByName(const std::string &name) throw (ChannelGetException);
+			bool isUserInChannel(const std::string &name);
 		private:
 			friend class ChannelCacheManager;
 			friend class ChannelBuilder;

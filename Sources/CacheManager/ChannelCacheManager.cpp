@@ -25,12 +25,20 @@ Channel *ChannelCacheManager::getFromCache(size_t channelId) throw (ChannelCache
 	throw ChannelCacheException(channelId, "Channel not found !");
 }
 
-Channel *ChannelCacheManager::getFromCacheString(const std::string &name)
+Channel *ChannelCacheManager::getFromCacheString(const std::string &name) throw(ChannelCacheException)
 {
 	std::list<Channel *>::iterator iterator = std::find_if(channels.begin(), channels.end(), ChannelPredicateName(name));
 	if (iterator != channels.end())
 		return *iterator;
-	return NULL;
+	throw (ChannelCacheException(this->uniqueIdCounter, ("No channel called " + name + " found")));
+}
+
+bool ChannelCacheManager::doesChannelExist(const std::string &name)
+{
+	std::list<Channel *>::iterator iterator = std::find_if(channels.begin(), channels.end(), ChannelPredicateName(name));
+	if (iterator != channels.end())
+		return true;
+	return false;
 }
 
 void ChannelCacheManager::deleteFromCache(size_t channelId) throw (ChannelCacheException)

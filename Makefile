@@ -41,6 +41,7 @@ FILES =	Server/Server						\
 		Configuration/Configuration			\
 		Configuration/ConfigurationSection	\
 		Exceptions/ChannelCacheException	\
+		Exceptions/ChannelGetException		\
 		Exceptions/ChannelBuildException	\
 		Exceptions/UserBuildException		\
 		Exceptions/UserCacheException		\

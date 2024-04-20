@@ -25,4 +25,14 @@
 			~ChannelCacheException() throw();
 			const char *what() const throw();
 	};
+
+	class ChannelGetException : public std::exception
+	{
+		private:
+			std::string message;
+		public:
+			ChannelGetException(const std::string& str) throw();
+			~ChannelGetException() throw();
+			const char *what() const throw();
+	};
 #endif

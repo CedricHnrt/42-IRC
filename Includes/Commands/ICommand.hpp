@@ -10,6 +10,7 @@
 	#include "ChannelCacheManager.hpp"
 	#include "UsersCacheManager.hpp"
 	#include "NumericReplies.hpp"
+	#include "IrcLogger.hpp"
 
 	class ICommand {
 		public:
