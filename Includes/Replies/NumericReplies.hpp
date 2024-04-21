@@ -141,5 +141,11 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 // USER
 # define ERR_ALREADYREGISTERED(client) (":localhost 462 " + client + " :You may not reregister.\r\n")
 
+//WHO
+# define RPL_WHOREPLY(channel, callerUsername, onChannelUsername) (":localhost 352 " + callerUsername + " #" + channel + " " + onChannelUsername)
+
+//ARGERROR
+#define ERR_ARG(callerUsername, command, usage) (":localhost " + callerUsername + " Wrong usage for command " + command + ". Usage: " + usage)
+
 #endif
 
