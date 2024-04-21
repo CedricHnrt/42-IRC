@@ -145,7 +145,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_WHOREPLY(channel, callerUsername, onChannelUsername) (":localhost 352 " + callerUsername + " #" + channel + " " + onChannelUsername)
 
 //ARGERROR
-#define ERR_ARG(callerUsername, command, usage) (":localhost " + callerUsername + " Wrong usage for command " + command + ". Usage: " + usage)
+#define ERR_ARG(callerUsername, command, usage) (":localhost 461" + callerUsername + " " + command + ":Usage: " + usage + "\r\n")
 
 #endif
 

@@ -72,7 +72,8 @@ FILES =	Server/Server						\
 		Commands/Join						\
 		Commands/Part						\
 		Commands/Quit						\
-		Commands/Who
+		Commands/Who						\
+		Commands/Invite
 
 MAIN_FILES =	$(FILES)	\
 				main

@@ -32,6 +32,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	std::vector<std::pair<std::string, std::string> > ChannelsPasswords;
 	std::vector<std::string> Channels = StringUtils::split(args.front(), ',');
 	std::vector<std::string> Passwords;
+	IrcLogger *logger = IrcLogger::getLogger();
 
 	if (args.size() > 1) {
 		Passwords = StringUtils::split(args[1], ',');
@@ -66,11 +67,18 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	//check the channel cache manager, if !exist->add new, else to implement(join existing channel with pword if necessary)
 	for (std::vector<std::pair<std::string, std::string> >::iterator it = ChannelsPasswords.begin() ; it != ChannelsPasswords.end() ; ++it)
 	{
-		if (ChanManager->doesChannelExist(it->first))
+		std::string channelName = it->first;
+		StringUtils::trim(channelName, "#");
+		if (it->first[0] != '#')
+		{
+			logger->log(IrcLogger::ERROR, "/join: missing '#'");
+			sendServerReply(user->getUserSocketFd(), ERR_ARG(user->getNickname(), this->_name, this->_usage), RED, BOLDR);
+		}
+		else if (ChanManager->doesChannelExist(channelName))
 		{
 			//[4]
 			try {
-				Channel *existingChannel = ChanManager->getFromCacheString(it->first);
+				Channel *existingChannel = ChanManager->getFromCacheString(channelName);
 				if (existingChannel->isUserInChannel(user->getUserName())) {
 					sendServerReply(user->getUserSocketFd(),
 								ERR_USERONCHANNEL(user->getUserName(), user->getNickname(), existingChannel->getName()),
@@ -101,7 +109,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 		{
 			//[3]
 			//create new channel
-			Builder.setName(it->first);
+			Builder.setName(channelName);
 			Builder.setPassword(it->second);
 			Builder.setTopic("");
 			Channel *newChannel;
