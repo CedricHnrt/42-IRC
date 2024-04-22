@@ -23,10 +23,12 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void)channel;
 	(void)args;
+
 	std::vector<Channel *>::iterator it = user->getChannelList().begin();
 	while (it != user->getChannelList().end())
 	{
-		this->sendQuitMessageToChan((*it), args.front(), user->getUniqueId());
+		Channel *tmp = *it;
+		this->sendQuitMessageToChan(tmp, args.front(), user->getUniqueId());
 		it++;
 	}
 	UsersCacheManager::getInstance()->addToLeftCache(user);
