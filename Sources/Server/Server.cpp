@@ -159,9 +159,6 @@ void Server::serverUp() throw (ServerStartingException)
 
 void Server::handleKnownClient(int incomingFD, std::string buffer)
 {
-
-	std::cout << "handle known client" << std::endl;
-
 	if (buffer.empty())
 		return;
 
@@ -187,7 +184,6 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		currentUser->clearBuffer();
 		return ;
 	}
-	std::cout << "buffer is valid" << std::endl;
 	buffer = currentUser->getReceivedBuffer();
 	currentUser->clearBuffer();
 	StringUtils::trim(buffer, "\r\n");
@@ -277,8 +273,6 @@ static void sendMessageOfTheDay(const User &user)
 
 void Server::handleIncomingRequest(int incomingFD)
 {
-	std::cout << "handle incoming request" << std::endl;
-
 	char buffer[512];
 
 	int size = recv(incomingFD, buffer, 512, 0);
@@ -336,8 +330,6 @@ void Server::handleIncomingRequest(int incomingFD)
 
 bool Server::handleNewClient()
 {
-	std::cout << "handle new client" << std::endl;
-
 	sockaddr_in newCli;
 	pollfd newPoll;
 	socklen_t len = sizeof(this->_serverSocket);
