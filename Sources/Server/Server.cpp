@@ -162,7 +162,6 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	if (buffer.empty())
 		return;
 
-
 	IrcLogger *logger = IrcLogger::getLogger();
 	User *currentUser;
 	try
@@ -186,6 +185,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	}
 	buffer = currentUser->getReceivedBuffer();
 	currentUser->clearBuffer();
+
 	StringUtils::trim(buffer, "\r\n");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
@@ -280,6 +280,11 @@ void Server::handleIncomingRequest(int incomingFD)
 		return;
 	buffer[size] = '\0';
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
+
+	std::string parse = buffer;
+	if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
+		return ;
+
 	if (it == this->_danglingUsers.end())
 	{
 		this->handleKnownClient(incomingFD, buffer);
@@ -290,8 +295,6 @@ void Server::handleIncomingRequest(int incomingFD)
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete())
 		{
-			//			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
-
 			User *user = this->_danglingUsers.at(incomingFD).build();
 
 			if (stringIsBanned(user->getNickname()) || stringIsBanned(user->getUserName()) || stringIsBanned(user->getRealName()))

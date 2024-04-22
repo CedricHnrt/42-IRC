@@ -55,6 +55,7 @@ void Ping::execute(User *user, Channel *channel, std::vector<std::string> args)
 			long currentTime = TimeUtils::getCurrentTimeMillis();
 			user->setLastPingTimestamp(currentTime);
 			sendServerReply(user->getUserSocketFd(), ":localhost PONG :" + args[0], -1, DEFAULT);
+			std::cout << "pong sent" << std::endl;
 		}
 	}
 	else if (args.size() == 2)
