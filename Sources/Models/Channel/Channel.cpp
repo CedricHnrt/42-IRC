@@ -81,3 +81,16 @@ bool Channel::isUserInChannel(const std::string &name)
 		return true;
 	return false;
 }
+
+std::string Channel::getUserList()
+{
+	std::string result;
+
+	for (std::vector<User *>::iterator it = this->_usersInChannel.begin() ; it != this->_usersInChannel.end() ; ++it)
+	{
+		result += (*it)->getNickname();
+		result += " ";
+	}
+	StringUtils::trim(result, " ");
+	return result;
+}
