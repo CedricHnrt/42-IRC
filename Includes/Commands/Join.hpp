@@ -2,8 +2,8 @@
 // Created by pgouasmi on 4/16/24.
 //
 
-#ifndef INC_42_IRC_JOIN_HPP
-#define INC_42_IRC_JOIN_HPP
+#ifndef JOIN_HPP
+#define JOIN_HPP
 
 #include "ICommand.hpp"
 #include <vector>
@@ -17,4 +17,4 @@ public:
 };
 
 
-#endif //INC_42_IRC_JOIN_HPP
+#endif

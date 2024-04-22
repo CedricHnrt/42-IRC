@@ -15,6 +15,7 @@ public:
 	static void trim(std::string &str, const char *characters);
 	static void toUpper(std::string &str);
 	static void toLower(std::string &str);
+	static void replaceAll(std::string &line, const std::string &key, const std::string &value);
 	static std::string ltos(long value);
 	static std::vector<std::string>split(const std::string &input, int c);
 };

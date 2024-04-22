@@ -6,7 +6,7 @@
 #    By: chonorat <chonorat@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/05 13:40:10 by chonorat          #+#    #+#              #
-#    Updated: 2024/04/18 15:27:06 by chonorat         ###   ########.fr        #
+#    Updated: 2024/04/15 17:54:19 by chonorat         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,8 +32,8 @@ INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Configuration \
 			-I ./Includes/Replies
 
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -g3
-C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -O0 -fno-omit-frame-pointer
+C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -O0 -fno-omit-frame-pointer
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
@@ -41,6 +41,7 @@ FILES =	Server/Server						\
 		Configuration/Configuration			\
 		Configuration/ConfigurationSection	\
 		Exceptions/ChannelCacheException	\
+		Exceptions/ChannelGetException		\
 		Exceptions/ChannelBuildException	\
 		Exceptions/UserBuildException		\
 		Exceptions/UserCacheException		\
@@ -55,6 +56,7 @@ FILES =	Server/Server						\
 		Utils/IrcLogger						\
 		Utils/Colors						\
 		Utils/FileUtils						\
+		Utils/TimeUtils						\
 		Models/User/User					\
 		Models/User/UserProperties			\
 		Models/Channel/ChannelProperties	\
@@ -71,7 +73,9 @@ FILES =	Server/Server						\
 		Commands/Join						\
 		Commands/Part						\
 		Commands/Quit						\
-		Commands/List
+		Commands/List						\
+		Commands/Who						\
+		Commands/Invite
 
 MAIN_FILES =	$(FILES)	\
 				main
@@ -86,7 +90,7 @@ DEBUG = false
 
 $(NAME): $(OBJS)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(OBJS) -o $(NAME)
+	$(CC) $(OBJS) -o $(NAME) -O0 -fno-omit-frame-pointer
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 debug: fclean $(DEBUG_OBJS)

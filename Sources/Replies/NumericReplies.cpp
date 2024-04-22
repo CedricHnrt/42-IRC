@@ -6,6 +6,7 @@
 
 void sendServerReply(int const fd, std::string buffer, int color, std::string mode)
 {
+//	std::cout << "buffer: " << buffer << std::endl;
 	if (color != -1)
 	{
 		std::ostringstream digit;

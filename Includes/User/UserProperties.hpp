@@ -1,7 +1,9 @@
 #ifndef USERPROPERTIES_HPP
 	#define USERPROPERTIES_HPP
 	#include <list>
-	#include "../Channel/Channel.hpp"
+	#include "Channel.hpp"
+
+	#include "PrimitivePredicate.hpp"
 
 	class User;
 	class UserProperties

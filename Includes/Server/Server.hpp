@@ -17,7 +17,6 @@
 #include <map>
 #include <csignal>
 
-#include "User.hpp"
 #include "UserBuilder.hpp"
 #include "Configuration.hpp"
 #include "StringUtils.hpp"
@@ -41,9 +40,9 @@ class Server
 
 		//key = userSocketFd
 		std::map<int, UserBuilder> _danglingUsers;
-		std::vector <User> _allUsers;
 
 	public:
+		static bool servUp;
 		Server() throw(ServerInitializationException);
 		~Server();
 
@@ -52,8 +51,10 @@ class Server
 		void handleIncomingRequest(int incomingFD);
 		void getNewClientInfos(int incomingFD);
 		void handleKnownClient(int incomingFD, std::string buffer);
+		void removeTimeoutDanglingUsers();
 		void closeOpenedSockets();
 		void sigHandler();
+		bool serverIsRunning();
 };
 
 

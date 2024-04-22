@@ -1,5 +1,8 @@
 #include "StringUtils.hpp"
 
+#include <IrcLogger.hpp>
+#include <stdexcept>
+
 bool StringUtils::isAscii(const std::string str)
 {
 	for (std::string::size_type i = 0; i < str.size(); ++i)
@@ -91,6 +94,29 @@ void StringUtils::toLower(std::string &str)
 	}
 }
 
+void StringUtils::replaceAll(std::string &line, const std::string &key, const std::string &value)
+{
+	const std::size_t keyLen = key.length();
+	const std::size_t valueLen = value.length();
+
+	try {
+			const std::size_t stringLen = line.length();
+			for (std::size_t charIndex = 0; charIndex < stringLen; charIndex++) {
+				size_t pos = line.find(key, charIndex);
+				if (pos == std::string::npos)
+					continue;
+				line.erase(pos, keyLen);
+				line.insert(pos, value);
+				charIndex = pos + valueLen;
+			}
+	}
+	catch (const std::exception &e) {
+		std::string trace = "Exception throws during replace :";
+		trace.append(e.what());
+		throw std::out_of_range(trace);
+	}
+}
+
 std::vector<std::string> StringUtils::split(const std::string &input, int c)
 {
 	std::vector<std::string> result;
@@ -100,6 +126,7 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 	if (input.find(c) == std::string::npos) {
 		StringUtils::trim(const_cast<std::string &>(input),"\r\n ");
 		result.push_back(input);
+		IrcLogger::getLogger()->log(IrcLogger::WARN, "No delimiter found in the input string");
 		return result;
 	}
 

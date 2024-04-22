@@ -1,6 +1,8 @@
-#include "../../Includes/IRCPredicate.hpp"
+#include "IRCPredicate.hpp"
 #include <iostream>
 #include <string>
+
+#include "User.hpp"
 
 ChannelPredicate::ChannelPredicate(size_t channelId) : channelId(channelId) {}
 bool ChannelPredicate::operator () (Channel *channel)
@@ -64,4 +66,16 @@ bool UserPredicateNickname::operator () (User *user)
 bool UserPredicateNickname::operator == (const std::string &value)
 {
 	return value == this->nickname;
+}
+
+UserPredicateUsername::UserPredicateUsername(const std::string &value) : username(value) {}
+
+bool UserPredicateUsername::operator () (User *user)
+{
+	return user->getUserName() == this->username;
+}
+
+bool UserPredicateUsername::operator == (const std::string &value)
+{
+	return value == this->username;
 }
