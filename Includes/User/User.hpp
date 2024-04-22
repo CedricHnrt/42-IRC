@@ -25,6 +25,7 @@ enum BUFFERSTATUS {
 			std::string receivedBuffer;
 
 			int userSocketFd;
+			long lastPingTimestamp;
 			size_t uniqueId;
 			UserProperties* properties;
 			Channel *currentChannel;
@@ -36,12 +37,14 @@ enum BUFFERSTATUS {
 			std::string getNickname() const;
 			std::string getIpAddr() const;
 			int getUserSocketFd() const;
+			long getLastPingTimestamp() const;
 			size_t getUniqueId() const;
 			UserProperties getProperties() const;
 			Channel *getCurrentChannel() const;
 			std::vector<Channel *> getChannelList() const;
 			void addChannelToList(Channel *newChannel);
 			void setNickname(const std::string& nickname);
+			void setLastPingTimestamp(long timestamp);
 
 			void addToBuffer(const std::string &incomingBuffer);
 			std::string &getReceivedBuffer();
