@@ -24,13 +24,19 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 	std::string recipient = args.front();
 	std::string message = args[1];
 
-//	if (User)
+//	std::cout << "got in message" << std::endl;
+//	std::cout << "recipient: " << recipient << std::endl;
+//	std::cout << "message: " << message << std::endl;
 
-	std::cout << "got in message" << std::endl;
-	std::cout << "recipient: " << recipient << std::endl;
+	UsersCacheManager *UserManager = UsersCacheManager::getInstance();
+	User *Recipient = UserManager->getFromNickname(recipient);
 
-//	message.erase(0);
-
-	std::cout << "message: " << message << std::endl;
+	//the recipient does not exist
+	if (!Recipient)
+	{
+		sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), RED, BOLDR);
+		return ;
+	}
+	sendServerReply(Recipient->getUserSocketFd(), RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), BLACK, DEFAULT);
 }
 

@@ -29,7 +29,7 @@
 				size_t userId;
 			public:
 				explicit UserPredicate(size_t userId);
-				bool operator () (User user);
+				bool operator () (User *user);
 				bool operator == (size_t userId);
 	};
 
@@ -39,7 +39,7 @@
 				int socketFD;
 			public:
 				explicit UserPredicateFD(int fd);
-				bool operator () (User user);
+				bool operator () (User *user);
 				bool operator == (int fd);
 	};
 
@@ -50,7 +50,7 @@
 			std::string nickname;
 		public:
 			explicit UserPredicateNickname(const std::string &value);
-			bool operator () (User user);
+			bool operator () (User *user);
 			bool operator == (const std::string &value);
 	};
 #endif

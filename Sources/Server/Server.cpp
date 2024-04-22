@@ -85,16 +85,20 @@ void Server::serverUp() throw (ServerStartingException)
 
 	IrcLogger *logger =IrcLogger::getLogger();
 	logger->log(IrcLogger::INFO, "Server is up !");
+	this->sigHandler();
 	CommandManager::getInstance();
-	while (true)
-	{
-		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
+	while (true) {
+		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1) {
+			if (errno == EINTR) {
+				this->closeOpenedSockets();
+				this->_fds.clear();
+				this->_danglingUsers.clear();
+				break;
+			}
 			throw ServerStartingException("poll failed");
-
-		for (size_t i = 0; i < this->_fds.size(); i++)
-		{
-			if (this->_fds[i].revents & POLLIN)
-			{
+		}
+		for (size_t i = 0; i < this->_fds.size(); i++) {
+			if (this->_fds[i].revents & POLLIN) {
 				if (this->_fds[i].fd == this->_socketfd)
 					this->handleNewClient();
 				else
@@ -108,9 +112,10 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 {
 	if (buffer.empty())
 		return;
-	IrcLogger::getLogger()->log(IrcLogger::INFO, "In Known client");
+	StringUtils::trim(buffer, "\r\n");
+	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
-	IrcLogger::getLogger()->log(IrcLogger::INFO, "NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD).getNickname());
+	IrcLogger::getLogger()->log(IrcLogger::INFO, "NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD)->getNickname());
 
 	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
 	if (!splitted.empty()) {
@@ -127,7 +132,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 					splitted[0]), RED, BOLDR);
 			return;
 		}
-		std::cout << "command found" << std::endl;
+//		std::cout << "command found" << std::endl;
 		splitted.erase(splitted.begin());
 		std::vector<ArgumentsType> ExpectedArgs = Command->getArgs();
 
@@ -152,8 +157,8 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 			splittedIterator++;
 		}
 
-		User currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
-		Command->execute(&currentUser, NULL, splitted);
+		User *currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+		Command->execute(currentUser, NULL, splitted);
 	}
 }
 
@@ -184,14 +189,14 @@ void Server::handleIncomingRequest(int incomingFD)
 
 			this->_danglingUsers.erase(incomingFD);
 
-			User CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
+			User *CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
 
-			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser.getNickname(), CurrentUser.getUserName()), CurrentUser.getUserName()), RED, BOLDR);
+			sendServerReply(incomingFD, RPL_WELCOME(user_id(CurrentUser->getNickname(), CurrentUser->getUserName()), CurrentUser->getUserName()), RED, BOLDR);
 			ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
 			if (section == NULL)
 				return;
-			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser.getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, UNDERLINE);
-			sendServerReply(incomingFD, RPL_CREATED(CurrentUser.getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
+			sendServerReply(incomingFD, RPL_YOURHOST(CurrentUser->getNickname(), section->getStringValue("servername", "IRCHEH"), section->getStringValue("version", "3")), BLUE, UNDERLINE);
+			sendServerReply(incomingFD, RPL_CREATED(CurrentUser->getNickname(), IrcLogger::getCurrentTime()), MAGENTA, ITALIC);
 		}
 	}
 	catch (UserBuildException &exception)
@@ -229,6 +234,27 @@ void Server::closeOpenedSockets()
 	for (size_t i = 0; i < this->_fds.size(); i++)
 		close(this->_fds[i].fd);
 }
+
+static void sigMessage(int signal)
+{
+	if (signal == SIGINT) {
+		std::cout << "\b\b  \b\b";
+		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Interrupted. Exiting...");
+	}
+	if (signal == SIGQUIT) {
+		std::cout << "\b\b  \b\b";
+		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Quit. Exiting...");
+	}
+}
+
+void Server::sigHandler()
+{
+	if (std::signal(SIGINT, sigMessage) == SIG_ERR)
+		throw ServerStartingException("Signal failed");
+	if (std::signal(SIGQUIT, sigMessage) == SIG_ERR)
+		throw ServerStartingException("Signal failed");
+}
+
 
 Server::~Server()
 {
