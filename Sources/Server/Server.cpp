@@ -87,27 +87,18 @@ Server::Server() throw(ServerInitializationException)
 	/*ADD the SERVER pollfd*/
 }
 
-static bool usernameIsBanned(User user)
+static bool stringIsBanned(std::string str)
 {
-	ConfigurationSection *banSection = Configuration::getInstance()->getSection("BANNED");
-	if (banSection == NULL)
-		return false;
-	std::vector<std::string> bannedUsernames = banSection->getVectorValue("banned_users");
-	if (!bannedUsernames.empty())
+	ConfigurationSection *serverSection = Configuration::getInstance()->getSection("SERVER");
+	std::vector<std::string> banned = serverSection->getVectorValue("banned");
+	if (!banned.empty())
 	{
-		IrcLogger::getLogger()->log(IrcLogger::INFO, "Checking if user is banned");
-		std::string userNick = user.getNickname();
-		std::string userRealName = user.getRealName();
-		std::string userName = user.getUserName();
-		StringUtils::toUpper(userNick);
-		StringUtils::toUpper(userRealName);
-		StringUtils::toUpper(userName);
-		if (std::find_if(bannedUsernames.begin(), bannedUsernames.end(), StringPredicate(userNick)) != bannedUsernames.end())
+		StringUtils::toUpper(str);
+		if (std::find_if(banned.begin(), banned.end(), StringPredicate(str)) != banned.end())
+		{
+			IrcLogger::getLogger()->log(IrcLogger::DEBUG, "The string: " + str + " is banned from this server !");
 			return true;
-		if (std::find_if(bannedUsernames.begin(), bannedUsernames.end(), StringPredicate(userRealName)) != bannedUsernames.end())
-			return true;
-		if (std::find_if(bannedUsernames.begin(), bannedUsernames.end(), StringPredicate(userName)) != bannedUsernames.end())
-			return true;
+		}
 	}
 	return false;
 }
@@ -277,7 +268,7 @@ void Server::handleIncomingRequest(int incomingFD)
 
 			User *user = this->_danglingUsers.at(incomingFD).build();
 
-			if (usernameIsBanned(*user))
+			if (stringIsBanned(user->getNickname()) || stringIsBanned(user->getUserName()) || stringIsBanned(user->getRealName()))
 			{
 				std::string bannedMessage = "Sorry, this nickname is banned from this server";
 				sendServerReply(incomingFD, ERR_YOUREBANNED(user->getNickname(), bannedMessage), RED, BOLDR);
@@ -285,25 +276,20 @@ void Server::handleIncomingRequest(int incomingFD)
 				return ;
 			}
 
-
+			this->_danglingUsers.erase(incomingFD);
 			UsersCacheManager *UManager = UsersCacheManager::getInstance();
 			UManager->addToCache(user);
 
-			this->_danglingUsers.erase(incomingFD);
-			User *CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
 
 			sendServerReply(incomingFD,
-				RPL_WELCOME(user_id(CurrentUser->getNickname(), CurrentUser->getUserName()),
-					CurrentUser->getUserName()), RED, BOLDR);
+				RPL_WELCOME(user_id(user->getNickname(), user->getUserName()), user->getUserName()), RED, BOLDR);
 			ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
-			if (section == NULL)
-				return;
 			sendServerReply(incomingFD,
-				RPL_YOURHOST(CurrentUser->getNickname(), section->getStringValue("servername", "IRCHEH"),
+				RPL_YOURHOST(user->getNickname(), section->getStringValue("servername", "IRCHEH"),
 					section->getStringValue("version", "3")), BLUE, UNDERLINE);
-			sendServerReply(incomingFD, RPL_CREATED(CurrentUser->getNickname(), TimeUtils::getCurrentTime()), MAGENTA,
+			sendServerReply(incomingFD, RPL_CREATED(user->getNickname(), TimeUtils::getCurrentTime()), MAGENTA,
 				ITALIC);
-			sendMessageOfTheDay(*CurrentUser);
+			sendMessageOfTheDay(*user);
 		}
 	}
 	catch (UserBuildException &exception)
