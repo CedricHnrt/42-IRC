@@ -31,7 +31,6 @@
 			void setLogLevel(LogLevel level);
 			LogLevel getLogLevelFromString(const std::string &value);
 			void close();
-			static std::string getCurrentTime();
 			static IrcLogger* getLogger();
 			void log(LogLevel level, const std::string& message);
 	};

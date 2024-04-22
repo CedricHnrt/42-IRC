@@ -46,6 +46,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_MYINFO(client, servername, version, user_modes, chan_modes, chan_param_modes) (":localhost 004 " + client + " " + servername + " " + version + " " + user_modes + " " + chan_modes + " " + chan_param_modes + "\r\n")
 # define RPL_ISUPPORT(client, tokens) (":localhost 005 " + client + " " + tokens " :are supported by this server\r\n")
 
+# define ERR_REQUESTTIMEOUT(client, server) (":localhost 408 " + client + " " + server + " :Request Timeout.\r\n")
 # define ERR_UNKNOWNCOMMAND(client, command) (":localhost 421 " + client + " " + command + " :Unknown command\r\n")
 
 // INVITE
@@ -55,6 +56,9 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define ERR_USERONCHANNEL(client, nick, channel) (":localhost 443 " + client + " " + nick + " #" + channel + " :Is already on channel\r\n")
 # define RPL_INVITING(user_id, client, nick, channel) (user_id + " 341 " + client + " " + nick + " #" + channel + "\r\n")
 # define RPL_INVITE(user_id, invited, channel) (user_id + " INVITE " + invited + " #" + channel + "\r\n")
+
+//BAN
+#define ERR_YOUREBANNED(client, reason) (":localhost 465 " + client + " :" + reason + "\r\n")
 
 // JOIN
 # define RPL_JOIN(user_id, channel) (user_id + " JOIN :#" +  channel + "\r\n")

@@ -8,12 +8,14 @@
 #include <poll.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <cerrno>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <map>
+#include <csignal>
 
 #include "UserBuilder.hpp"
 #include "Configuration.hpp"
@@ -26,6 +28,7 @@
 class Server
 {
 	private:
+		static Server *_instance;
 		Server(const Server &obj);
 		Server &operator=(const Server &obj);
 
@@ -39,6 +42,7 @@ class Server
 		std::map<int, UserBuilder> _danglingUsers;
 
 	public:
+		static bool servUp;
 		Server() throw(ServerInitializationException);
 		~Server();
 
@@ -47,7 +51,10 @@ class Server
 		void handleIncomingRequest(int incomingFD);
 		void getNewClientInfos(int incomingFD);
 		void handleKnownClient(int incomingFD, std::string buffer);
+		void removeTimeoutDanglingUsers();
 		void closeOpenedSockets();
+		void sigHandler();
+		bool serverIsRunning();
 };
 
 
