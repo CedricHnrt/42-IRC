@@ -161,6 +161,31 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 {
 	if (buffer.empty())
 		return;
+
+
+	IrcLogger *logger = IrcLogger::getLogger();
+	User *currentUser;
+	try
+	{
+		currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+	}
+	catch (UserCacheExceptionString &e)
+	{
+		logger->log(IrcLogger::ERROR, e.what());
+		return ;
+	}
+
+	currentUser->addToBuffer(buffer);
+	if (currentUser->isBufferValid() == WAITING) {
+		return;
+	}
+	if (currentUser->isBufferValid() == KO)
+	{
+		currentUser->clearBuffer();
+		return ;
+	}
+	buffer = currentUser->getReceivedBuffer();
+	currentUser->clearBuffer();
 	StringUtils::trim(buffer, "\r\n");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
@@ -168,6 +193,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		"NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD)->getNickname());
 
 	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
+	buffer.clear();
 	if (!splitted.empty())
 	{
 		if (splitted.front()[0] == '/')
