@@ -126,7 +126,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define ERR_PASSWDMISMATCH(client) (":localhost 464 " + client + " :Password incorrect.\r\n")
 
 // PING
-# define RPL_PONG(user_id, token) (user_id + " PONG " + token + "\r\n")
+# define RPL_PING(nick, time) ("Ping reply for " + nick + ":" + time + " second(s)" + "\r\n")
 
 // QUIT
 # define RPL_QUIT(user_id, reason) (user_id + " QUIT : " + reason + "\r\n")
