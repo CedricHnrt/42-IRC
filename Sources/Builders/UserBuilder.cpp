@@ -39,6 +39,11 @@ UserBuilder& UserBuilder::setProperties(const UserProperties& properties) {
 	return *this;
 }
 
+size_t UserBuilder::getTimeout() const
+{
+	return this->builderTimeout;
+}
+
 static bool isValid(std::string str) {
 	if (str.empty() || str.length() > 255)
 		return false;

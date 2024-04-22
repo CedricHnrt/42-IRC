@@ -96,6 +96,8 @@
 			 */
 			UserBuilder &setProperties(const UserProperties &properties);
 
+			size_t getTimeout() const;
+
 			/**
 			 * @brief Clears the builder for reuse.
 			 * @author jbadaire

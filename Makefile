@@ -32,8 +32,8 @@ INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Configuration \
 			-I ./Includes/Replies
 
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -g3
-C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -g3
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -O0 -fno-omit-frame-pointer
+C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -O0 -fno-omit-frame-pointer
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
@@ -86,7 +86,7 @@ DEBUG = false
 
 $(NAME): $(OBJS)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(OBJS) -o $(NAME) -pg
+	$(CC) $(OBJS) -o $(NAME) -O0 -fno-omit-frame-pointer
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 debug: fclean $(DEBUG_OBJS)

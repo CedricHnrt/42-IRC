@@ -53,6 +53,7 @@ class Server
 		void handleIncomingRequest(int incomingFD);
 		void getNewClientInfos(int incomingFD);
 		void handleKnownClient(int incomingFD, std::string buffer);
+		void removeTimeoutDanglingUsers();
 		void closeOpenedSockets();
 		void sigHandler();
 		bool serverIsRunning();
