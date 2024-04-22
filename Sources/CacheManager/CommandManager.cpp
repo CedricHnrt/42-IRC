@@ -6,7 +6,7 @@
 
 #include <Part.hpp>
 #include <Ping.hpp>
-
+#include <Pong.hpp>
 #include "Join.hpp"
 #include "Part.hpp"
 #include "Ping.hpp"
@@ -27,6 +27,7 @@ CommandManager::CommandManager()
 	this->_commandsMap["WHO"] = new Who();
 	this->_commandsMap["INVITE"] = new Invite();
 	this->_commandsMap["PING"] = new Ping();
+	this->_commandsMap["PONG"] = new Pong();
 }
 
 CommandManager::~CommandManager()
