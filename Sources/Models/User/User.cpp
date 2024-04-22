@@ -19,6 +19,11 @@ std::string User::getIpAddr() const
 	return ipAddr;
 }
 
+long User::getLastPingTimestamp() const
+{
+	return lastPingTimestamp;
+}
+
 size_t User::getUniqueId() const
 {
 	return uniqueId;
@@ -47,6 +52,11 @@ void User::setIpAddr(const std::string& ipAddr)
 void User::setUniqueId(const size_t& uniqueId)
 {
 	this->uniqueId = uniqueId;
+}
+
+void User::setLastPingTimestamp(long timestamp)
+{
+	this->lastPingTimestamp = timestamp;
 }
 
 void User::setProperties(const UserProperties& properties)
@@ -87,6 +97,31 @@ std::vector<Channel *> User::getChannelList() const
 void User::addChannelToList(Channel *newChannel)
 {
 	this->channelList.push_back(newChannel);
+}
+
+void User::addToBuffer(const std::string &incomingBuffer)
+{
+	this->receivedBuffer += incomingBuffer;
+}
+
+std::string &User::getReceivedBuffer()
+{
+	return this->receivedBuffer;
+}
+
+#include <iostream>
+int User::isBufferValid() const
+{
+	if (receivedBuffer.find("\r\n", receivedBuffer.size() - 2) != std::string::npos)
+		return OK;
+	if (receivedBuffer.find("\r\n") != std::string::npos)
+		return KO;
+	return WAITING;
+}
+
+void User::clearBuffer()
+{
+	this->receivedBuffer.clear();
 }
 
 

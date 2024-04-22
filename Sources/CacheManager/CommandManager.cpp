@@ -3,8 +3,11 @@
 //
 
 #include "CommandManager.hpp"
+
+#include <Part.hpp>
 #include "Join.hpp"
 #include "Part.hpp"
+#include "Ping.hpp"
 #include "Quit.hpp"
 #include "Who.hpp"
 #include "Invite.hpp"
@@ -23,6 +26,7 @@ CommandManager::CommandManager()
 	this->_commandsMap["WHO"] = new Who();
 	this->_commandsMap["INVITE"] = new Invite();
 	this->_commandsMap["LIST"] = new List();
+	this->_commandsMap["PING"] = new Ping();
 }
 
 CommandManager::~CommandManager()

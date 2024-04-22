@@ -1,5 +1,6 @@
 #include "UserBuilder.hpp"
 
+#include <TimeUtils.hpp>
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
 
 UserBuilder& UserBuilder::setName(const std::string& name) {
@@ -102,6 +103,7 @@ User *UserBuilder::build() {
 		user->setUserSocketId(this->userSocketFd);
 	//TODO: FIX NULL POINTER EXCEPTION WHEN PROPERTIES IS NOT SET
 	//user->setProperties(this->properties);
+	user->setLastPingTimestamp(TimeUtils::getCurrentTimeMillis());
 	clearBuilder();
 
 	return (user);
