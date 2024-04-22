@@ -91,7 +91,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				return;
 				}
 				existingChannel->addUserToChannel(user);
-				sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), existingChannel->getName()), -1, DEFAULT);
+				sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getNickname(), user->getUserName()), existingChannel->getName()), -1, DEFAULT);
 				if (existingChannel->getTopic().empty())
 					sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getUserName(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
 				else
