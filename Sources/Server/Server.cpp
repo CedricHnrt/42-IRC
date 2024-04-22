@@ -87,6 +87,7 @@ void Server::removeTimeoutDanglingUsers()
 {
 	std::map<int, UserBuilder>::iterator iterator = this->_danglingUsers.begin();
 	size_t currentTime = TimeUtils::getCurrentTimeMillis();
+	std::string serverName = Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH");
 	while (iterator != this->_danglingUsers.end())
 	{
 		UserBuilder builder = iterator->second;
@@ -95,8 +96,7 @@ void Server::removeTimeoutDanglingUsers()
 		{
 			std::ostringstream st;
 			st << iterator->first;
-			sendServerReply(iterator->first, ERR_REQUESTTIMEOUT(st.str(),
-				Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH")), RED,BOLDR);
+			sendServerReply(iterator->first, ERR_REQUESTTIMEOUT(st.str(), serverName), RED,BOLDR);
 			close(iterator->first);
 			st.clear();
 			this->_danglingUsers.erase(iterator++);
@@ -120,7 +120,7 @@ void Server::serverUp() throw (ServerStartingException)
 	while (servUp)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
-			break;
+			continue;
 		const size_t size = this->_fds.size();
 		for (size_t i = 0; i < size; i++)
 		{
@@ -198,6 +198,32 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	}
 }
 
+static void sendMessageOfTheDay(const User &user)
+{
+	ConfigurationSection *joinSection = Configuration::getInstance()->getSection("ON_JOIN");
+	if (joinSection == NULL)
+	{
+		sendServerReply(user.getUserSocketFd(), ERR_NOMOTD(user.getNickname()), RED, BOLDR);
+		return ;
+	}
+
+	ConfigurationSection *serverSection = Configuration::getInstance()->getSection("SERVER");
+
+	sendServerReply(user.getUserSocketFd(), RPL_MOTDSTART(user.getNickname(), serverSection->getStringValue("servername", "IRCheh")), GREEN, ITALIC);
+	std::string motd = joinSection->getStringValue("message_of_the_day", "Welcome to IRCheh, have a nice day !");
+	std::vector<std::string> splittedMotd = StringUtils::split(motd, '|');
+	for (std::vector<std::string>::iterator motVector = splittedMotd.begin(); motVector != splittedMotd.end(); ++motVector)
+	{
+		StringUtils::replaceAll(*motVector, "{user_nickname}", user.getNickname());
+		StringUtils::replaceAll(*motVector, "{user_username}", user.getUserName());
+		StringUtils::replaceAll(*motVector, "{server_name}", serverSection->getStringValue("servername", "IRCheh"));
+		StringUtils::replaceAll(*motVector, "{server_version}", serverSection->getStringValue("version", "3"));
+		sendServerReply(user.getUserSocketFd(), RPL_MOTD(user.getNickname(), *motVector), YELLOW, DEFAULT);
+	}
+	sendServerReply(user.getUserSocketFd(), RPL_ENDOFMOTD(user.getNickname()), GREEN, ITALIC);
+}
+
+
 void Server::handleIncomingRequest(int incomingFD)
 {
 	char buffer[512];
@@ -238,6 +264,7 @@ void Server::handleIncomingRequest(int incomingFD)
 					section->getStringValue("version", "3")), BLUE, UNDERLINE);
 			sendServerReply(incomingFD, RPL_CREATED(CurrentUser->getNickname(), TimeUtils::getCurrentTime()), MAGENTA,
 				ITALIC);
+			sendMessageOfTheDay(*CurrentUser);
 		}
 	}
 	catch (UserBuildException &exception)
@@ -257,8 +284,6 @@ bool Server::handleNewClient()
 	socklen_t len = sizeof(this->_serverSocket);
 
 	ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
-	if (section == NULL)
-		return false;
 
 	int client_sock = accept(this->_socketfd, reinterpret_cast<sockaddr *>(&newCli), &len);
 	IrcLogger *logger = IrcLogger::getLogger();
@@ -324,6 +349,7 @@ void Server::sigHandler()
 		throw ServerStartingException("Signal failed");
 	}
 }
+
 
 Server::~Server()
 {

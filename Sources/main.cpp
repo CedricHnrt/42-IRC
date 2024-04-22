@@ -41,7 +41,10 @@ int main(int argc, char **argv)
 		logger->log(IrcLogger::INFO, "Redefine logger level from configuration");
 		ConfigurationSection *serverSection = configuration->getSection("SERVER");
 		if (serverSection == NULL)
-			return 1;
+		{
+			logger->log(IrcLogger::ERROR, "Section \"SERVER\" not found in configuration file !");
+			return (delete logger, delete configuration, 1) ;
+		}
 		std::string strLevel = serverSection->getStringValue("log_level", "TRACE");
 		IrcLogger::LogLevel level = logger->getLogLevelFromString(strLevel);
 		logger->setLogLevel(level);
