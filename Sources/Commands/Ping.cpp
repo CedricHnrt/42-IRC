@@ -27,7 +27,6 @@ Ping::Ping()
 
 void Ping::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
-
 		(void)channel;
 		(void)user;
 		(void)args;

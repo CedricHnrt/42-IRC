@@ -32,7 +32,7 @@ INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Configuration \
 			-I ./Includes/Replies
 
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -O0 -fno-omit-frame-pointer
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -g3
 C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -O0 -fno-omit-frame-pointer
 RM = @rm -rf
 DIR = @mkdir -p
