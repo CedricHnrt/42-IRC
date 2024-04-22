@@ -2,8 +2,12 @@
 // Created by pgouasmi on 4/5/24.
 //
 #include "Server.hpp"
+
+#include <algorithm>
+
 #include "CommandManager.hpp"
 #include "TimeUtils.hpp"
+#include <PrimitivePredicate.hpp>
 #include <cmath>
 bool Server::servUp = false;
 
@@ -82,6 +86,32 @@ Server::Server() throw(ServerInitializationException)
 
 	/*ADD the SERVER pollfd*/
 }
+
+static bool usernameIsBanned(User user)
+{
+	ConfigurationSection *banSection = Configuration::getInstance()->getSection("BANNED");
+	if (banSection == NULL)
+		return false;
+	std::vector<std::string> bannedUsernames = banSection->getVectorValue("banned_users");
+	if (!bannedUsernames.empty())
+	{
+		IrcLogger::getLogger()->log(IrcLogger::INFO, "Checking if user is banned");
+		std::string userNick = user.getNickname();
+		std::string userRealName = user.getRealName();
+		std::string userName = user.getUserName();
+		StringUtils::toUpper(userNick);
+		StringUtils::toUpper(userRealName);
+		StringUtils::toUpper(userName);
+		if (std::find_if(bannedUsernames.begin(), bannedUsernames.end(), StringPredicate(userNick)) != bannedUsernames.end())
+			return true;
+		if (std::find_if(bannedUsernames.begin(), bannedUsernames.end(), StringPredicate(userRealName)) != bannedUsernames.end())
+			return true;
+		if (std::find_if(bannedUsernames.begin(), bannedUsernames.end(), StringPredicate(userName)) != bannedUsernames.end())
+			return true;
+	}
+	return false;
+}
+
 
 void Server::removeTimeoutDanglingUsers()
 {
@@ -245,12 +275,21 @@ void Server::handleIncomingRequest(int incomingFD)
 		{
 			//			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
 
-			UsersCacheManager *UManager = UsersCacheManager::getInstance();
+			User *user = this->_danglingUsers.at(incomingFD).build();
 
-			UManager->addToCache(this->_danglingUsers.at(incomingFD).build());
+			if (usernameIsBanned(*user))
+			{
+				std::string bannedMessage = "Sorry, this nickname is banned from this server";
+				sendServerReply(incomingFD, ERR_YOUREBANNED(user->getNickname(), bannedMessage), RED, BOLDR);
+				close(user->getUserSocketFd());
+				return ;
+			}
+
+
+			UsersCacheManager *UManager = UsersCacheManager::getInstance();
+			UManager->addToCache(user);
 
 			this->_danglingUsers.erase(incomingFD);
-
 			User *CurrentUser = UManager->getFromCacheSocketFD(incomingFD);
 
 			sendServerReply(incomingFD,
