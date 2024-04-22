@@ -102,7 +102,6 @@ std::string &User::getReceivedBuffer()
 #include <iostream>
 int User::isBufferValid() const
 {
-	std::cout << "in isbufferValid, buffer: " << receivedBuffer << std::endl;
 	if (receivedBuffer.find("\r\n", receivedBuffer.size() - 2) != std::string::npos)
 		return OK;
 	if (receivedBuffer.find("\r\n") != std::string::npos)
