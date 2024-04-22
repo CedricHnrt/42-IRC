@@ -159,8 +159,37 @@ void Server::serverUp() throw (ServerStartingException)
 
 void Server::handleKnownClient(int incomingFD, std::string buffer)
 {
+
+	std::cout << "handle known client" << std::endl;
+
 	if (buffer.empty())
 		return;
+
+
+	IrcLogger *logger = IrcLogger::getLogger();
+	User *currentUser;
+	try
+	{
+		currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+	}
+	catch (UserCacheExceptionString &e)
+	{
+		logger->log(IrcLogger::ERROR, e.what());
+		return ;
+	}
+
+	currentUser->addToBuffer(buffer);
+	if (currentUser->isBufferValid() == WAITING) {
+		return;
+	}
+	if (currentUser->isBufferValid() == KO)
+	{
+		currentUser->clearBuffer();
+		return ;
+	}
+	std::cout << "buffer is valid" << std::endl;
+	buffer = currentUser->getReceivedBuffer();
+	currentUser->clearBuffer();
 	StringUtils::trim(buffer, "\r\n");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
@@ -168,6 +197,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		"NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD)->getNickname());
 
 	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
+	buffer.clear();
 	if (!splitted.empty())
 	{
 		if (splitted.front()[0] == '/')
@@ -247,6 +277,8 @@ static void sendMessageOfTheDay(const User &user)
 
 void Server::handleIncomingRequest(int incomingFD)
 {
+	std::cout << "handle incoming request" << std::endl;
+
 	char buffer[512];
 
 	int size = recv(incomingFD, buffer, 512, 0);
@@ -304,6 +336,8 @@ void Server::handleIncomingRequest(int incomingFD)
 
 bool Server::handleNewClient()
 {
+	std::cout << "handle new client" << std::endl;
+
 	sockaddr_in newCli;
 	pollfd newPoll;
 	socklen_t len = sizeof(this->_serverSocket);

@@ -4,6 +4,11 @@
 	#include <string>
 	#include <vector>
 
+enum BUFFERSTATUS {
+	OK,
+	WAITING,
+	KO
+};
 //	#include "Channel.hpp"
 	class Channel;
 
@@ -16,6 +21,9 @@
 			std::string realName;
 			std::string nickname;
 			std::string ipAddr;
+
+			std::string receivedBuffer;
+
 			int userSocketFd;
 			size_t uniqueId;
 			UserProperties* properties;
@@ -34,6 +42,11 @@
 			std::vector<Channel *> getChannelList() const;
 			void addChannelToList(Channel *newChannel);
 			void setNickname(const std::string& nickname);
+
+			void addToBuffer(const std::string &incomingBuffer);
+			std::string &getReceivedBuffer();
+			int isBufferValid() const;
+			void clearBuffer();
 
 		private:
 			friend class UserBuilder;
