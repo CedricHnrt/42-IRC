@@ -1,7 +1,10 @@
 #ifndef COMPARATOR_HPP
 	#define COMPARATOR_HPP
-	#include "Channel.hpp"
+
 	#include "User.hpp"
+	#include "Channel.hpp"
+
+	#include <vector>
 
 	class ChannelPredicate
 	{
@@ -50,6 +53,16 @@
 			std::string nickname;
 		public:
 			explicit UserPredicateNickname(const std::string &value);
+			bool operator () (User *user);
+			bool operator == (const std::string &value);
+	};
+
+	class UserPredicateUsername
+	{
+		private:
+			std::string username;
+		public:
+			explicit UserPredicateUsername(const std::string &value);
 			bool operator () (User *user);
 			bool operator == (const std::string &value);
 	};

@@ -2,7 +2,7 @@
 #include "UserProperties.hpp"
 #include "User.hpp"
 #include <algorithm>
-#include <PrimitivePredicate.hpp>
+#include "PrimitivePredicate.hpp"
 UserProperties::UserProperties() : isAway(false) {}
 
 void UserProperties::setAway(bool away)

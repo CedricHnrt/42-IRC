@@ -33,6 +33,7 @@
 			std::string password;
 			int userSocketFd;
 			size_t uniqueId;
+			size_t builderTimeout;
 			UserProperties properties;
 			std::vector<std::string> connectionInfos;
 
@@ -80,12 +81,22 @@
 			UserBuilder &setUserSocketId(int userSocketFd);
 
 			/**
+			 * @brief Sets the timestamp timeout of the User.
+			 * @param timeout The timeout to set.
+			 * @return A reference to the UserBuilder object.
+			 * @author jbadaire
+			 */
+			UserBuilder &setBuilderTimeout(size_t timeout);
+
+			/**
 			 * @brief Sets the properties of the User.
 			 * @param properties The properties to set.
 			 * @return A reference to the UserBuilder object.
 			 * @author jbadaire
 			 */
 			UserBuilder &setProperties(const UserProperties &properties);
+
+			size_t getTimeout() const;
 
 			/**
 			 * @brief Clears the builder for reuse.

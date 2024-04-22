@@ -28,7 +28,7 @@ User* UsersCacheManager::getFromCache(size_t userId) throw (UserCacheException)
 	std::list<User *>::iterator iterator = std::find_if(users.begin(), users.end(), UserPredicate(userId));
 	if (iterator != users.end())
 		return *iterator;
-	throw UserCacheException(userId, "User not found !");
+	throw UserCacheException(userId, "get user from id: User not found !");
 }
 
 User* UsersCacheManager::getFromCacheSocketFD(int socketFD) throw (UserCacheException)
@@ -36,7 +36,7 @@ User* UsersCacheManager::getFromCacheSocketFD(int socketFD) throw (UserCacheExce
 	std::list<User *>::iterator iterator = std::find_if(users.begin(), users.end(), UserPredicateFD(socketFD));
 	if (iterator != users.end())
 		return *iterator;
-	throw UserCacheException(socketFD, "User not found !");
+	throw UserCacheException(socketFD, "get user from fd: User not found !");
 }
 
 User* UsersCacheManager::getFromNickname(std::string &nickname) throw (UserCacheExceptionString)
@@ -44,15 +44,12 @@ User* UsersCacheManager::getFromNickname(std::string &nickname) throw (UserCache
 	std::list<User *>::iterator iterator = std::find_if(users.begin(), users.end(), UserPredicateNickname(nickname));
 	if (iterator != users.end())
 		return *iterator;
-	throw UserCacheExceptionString(nickname, "User not found !");
+	throw UserCacheExceptionString(nickname, "get user from nickname: User not found !");
 }
 
 bool UsersCacheManager::doesNicknameAlreadyExist(const std::string &nickname) const
 {
-	std::list<User *>::const_iterator it = std::find_if(this->users.begin(), this->users.end(), UserPredicateNickname(nickname));
-	if (it != users.end())
-		return true;
-	return false;
+	return std::find_if(this->users.begin(), this->users.end(), UserPredicateNickname(nickname)) == this->users.end() ? false : true;
 }
 
 
@@ -64,7 +61,7 @@ void UsersCacheManager::deleteFromCache(size_t userId) throw (UserCacheException
 		users.erase(iterator);
 		return ;
 	}
-	throw UserCacheException(userId, "User not found !");
+	throw UserCacheException(userId, "delete user from cache: User not found !");
 }
 
 std::list<User *> UsersCacheManager::getCache()

@@ -6,6 +6,8 @@
 #include "Join.hpp"
 #include "Part.hpp"
 #include "Quit.hpp"
+#include "Who.hpp"
+#include "Invite.hpp"
 
 CommandManager* CommandManager::instance = NULL;
 
@@ -17,6 +19,8 @@ CommandManager::CommandManager()
 	this->_commandsMap["PART"] = new Part();
 	this->_commandsMap["QUIT"] = new Quit();
 	this->_commandsMap["PRIVMSG"] = new Message();
+	this->_commandsMap["WHO"] = new Who();
+	this->_commandsMap["INVITE"] = new Invite();
 }
 
 CommandManager::~CommandManager()
