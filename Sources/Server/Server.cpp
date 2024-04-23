@@ -138,10 +138,37 @@ void Server::serverUp() throw (ServerStartingException)
 	this->sigHandler();
 	CommandManager::getInstance();
 	servUp = true;
+	std::string serverName = Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH");
+
 	while (servUp)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
 			continue;
+		long currentTimestamp = TimeUtils::getCurrentTimeMillis();
+		std::list<User *>::iterator users = UsersCacheManager::getInstance()->getCache().begin();
+		while (users != UsersCacheManager::getInstance()->getCache().end())
+		{
+			User *user = *users;
+			size_t maxDifference = Configuration::getInstance()->getSection("SERVER")->getNumericValue("user_timeout", 78000);
+			size_t total = user->getLastPingTimestamp() + maxDifference;
+			if (currentTimestamp > total)
+			{
+				try
+				{
+						int userFd = user->getUserSocketFd();
+						UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
+						UsersCacheManager::getInstance()->addToLeftCache(user);
+						sendServerReply(userFd, ERR_REQUESTTIMEOUT(StringUtils::ltos(userFd), serverName), RED,BOLDR);
+						close(userFd);
+				}
+				catch (UserCacheException &exception)
+				{
+					IrcLogger::getLogger()->log(IrcLogger::ERROR, "An error occurred during user timeout fixer !");
+					IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+				}
+			}
+			++users;
+		}
 		const size_t size = this->_fds.size();
 		for (size_t i = 0; i < size; i++)
 		{
@@ -360,7 +387,7 @@ bool Server::handleNewClient()
 	newPoll.revents = 0;
 
 	UserBuilder newClient = UserBuilder().setBuilderTimeout(
-		TimeUtils::getTimeMillisAt(section->getNumericValue("dandling_timeout", 15000)));
+		TimeUtils::getTimeMillisAt(section->getNumericValue("user_timeout", 15000)));
 	this->_danglingUsers[newPoll.fd] = newClient;
 	this->_fds.push_back(newPoll);
 	return true;
