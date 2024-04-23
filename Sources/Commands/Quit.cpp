@@ -17,6 +17,14 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 //		sendServerReply(user->getUserSocketFd(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), args.front()), GREY, ITALIC);
 //	else
 //		sendServerReply(user->getUserSocketFd(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), ""), GREY, ITALIC);
-	UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
-	UsersCacheManager::getInstance()->addToLeftCache(user);
+	try
+	{
+		UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
+		UsersCacheManager::getInstance()->addToLeftCache(user);
+	}
+	catch (UserCacheException &exception)
+	{
+		IrcLogger::getLogger()->log(IrcLogger::ERROR, "An error occurred during user quit command !");
+		IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+	}
 }
