@@ -1,7 +1,7 @@
 #include "StringUtils.hpp"
 
 #include <IrcLogger.hpp>
-#include <regex>
+//#include <regex>
 #include <stdexcept>
 
 bool StringUtils::isAscii(const std::string str)
@@ -168,11 +168,11 @@ std::string StringUtils::ltos(long value)
 
 void StringUtils::keepOnlyUsefulChar(std::string &input, const std::string toKeep)
 {
-	for (std::string::iterator it = input.begin() ; it != input.end() ; ++it)
-	{
+	for (std::string::iterator it = input.begin(); it != input.end(); ++it) {
 		if (toKeep.find(*it) == std::string::npos)
 			input.erase(it);
 	}
+}
 
 static std::string generateCensuredWord(std::string word, char c)
 {
@@ -187,7 +187,7 @@ static std::string generateCensuredWord(std::string word, char c)
 	return censuredWord;
 }
 
-std::vector<std::string> generateCensuredStrings(std::vector<std::string> words)
+std::vector<std::string> StringUtils::generateCensuredStrings(std::vector<std::string> words)
 {
 	std::vector<std::string> censuredWords;
 	int index = 32;
@@ -208,7 +208,7 @@ std::vector<std::string> generateCensuredStrings(std::vector<std::string> words)
 	return censuredWords;
 }
 
-std::pair<bool, std::string> hasCensuredWord(std::string word, std::vector<std::string> censuredWords)
+std::pair<bool, std::string> StringUtils::hasCensuredWord(std::string word, std::vector<std::string> censuredWords)
 {
 	std::vector<std::string>::iterator it = censuredWords.begin();
 	while (it != censuredWords.end())

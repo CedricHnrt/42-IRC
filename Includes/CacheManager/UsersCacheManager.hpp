@@ -22,7 +22,7 @@
 			User* getFromNickname(std::string &nickname) throw (UserCacheExceptionString);
 			bool doesNicknameAlreadyExist(const std::string &nickname) const;
 			void deleteFromCache(size_t uniqueId) throw(UserCacheException);
-			void UsersCacheManager::deleteTimeoutUsers(std::string serverName);
+			void deleteTimeoutUsers(std::string serverName);
 			std::list<User *> getCache();
 			size_t getUniqueIdCounter() const;
 			static UsersCacheManager* getInstance();

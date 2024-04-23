@@ -76,7 +76,7 @@ void UsersCacheManager::deleteTimeoutUsers(std::string serverName)
 	{
 		User *user = *users;
 		size_t total = user->getLastPingTimestamp() + maxDifference;
-		if (currentTimestamp > total)
+		if (static_cast<size_t>(currentTimestamp) > total)
 		{
 			try
 			{
