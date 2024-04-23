@@ -53,7 +53,7 @@ void ChannelProperties::addModeToChannel(size_t callingUserId, char c) throw(Cha
 void ChannelProperties::addModeToUser(size_t targetId, size_t callingUserId, char c) throw(ChannelGetException)
 {
 	if (callingUserId != 0) {
-		if (!doesUserHaveMode(callingUserId, OPERATOR))
+		if (doesUserHaveMode(callingUserId, OPERATOR) == false)
 			throw (ChannelGetException("Error: User is not Operator"));
 	}
 	if (doesUserHaveMode(targetId, c))

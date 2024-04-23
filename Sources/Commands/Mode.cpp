@@ -27,7 +27,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	Channel *targetChannel;
 //	User *targetUser;
 	std::string channelName;
-	ChannelProperties *chanProperties;
+	ChannelProperties *TargetChanProperties;
 
 	std::cout << "got in MODE" << std::endl;
 
@@ -63,21 +63,26 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	{
 		std::cout << "got in +" << std::endl;
 		StringUtils::trim(modes, "+");
-		chanProperties = targetChannel->getProperties();
+		TargetChanProperties = targetChannel->getProperties();
 		if (onChannel)
 		{
 			//modifying channel;
-
+				std::cout << "calling user: " << user->getNickname() << ". his modes: " <<
 				std::cout << "got in target not empty" << std::endl;
 				for (std::string::iterator it = modes.begin() ; it != modes.end() ; ++it)
 				{
 					try {
-						chanProperties->addModeToChannel(user->getUniqueId(), *it);
+//						TargetChanProperties->addModeToChannel(user->getUniqueId(), *it);
 						if (*it == 'k')
 						{
 							std::cout << "gotta handle password" << std::endl;
-							chanProperties->setPassword(target);
-							chanProperties->setPasswordStatus(true);
+							TargetChanProperties->setPassword(target);
+							TargetChanProperties->setPasswordStatus(true);
+						}
+						if (*it == 'b')
+						{
+							User *targetUser = UsersCacheManager::getInstance()->getFromNickname(target);
+							TargetChanProperties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), *it);
 						}
 					}
 					catch (std::exception &e)
