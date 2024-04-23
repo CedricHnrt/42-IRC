@@ -50,7 +50,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 			std::cout << "Users on channel: " << usersInChannel.size() << std::endl;
 
 			for (std::vector<User *>::iterator it = usersInChannel.begin(); it != usersInChannel.end(); ++it) {
-				if ((*it)->getUserName() != user->getUserName())
+				if ((*it)->getNickname() != user->getNickname())
 					sendServerReply((*it)->getUserSocketFd(),
 									RPL_PRIVMSG(user->getUserName(), user->getNickname(), recipient, message), -1,
 									DEFAULT);
@@ -71,7 +71,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 							RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1, DEFAULT);
 		}
 		catch (UserCacheExceptionString &exception) {
-			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getUserName(), recipient), RED, BOLDR);
+			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), RED, BOLDR);
 			IrcLogger *logger = IrcLogger::getLogger();
 			logger->log(IrcLogger::ERROR, "An error occurred during message sending !");
 			logger->log(IrcLogger::ERROR, exception.what());

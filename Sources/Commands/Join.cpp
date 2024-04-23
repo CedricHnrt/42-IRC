@@ -90,12 +90,13 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), RED, BOLDR);
 				return;
 				}
+				user->addChannelToList(existingChannel);
 				existingChannel->addUserToChannel(user);
-				sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getNickname(), user->getUserName()), existingChannel->getName()), -1, DEFAULT);
-				if (existingChannel->getTopic().empty())
-					sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getUserName(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
-				else
-					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
+				sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), existingChannel->getName()), -1, DEFAULT);
+//				if (existingChannel->getTopic().empty())
+//					sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
+//				else
+//					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getNickname(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
 				std::string userList = existingChannel->getUserList();
 				sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", existingChannel->getName(), userList), -1, DEFAULT);
 			}
@@ -126,6 +127,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				logger->log(IrcLogger::ERROR, e.what());
 				return ;
 			}
+			newChannel->addUserToChannel(user);
 			user->addChannelToList(newChannel);
 			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), -1, DEFAULT);
 //			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);

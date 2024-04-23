@@ -31,7 +31,7 @@
 			ChannelProperties getProperties() const;
 			void addUserToChannel(User *user);
 			std::vector<User *> getChannelsUsers() const;
-			User *getUserByName(const std::string &name) throw (ChannelGetException);
+			User *getUserByNickname(const std::string &name) throw (ChannelGetException);
 			bool isUserInChannel(const std::string &name);
 			std::string getUserList();
 		private:

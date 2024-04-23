@@ -19,7 +19,6 @@ void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void) channel;
 
-	std::cout << "got in who" << std::endl;
 	std::string ChannelName = args.front();
 	if (ChannelName[0] != '#')
 	{
@@ -32,10 +31,8 @@ void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	try {
 		currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(ChannelName);
-		currentChannel->getUserByName(user->getUserName());
+		currentChannel->getUserByNickname(user->getNickname());
 		std::vector<User *> userList = currentChannel->getChannelsUsers();
-
-		std::cout << "nb of users in chan: " << userList.size() << std::endl;
 
 		for (std::vector<User *>::iterator it = userList.begin() ; it != userList.end() ; ++it)
 		{

@@ -65,9 +65,9 @@ std::vector<User *> Channel::getChannelsUsers() const
 	return this->_usersInChannel;
 }
 
-User *Channel::getUserByName(const std::string &name)  throw (ChannelGetException)
+User *Channel::getUserByNickname(const std::string &name)  throw (ChannelGetException)
 {
-	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateUsername(name));
+	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateNickname(name));
 	if (it != this->_usersInChannel.end())
 		return *it;
 	std::string chanName = this->name;
@@ -76,7 +76,7 @@ User *Channel::getUserByName(const std::string &name)  throw (ChannelGetExceptio
 
 bool Channel::isUserInChannel(const std::string &name)
 {
-	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateUsername(name));
+	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateNickname(name));
 	if (it != this->_usersInChannel.end())
 		return true;
 	return false;
