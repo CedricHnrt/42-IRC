@@ -18,6 +18,36 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void) channel;
 
+
+//	std::string channelNew = "";
+//
+//	if (args[0][0] == '#') {
+//		channelNew = args[0];
+//		args.erase(args.begin());
+//	}
+//
+//	std::vector<std::vector<std::string > >argV;
+//	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
+//	{
+//		size_t i = 0;
+//		if (it == args.begin())
+//		{
+//			std::string res;
+//			while (it != args.end() && (*(it + 1))[0] != '+' && (*(it + 1))[0] != '-') {
+//				res += *it;
+//				res += ' ';
+//				i++;
+//				if (i == 5)
+//					break ;
+//			}
+//			std::cout << "res = " << res << std::endl;
+//		}
+//	}
+
+
+
+
+
 	if (!args.size())
 		return ;
 	std::string recipient = args[0];
@@ -78,11 +108,16 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 							std::cout << "gotta handle password" << std::endl;
 							TargetChanProperties->setPassword(target);
 							TargetChanProperties->setPasswordStatus(true);
+							return ;
 						}
 						if (*it == 'b')
 						{
 							User *targetUser = UsersCacheManager::getInstance()->getFromNickname(target);
 							TargetChanProperties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), *it);
+						}
+						if (*it == 't')
+						{
+							TargetChanProperties->setTopic(user->getUniqueId(), target);
 						}
 					}
 					catch (std::exception &e)

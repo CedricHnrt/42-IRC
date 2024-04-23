@@ -89,3 +89,14 @@ void ChannelProperties::setPasswordStatus(bool value)
 {
 	this->hasPassword = value;
 }
+
+std::string &ChannelProperties::getTopic()
+{
+	return this->topic;
+}
+
+void ChannelProperties::setTopic(size_t userId, const std::string &newTopic)
+{
+	if (doesUserHaveMode(userId, OPERATOR))
+		this->topic = newTopic;
+}

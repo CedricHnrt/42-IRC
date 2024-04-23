@@ -34,6 +34,7 @@
 			std::list<size_t> operators;
 
 			std::string canalModes;
+			std::string topic;
 			bool hasPassword;
 			std::string password;
 			std::map<size_t, std::string> userModes;
@@ -55,6 +56,10 @@
 			void setPassword(const std::string &newPassword);
 			bool isPasswordSet() const;
 			void setPasswordStatus(bool value);
+
+			std::string &getTopic();
+			void setTopic(size_t userId, const std::string &newTopic);
+
 
 	};
 
