@@ -1,11 +1,26 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   UsersCacheManager.cpp                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jbadaire <jbadaire@student.42lyon.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/23 14:35:07 by jbadaire          #+#    #+#             */
+/*   Updated: 2024/04/23 14:35:07 by jbadaire         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "UsersCacheManager.hpp"
 #include "UserExceptions.hpp"
 #include <limits>
 #include <algorithm>
+#include <Configuration.hpp>
 #include <iostream>
+#include <IrcLogger.hpp>
 #include <IRCPredicate.hpp>
-#include <PrimitivePredicate.hpp>
-
+#include <NumericReplies.hpp>
+#include <TimeUtils.hpp>
+#include <unistd.h>
 UsersCacheManager* UsersCacheManager::instance = NULL;
 
 UsersCacheManager::UsersCacheManager() : users(std::list<User *>()), uniqueIdCounter(1)  {}
@@ -52,6 +67,34 @@ bool UsersCacheManager::doesNicknameAlreadyExist(const std::string &nickname) co
 	return std::find_if(this->users.begin(), this->users.end(), UserPredicateNickname(nickname)) == this->users.end() ? false : true;
 }
 
+void UsersCacheManager::deleteTimeoutUsers(std::string serverName)
+{
+	long currentTimestamp = TimeUtils::getCurrentTimeMillis();
+	std::list<User *>::iterator users = getCache().begin();
+	size_t maxDifference = Configuration::getInstance()->getSection("SERVER")->getNumericValue("user_timeout", 78000);
+	while (users != getCache().end())
+	{
+		User *user = *users;
+		size_t total = user->getLastPingTimestamp() + maxDifference;
+		if (currentTimestamp > total)
+		{
+			try
+			{
+				int userFd = user->getUserSocketFd();
+				deleteFromCache(user->getUniqueId());
+				addToLeftCache(user);
+				sendServerReply(userFd, ERR_REQUESTTIMEOUT(StringUtils::ltos(userFd), serverName), RED,BOLDR);
+				close(userFd);
+			}
+			catch (UserCacheException &exception)
+			{
+				IrcLogger::getLogger()->log(IrcLogger::ERROR, "An error occurred during user timeout fixer !");
+				IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+			}
+		}
+		++users;
+	}
+}
 
 void UsersCacheManager::deleteFromCache(size_t userId) throw (UserCacheException)
 {

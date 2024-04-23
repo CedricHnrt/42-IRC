@@ -19,6 +19,8 @@ public:
 	static std::string ltos(long value);
 	static std::vector<std::string>split(const std::string &input, int c);
 	static void keepOnlyUsefulChar(std::string &input, const std::string toKeep);
+	static std::vector<std::string> generateCensuredStrings(std::vector<std::string> words);
+	static std::pair<bool, std::string> hasCensuredWord(std::string word, std::vector<std::string> censuredWords);
 };
 
 #endif //STRINGUTILS_H
