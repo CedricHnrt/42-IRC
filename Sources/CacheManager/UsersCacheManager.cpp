@@ -8,7 +8,7 @@
 
 UsersCacheManager* UsersCacheManager::instance = NULL;
 
-UsersCacheManager::UsersCacheManager() : users(std::list<User *>()), uniqueIdCounter(0)  {}
+UsersCacheManager::UsersCacheManager() : users(std::list<User *>()), uniqueIdCounter(1)  {}
 
 void UsersCacheManager::addToCache(User* user) throw (UserCacheException)
 {

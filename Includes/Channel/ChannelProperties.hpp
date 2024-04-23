@@ -5,6 +5,7 @@
 	#include <string>
 
 	#include "ChannelExceptions.hpp"
+	#include "User.hpp"
 
 //canal modes
 #define TOPIC 't'
@@ -33,6 +34,8 @@
 			std::list<size_t> operators;
 
 			std::string canalModes;
+			bool hasPassword;
+			std::string password;
 			std::map<size_t, std::string> userModes;
 
 		public:
@@ -46,6 +49,12 @@
 			bool doesUserHaveMode(size_t UserId, char c) const throw (ChannelGetException);
 			void addModeToChannel(size_t callingUserId, char c) throw (ChannelGetException);
 			void addModeToUser(size_t targetId, size_t callingUserId, char c) throw (ChannelGetException);
+			void addUserToChannel(size_t userId);
+
+			std::string &getPassword();
+			void setPassword(const std::string &newPassword);
+			bool isPasswordSet() const;
+			void setPasswordStatus(bool value);
 
 	};
 

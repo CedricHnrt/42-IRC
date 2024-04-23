@@ -3,7 +3,15 @@
 
 #include "User.hpp"
 
-Channel::Channel() {}
+Channel::Channel()
+{
+	this->properties = new ChannelProperties();
+}
+
+Channel::~Channel()
+{
+	delete this->properties;
+}
 
 std::string Channel::getName() const
 {
@@ -25,7 +33,7 @@ size_t Channel::getUniqueId() const
 	return this->uniqueId;
 }
 
-ChannelProperties &Channel::getProperties()
+ChannelProperties *Channel::getProperties()
 {
 	return this->properties;
 }
@@ -50,7 +58,7 @@ void Channel::setUniqueId(size_t uniqueId)
 	this->uniqueId = uniqueId;
 }
 
-void Channel::setProperties(const ChannelProperties &properties)
+void Channel::setProperties(ChannelProperties *properties)
 {
 	this->properties = properties;
 }

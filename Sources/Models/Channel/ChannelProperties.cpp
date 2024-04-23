@@ -52,9 +52,40 @@ void ChannelProperties::addModeToChannel(size_t callingUserId, char c) throw(Cha
 
 void ChannelProperties::addModeToUser(size_t targetId, size_t callingUserId, char c) throw(ChannelGetException)
 {
-	if (!doesUserHaveMode(callingUserId, OPERATOR))
-		throw (ChannelGetException("Error: User is not Operator"));
+	if (callingUserId != 0) {
+		if (!doesUserHaveMode(callingUserId, OPERATOR))
+			throw (ChannelGetException("Error: User is not Operator"));
+	}
 	if (doesUserHaveMode(targetId, c))
 		throw (ChannelGetException("Error: User already has this mode"));
 	this->userModes.find(targetId)->second += c;
+}
+
+void ChannelProperties::addUserToChannel(size_t userId)
+{
+	std::pair<size_t, std::string> newUser;
+	newUser.first = userId;
+	newUser.second = "";
+
+	this->userModes.insert(newUser);
+}
+
+std::string &ChannelProperties::getPassword()
+{
+	return this->password;
+}
+
+void ChannelProperties::setPassword(const std::string &newPassword)
+{
+	this->password = newPassword;
+}
+
+bool ChannelProperties::isPasswordSet() const
+{
+	return this->hasPassword;
+}
+
+void ChannelProperties::setPasswordStatus(bool value)
+{
+	this->hasPassword = value;
 }

@@ -1,0 +1,113 @@
+//
+// Created by pgouasmi on 4/23/24.
+//
+
+#include "Mode.hpp"
+
+Mode::Mode()
+{
+	this->_name = "MODE";
+	this->_permissionLevel = 1;
+	this->_usage = "/mode #canal +b user // /mode your_nickname +a";
+	this->_description = "Modifies attributes or permissions for a user or a channel";
+
+	(void)this->_expectedArgs;
+}
+
+void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
+{
+	(void) channel;
+
+	if (!args.size())
+		return ;
+	std::string recipient = args[0];
+	std::string modes;
+	std::string target = "";
+	bool onChannel = false;
+	Channel *targetChannel;
+//	User *targetUser;
+	std::string channelName;
+	ChannelProperties *chanProperties;
+
+	std::cout << "got in MODE" << std::endl;
+
+	if (recipient[0] == '#')
+	{
+		if (args.size() < 2)
+			return ;
+		onChannel = true;
+		channelName = recipient;
+		StringUtils::trim(channelName, "#");
+		try {
+			targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+		}
+		catch (std::exception &e) {
+			std::cout << "targetChannel failed" << std::endl;
+			std::cout << e.what() << std::endl;
+			return ;
+		}
+		modes = args[1];
+		if (args.size() > 2)
+			target = args[2];
+	}
+	else
+		modes = args[1];
+
+	std::string prefix;
+	prefix += modes[0];
+	StringUtils::keepOnlyUsefulChar(modes, "tnsmikpovbai");
+	prefix += modes;
+	modes = prefix;
+
+	if (modes[0] == '+')
+	{
+		std::cout << "got in +" << std::endl;
+		StringUtils::trim(modes, "+");
+		chanProperties = targetChannel->getProperties();
+		if (onChannel)
+		{
+			//modifying channel;
+
+				std::cout << "got in target not empty" << std::endl;
+				for (std::string::iterator it = modes.begin() ; it != modes.end() ; ++it)
+				{
+					try {
+						chanProperties->addModeToChannel(user->getUniqueId(), *it);
+						if (*it == 'k')
+						{
+							std::cout << "gotta handle password" << std::endl;
+							chanProperties->setPassword(target);
+							chanProperties->setPasswordStatus(true);
+						}
+					}
+					catch (std::exception &e)
+					{
+						std::cout << "channel mode failed" << std::endl;
+						std::cout << e.what() << std::endl;
+					}
+				}
+			}
+//			else
+//			{
+//				try {
+//					targetUser = UsersCacheManager::getInstance()->getFromNickname(target);
+//				}
+//				catch (std::exception &e)
+//				{
+//					std::cout << e.what() << std::endl;
+//					return;
+//				}
+//				for (std::string::iterator it = modes.begin() ; it != modes.end() ; ++it)
+//				{
+//					chanProperties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), *it);
+//				}
+//			}
+		}
+//		else
+//		{
+//			if (modes.find('a') != std::string::npos)
+//				chanProperties->addModeToUser(user->getUniqueId(), 0, 'a');
+//		}
+//	}
+
+}
