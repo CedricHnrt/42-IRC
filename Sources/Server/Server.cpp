@@ -144,31 +144,7 @@ void Server::serverUp() throw (ServerStartingException)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
 			continue;
-		long currentTimestamp = TimeUtils::getCurrentTimeMillis();
-		std::list<User *>::iterator users = UsersCacheManager::getInstance()->getCache().begin();
-		while (users != UsersCacheManager::getInstance()->getCache().end())
-		{
-			User *user = *users;
-			size_t maxDifference = Configuration::getInstance()->getSection("SERVER")->getNumericValue("user_timeout", 78000);
-			size_t total = user->getLastPingTimestamp() + maxDifference;
-			if (currentTimestamp > total)
-			{
-				try
-				{
-						int userFd = user->getUserSocketFd();
-						UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
-						UsersCacheManager::getInstance()->addToLeftCache(user);
-						sendServerReply(userFd, ERR_REQUESTTIMEOUT(StringUtils::ltos(userFd), serverName), RED,BOLDR);
-						close(userFd);
-				}
-				catch (UserCacheException &exception)
-				{
-					IrcLogger::getLogger()->log(IrcLogger::ERROR, "An error occurred during user timeout fixer !");
-					IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
-				}
-			}
-			++users;
-		}
+		UsersCacheManager::getInstance()->deleteTimeoutUsers(serverName);
 		const size_t size = this->_fds.size();
 		for (size_t i = 0; i < size; i++)
 		{
