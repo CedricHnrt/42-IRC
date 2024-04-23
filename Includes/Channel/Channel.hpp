@@ -28,7 +28,7 @@
 			std::string getTopic() const;
 			std::string getPassword() const;
 			size_t getUniqueId() const;
-			ChannelProperties getProperties() const;
+			ChannelProperties &getProperties();
 			void addUserToChannel(User *user);
 			std::vector<User *> getChannelsUsers() const;
 			User *getUserByNickname(const std::string &name) throw (ChannelGetException);

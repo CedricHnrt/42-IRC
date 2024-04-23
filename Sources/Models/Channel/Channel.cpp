@@ -25,7 +25,7 @@ size_t Channel::getUniqueId() const
 	return this->uniqueId;
 }
 
-ChannelProperties Channel::getProperties() const
+ChannelProperties &Channel::getProperties()
 {
 	return this->properties;
 }
