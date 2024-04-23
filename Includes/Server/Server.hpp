@@ -37,7 +37,6 @@ class Server
 		sockaddr_in _serverSocket;
 		std::string _password;
 		std::vector<pollfd> _fds;
-		std::vector<std::string> _censoredWords;
 
 		//key = userSocketFd
 		std::map<int, UserBuilder> _danglingUsers;

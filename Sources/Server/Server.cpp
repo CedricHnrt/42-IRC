@@ -396,11 +396,6 @@ void Server::sigHandler()
 	}
 }
 
-std::vector<std::string> Server::getCensoredWords()
-{
-	return _censoredWords;
-}
-
 Server::~Server()
 {
 	close(this->_socketfd);
