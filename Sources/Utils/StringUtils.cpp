@@ -165,6 +165,15 @@ std::string StringUtils::ltos(long value)
 	return result;
 }
 
+
+void StringUtils::keepOnlyUsefulChar(std::string &input, const std::string toKeep)
+{
+	for (std::string::iterator it = input.begin() ; it != input.end() ; ++it)
+	{
+		if (toKeep.find(*it) == std::string::npos)
+			input.erase(it);
+	}
+
 static std::string generateCensuredWord(std::string word, char c)
 {
 	std::string censuredWord = "";
