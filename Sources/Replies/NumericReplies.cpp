@@ -4,17 +4,16 @@
 
 #include "NumericReplies.hpp"
 
+#include <IrcLogger.hpp>
+#include <StringUtils.hpp>
+
 void sendServerReply(int const fd, std::string buffer, int color, std::string mode)
 {
 //	std::cout << "buffer: " << buffer << std::endl;
 	if (color != -1)
 	{
-		std::ostringstream digit;
-		digit<<color;
 		std::string scolor = "\x03";
-		scolor += digit.str();
-
-
+		scolor.append(StringUtils::ltos(color));
 		buffer.insert(buffer.find(':', 2) + 1, scolor);
 	}
 	if (!mode.empty())
@@ -23,5 +22,5 @@ void sendServerReply(int const fd, std::string buffer, int color, std::string mo
 		buffer.insert(buffer.length() - 2, mode);
 	}
 	if (send(fd, buffer.c_str(), buffer.length(), 0) == -1)
-		std::cout << "send KO" << std::endl;
+		IrcLogger::getLogger()->log(IrcLogger::WARN, "KO send of " + buffer);
 }

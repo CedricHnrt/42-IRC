@@ -40,6 +40,10 @@ Server::Server() throw(ServerInitializationException)
 	std::string portStr = section->getStringValue("port", "25565");
 	std::string passwordStr = section->getStringValue("password", "password");
 
+	std::vector<std::string> banned = section->getVectorValue("censored");
+	if (!banned.empty())
+			_censoredWords = StringUtils::generateCensuredStrings(banned);
+
 	/*create the server*/
 
 	//creation du socket (fd / interface)
@@ -87,23 +91,6 @@ Server::Server() throw(ServerInitializationException)
 	/*ADD the SERVER pollfd*/
 }
 
-static bool stringIsBanned(std::string str)
-{
-	ConfigurationSection *serverSection = Configuration::getInstance()->getSection("SERVER");
-	std::vector<std::string> banned = serverSection->getVectorValue("banned");
-	if (!banned.empty())
-	{
-		StringUtils::toUpper(str);
-		if (std::find_if(banned.begin(), banned.end(), StringPredicate(str)) != banned.end())
-		{
-			IrcLogger::getLogger()->log(IrcLogger::DEBUG, "The string: " + str + " is banned from this server !");
-			return true;
-		}
-	}
-	return false;
-}
-
-
 void Server::removeTimeoutDanglingUsers()
 {
 	std::map<int, UserBuilder>::iterator iterator = this->_danglingUsers.begin();
@@ -138,10 +125,13 @@ void Server::serverUp() throw (ServerStartingException)
 	this->sigHandler();
 	CommandManager::getInstance();
 	servUp = true;
+	std::string serverName = Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH");
+
 	while (servUp)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
 			continue;
+		UsersCacheManager::getInstance()->deleteTimeoutUsers(serverName);
 		const size_t size = this->_fds.size();
 		for (size_t i = 0; i < size; i++)
 		{
@@ -297,7 +287,9 @@ void Server::handleIncomingRequest(int incomingFD)
 		{
 			User *user = this->_danglingUsers.at(incomingFD).build();
 
-			if (stringIsBanned(user->getNickname()) || stringIsBanned(user->getUserName()) || stringIsBanned(user->getRealName()))
+			if (StringUtils::hasCensuredWord(user->getNickname(), getCensoredWords()).first || \
+				StringUtils::hasCensuredWord(user->getUserName(), getCensoredWords()).first || \
+					StringUtils::hasCensuredWord(user->getRealName(), getCensoredWords()).first)
 			{
 				std::string bannedMessage = "Sorry, this nickname is banned from this server";
 				sendServerReply(incomingFD, ERR_YOUREBANNED(user->getNickname(), bannedMessage), RED, BOLDR);
@@ -360,7 +352,7 @@ bool Server::handleNewClient()
 	newPoll.revents = 0;
 
 	UserBuilder newClient = UserBuilder().setBuilderTimeout(
-		TimeUtils::getTimeMillisAt(section->getNumericValue("dandling_timeout", 15000)));
+		TimeUtils::getTimeMillisAt(section->getNumericValue("user_timeout", 15000)));
 	this->_danglingUsers[newPoll.fd] = newClient;
 	this->_fds.push_back(newPoll);
 	return true;
@@ -404,6 +396,10 @@ void Server::sigHandler()
 	}
 }
 
+std::vector<std::string> Server::getCensoredWords()
+{
+	return _censoredWords;
+}
 
 Server::~Server()
 {
