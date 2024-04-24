@@ -286,7 +286,7 @@ void Server::handleIncomingRequest(int incomingFD)
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete())
 		{
 			User *user = this->_danglingUsers.at(incomingFD).build();
-
+			/*
 			if (StringUtils::hasCensuredWord(user->getNickname(), getCensoredWords()).first || \
 				StringUtils::hasCensuredWord(user->getUserName(), getCensoredWords()).first || \
 					StringUtils::hasCensuredWord(user->getRealName(), getCensoredWords()).first)
@@ -296,7 +296,7 @@ void Server::handleIncomingRequest(int incomingFD)
 				close(user->getUserSocketFd());
 				return ;
 			}
-
+			*/
 			this->_danglingUsers.erase(incomingFD);
 			UsersCacheManager *UManager = UsersCacheManager::getInstance();
 			UManager->addToCache(user);

@@ -27,10 +27,13 @@ void Nick::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void)user;
 	(void)args;
+	(void)channel;
+
+	return;
 
 	std::string newNick = args[0];
 	bool newNickIsOk = true;
-
+	(void)newNickIsOk;
 	//TODO: Check if the nickname is already taken
 
 	try
