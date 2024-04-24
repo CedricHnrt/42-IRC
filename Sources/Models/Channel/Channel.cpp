@@ -102,3 +102,12 @@ std::string Channel::getUserList()
 	StringUtils::trim(result, " ");
 	return result;
 }
+
+void Channel::removeUserFromChannel(User *user)
+{
+	std::vector<User *>::iterator it = find(this->_usersInChannel.begin(), this->_usersInChannel.end(), user);
+	if (it != this->_usersInChannel.end())
+	{
+		this->_usersInChannel.erase(it);
+	}
+}

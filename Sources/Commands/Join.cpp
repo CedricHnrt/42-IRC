@@ -135,8 +135,6 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			properties->addUserToChannel(user->getUniqueId());
 			properties->addModeToUser(user->getUniqueId(), 0, OPERATOR);
 			properties->setPasswordStatus(false);
-
-			newChannel->addUserToChannel(user);
 			user->addChannelToList(newChannel);
 			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), -1, DEFAULT);
 //			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);

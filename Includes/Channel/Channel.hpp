@@ -34,6 +34,7 @@
 			User *getUserByNickname(const std::string &name) throw (ChannelGetException);
 			bool isUserInChannel(const std::string &name);
 			std::string getUserList();
+			void removeUserFromChannel(User *user);
 			~Channel();
 		private:
 			friend class ChannelCacheManager;
