@@ -50,6 +50,15 @@ void ChannelProperties::addModeToChannel(size_t callingUserId, char c) throw(Cha
 	this->canalModes += c;
 }
 
+void ChannelProperties::removeModeToChannel(size_t callingUserId, char c) throw(ChannelGetException)
+{
+	if (!doesUserHaveMode(callingUserId, OPERATOR))
+		throw (ChannelGetException("Error: User is not Operator"));
+	if (!doesChannelHaveMode(c))
+		throw (ChannelGetException("Error: Channel doesn't have this mode"));
+	this->canalModes.erase(canalModes.find(c));
+}
+
 void ChannelProperties::addModeToUser(size_t targetId, size_t callingUserId, char c) throw(ChannelGetException)
 {
 	if (callingUserId != 0) {
@@ -58,7 +67,20 @@ void ChannelProperties::addModeToUser(size_t targetId, size_t callingUserId, cha
 	}
 	if (doesUserHaveMode(targetId, c))
 		throw (ChannelGetException("Error: User already has this mode"));
+
 	this->userModes.find(targetId)->second += c;
+}
+
+void ChannelProperties::removeModeToUser(size_t targetId, size_t callingUserId, char c) throw(ChannelGetException)
+{
+	if (callingUserId != 0) {
+		if (doesUserHaveMode(callingUserId, OPERATOR) == false)
+			throw (ChannelGetException("Error: User is not Operator"));
+	}
+	if (!doesUserHaveMode(targetId, c))
+		throw (ChannelGetException("Error: User doesn't have this mode"));
+
+	this->userModes[targetId].erase(this->userModes[targetId].find(c));
 }
 
 void ChannelProperties::addUserToChannel(size_t userId)

@@ -7,6 +7,9 @@
 
 #include "ICommand.hpp"
 
+#define PLUS  1
+#define MINUS -1
+
 
 class Mode : public ICommand {
 public:

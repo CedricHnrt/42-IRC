@@ -8,7 +8,6 @@
 	#include "User.hpp"
 
 //canal modes
-#define TOPIC 't'
 #define NOEXTRENALMESSAGES 'n'
 #define SECRET 's'
 #define INVITEONLY 'i'
@@ -18,6 +17,7 @@
 
 //user modes
 #define OPERATOR 'o'
+#define TOPIC 't'
 #define VOICE 'v'
 #define BAN 'b'
 #define AWAY 'a'
@@ -49,7 +49,9 @@
 			bool doesChannelHaveMode(char c) const;
 			bool doesUserHaveMode(size_t UserId, char c) const throw (ChannelGetException);
 			void addModeToChannel(size_t callingUserId, char c) throw (ChannelGetException);
+			void removeModeToChannel(size_t callingUserId, char c) throw (ChannelGetException);
 			void addModeToUser(size_t targetId, size_t callingUserId, char c) throw (ChannelGetException);
+			void removeModeToUser(size_t targetId, size_t callingUserId, char c) throw (ChannelGetException);
 			void addUserToChannel(size_t userId);
 
 			std::string &getPassword();

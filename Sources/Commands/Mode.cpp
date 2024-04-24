@@ -34,6 +34,81 @@ static void printVvector(std::vector<std::vector<std::string> > vec)
 	}
 }
 
+static void handleKeyMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+{
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
+
+	if (properties->doesUserHaveMode(user->getUniqueId(), 'o') == false)
+	{
+		std::cout << "user is not op" << std::endl;
+		return ;
+	}
+
+	if (mode == PLUS)
+	{
+		if (args.size() < 2)
+		{
+			std::cout << "insufficient arguments to add keyword" << std::endl;
+			return ;
+		}
+		std::string keyword = args[1];
+		properties->setPassword(keyword);
+		properties->setPasswordStatus(true);
+		std::cout << "new pass set" << std::endl;
+	}
+	else
+	{
+		properties->setPassword("");
+		properties->setPasswordStatus(false);
+		std::cout << "pass deleted" << std::endl;
+	}
+}
+
+//static void handleBanMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+//{
+//	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+//	ChannelProperties *properties = targetChannel->getProperties();
+//	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
+//
+//	if (mode == PLUS)
+//		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), 'b');
+//	else
+//		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), 'b');
+//}
+//
+//static void handleTopicMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+//{
+//	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+//	ChannelProperties *properties = targetChannel->getProperties();
+//	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
+//
+//	if (mode == PLUS)
+//		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), 'b');
+//	else
+//		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), 'b');
+//}
+
+static void handleUserMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
+{
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
+	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
+
+	if (args.size() < 2){
+		std::cout << "insufficient arguments" << std::endl;
+	}
+
+	if (mode == PLUS)
+		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
+	else
+		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
+}
+
+static void handleAwayMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+{
+
+}
 
 void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
@@ -45,6 +120,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	if (args[0][0] == '#') {
 		channelNew = args[0];
+		StringUtils::trim(channelNew, "#");
 		args.erase(args.begin());
 	}
 
@@ -54,8 +130,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
 	{
 		std::string res;
-//		std::cout << "it[0]: " << (*it)[0] << std::endl;
-		while (it != args.end()/* && (*it)[0] != '+' && (*it)[0] != '-'*/) {
+		while (it != args.end()) {
 			if (New)
 			{
 				res += *it;
@@ -68,7 +143,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 				if (((*it)[0] != '+' && (*it)[0] != '-'))
 				{
 					New = false;
-//					std::cout << "current it: " << *it << std::endl;
 					res += *it;
 					res += ' ';
 					it++;
@@ -82,7 +156,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 				}
 			}
 		}
-//		std::cout << "res = " << res << std::endl;
 		StringUtils::trim(res, " ");
 		argV.push_back(StringUtils::split(res, ' '));
 		if (it == args.end())
@@ -97,6 +170,50 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	printVvector(argV);
 
 
+	std::string userModes = "otvbi";
+
+	for (std::vector<std::vector<std::string> >::iterator it = argV.begin() ; it != argV.end() ; ++it)
+	{
+		int mode;
+		for (std::string::iterator sIt = (*it)[0].begin() ; sIt != (*it)[0].end() ; ++sIt)
+		{
+			std::cout << "current char: " << *sIt << std::endl;
+			if (*sIt == '+')
+				mode = PLUS;
+			if (*sIt == '-')
+				mode = MINUS;
+//			if (*sIt == 'a') {
+//				try {
+//					handleAwayMode(user, channelNew, *it, mode);
+//				}
+//				catch (std::exception &e) {
+//					std::cout << e.what() << std::endl;
+//				}
+//			}
+			if (*sIt == 'k')
+			{
+				try {
+					handleKeyMode(user, channelNew, *it, mode);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+			if (userModes.find(*sIt) != std::string::npos) {
+				try {
+					handleUserMode(user, channelNew, *it, mode, *sIt);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+
+//			if (*sIt == 'b')
+//				handleBanMode(user, channelNew, *it, mode);
+//			if (*sIt == 't')
+//				handleTopicMode(user, channelNew, *it, mode);
+		}
+	}
 
 
 //
