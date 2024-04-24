@@ -14,6 +14,27 @@ Mode::Mode()
 	(void)this->_expectedArgs;
 }
 
+static void printvector(std::vector<std::string> vec)
+{
+	for (std::vector<std::string >::iterator it = vec.begin() ; it != vec.end() ; ++it)
+	{
+		std::cout << *it << std::endl;
+	}
+}
+
+static void printVvector(std::vector<std::vector<std::string> > vec)
+{
+	size_t i = 0;
+	for (std::vector<std::vector<std::string> >::iterator it = vec.begin() ; it != vec.end() ; ++it)
+	{
+		std::cout << "vector " << i << ":" << std::endl;
+		printvector(*it);
+		std::cout << std::endl;
+		i++;
+	}
+}
+
+
 void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void) channel;
@@ -27,23 +48,53 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 		args.erase(args.begin());
 	}
 
+	bool New = true;
+
 	std::vector<std::vector<std::string > >argV;
 	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
 	{
-		size_t i = 0;
-		if (it == args.begin())
-		{
-			std::string res;
-			while (it != args.end() && (*(it + 1))[0] != '+' && (*(it + 1))[0] != '-') {
+		std::string res;
+//		std::cout << "it[0]: " << (*it)[0] << std::endl;
+		while (it != args.end()/* && (*it)[0] != '+' && (*it)[0] != '-'*/) {
+			if (New)
+			{
 				res += *it;
 				res += ' ';
-				i++;
-				if (i == 5)
-					break ;
+				it++;
+				New = false;
 			}
-			std::cout << "res = " << res << std::endl;
+			else
+			{
+				if (((*it)[0] != '+' && (*it)[0] != '-'))
+				{
+					New = false;
+//					std::cout << "current it: " << *it << std::endl;
+					res += *it;
+					res += ' ';
+					it++;
+					if (it == args.end())
+						break;
+				}
+				else
+				{
+					New = true;
+					break;
+				}
+			}
 		}
+//		std::cout << "res = " << res << std::endl;
+		StringUtils::trim(res, " ");
+		argV.push_back(StringUtils::split(res, ' '));
+		if (it == args.end())
+			break ;
+		res.clear();
+		New = true;
+		if ((*it)[0] == '+' || (*it)[0] == '-')
+			--it;
 	}
+
+	std::cout << "end of loop, vector size = " << argV.size() << std::endl;
+	printVvector(argV);
 
 
 
