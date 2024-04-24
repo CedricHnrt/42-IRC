@@ -104,7 +104,6 @@ User *UserBuilder::build() {
 	//TODO: FIX NULL POINTER EXCEPTION WHEN PROPERTIES IS NOT SET
 	//user->setProperties(this->properties);
 	user->setLastPingTimestamp(TimeUtils::getCurrentTimeMillis());
-	std::cout << "Setting time stamp new user: " << user->getLastPingTimestamp() << std::endl;
 	clearBuilder();
 
 	return (user);
