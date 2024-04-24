@@ -40,6 +40,10 @@ Server::Server() throw(ServerInitializationException)
 	std::string portStr = section->getStringValue("port", "25565");
 	std::string passwordStr = section->getStringValue("password", "password");
 
+	std::vector<std::string> banned = section->getVectorValue("censored");
+	if (!banned.empty())
+			_censoredWords = StringUtils::generateCensuredStrings(banned);
+
 	/*create the server*/
 
 	//creation du socket (fd / interface)
@@ -87,23 +91,6 @@ Server::Server() throw(ServerInitializationException)
 	/*ADD the SERVER pollfd*/
 }
 
-static bool stringIsBanned(std::string str)
-{
-	ConfigurationSection *serverSection = Configuration::getInstance()->getSection("SERVER");
-	std::vector<std::string> banned = serverSection->getVectorValue("banned");
-	if (!banned.empty())
-	{
-		StringUtils::toUpper(str);
-		if (std::find_if(banned.begin(), banned.end(), StringPredicate(str)) != banned.end())
-		{
-			IrcLogger::getLogger()->log(IrcLogger::DEBUG, "The string: " + str + " is banned from this server !");
-			return true;
-		}
-	}
-	return false;
-}
-
-
 void Server::removeTimeoutDanglingUsers()
 {
 	std::map<int, UserBuilder>::iterator iterator = this->_danglingUsers.begin();
@@ -138,10 +125,13 @@ void Server::serverUp() throw (ServerStartingException)
 	this->sigHandler();
 	CommandManager::getInstance();
 	servUp = true;
+	std::string serverName = Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH");
+
 	while (servUp)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
 			continue;
+		UsersCacheManager::getInstance()->deleteTimeoutUsers(serverName);
 		const size_t size = this->_fds.size();
 		for (size_t i = 0; i < size; i++)
 		{
@@ -161,7 +151,6 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 {
 	if (buffer.empty())
 		return;
-
 
 	IrcLogger *logger = IrcLogger::getLogger();
 	User *currentUser;
@@ -186,6 +175,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	}
 	buffer = currentUser->getReceivedBuffer();
 	currentUser->clearBuffer();
+
 	StringUtils::trim(buffer, "\r\n");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
@@ -280,6 +270,11 @@ void Server::handleIncomingRequest(int incomingFD)
 		return;
 	buffer[size] = '\0';
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
+
+	std::string parse = buffer;
+	if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
+		return ;
+
 	if (it == this->_danglingUsers.end())
 	{
 		this->handleKnownClient(incomingFD, buffer);
@@ -290,18 +285,18 @@ void Server::handleIncomingRequest(int incomingFD)
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete())
 		{
-			//			UsersCacheManager::getInstance()->addToCache(this->_danglingUsers.at(incomingFD).build());
-
 			User *user = this->_danglingUsers.at(incomingFD).build();
-
-			if (stringIsBanned(user->getNickname()) || stringIsBanned(user->getUserName()) || stringIsBanned(user->getRealName()))
+			/*
+			if (StringUtils::hasCensuredWord(user->getNickname(), getCensoredWords()).first || \
+				StringUtils::hasCensuredWord(user->getUserName(), getCensoredWords()).first || \
+					StringUtils::hasCensuredWord(user->getRealName(), getCensoredWords()).first)
 			{
 				std::string bannedMessage = "Sorry, this nickname is banned from this server";
 				sendServerReply(incomingFD, ERR_YOUREBANNED(user->getNickname(), bannedMessage), RED, BOLDR);
 				close(user->getUserSocketFd());
 				return ;
 			}
-
+			*/
 			this->_danglingUsers.erase(incomingFD);
 			UsersCacheManager *UManager = UsersCacheManager::getInstance();
 			UManager->addToCache(user);
@@ -357,7 +352,7 @@ bool Server::handleNewClient()
 	newPoll.revents = 0;
 
 	UserBuilder newClient = UserBuilder().setBuilderTimeout(
-		TimeUtils::getTimeMillisAt(section->getNumericValue("dandling_timeout", 15000)));
+		TimeUtils::getTimeMillisAt(section->getNumericValue("user_timeout", 15000)));
 	this->_danglingUsers[newPoll.fd] = newClient;
 	this->_fds.push_back(newPoll);
 	return true;
@@ -400,7 +395,6 @@ void Server::sigHandler()
 		throw ServerStartingException("Signal failed");
 	}
 }
-
 
 Server::~Server()
 {

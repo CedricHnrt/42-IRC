@@ -3,7 +3,15 @@
 
 #include "User.hpp"
 
-Channel::Channel() {}
+Channel::Channel()
+{
+	this->properties = new ChannelProperties();
+}
+
+Channel::~Channel()
+{
+	delete this->properties;
+}
 
 std::string Channel::getName() const
 {
@@ -25,7 +33,7 @@ size_t Channel::getUniqueId() const
 	return this->uniqueId;
 }
 
-ChannelProperties Channel::getProperties() const
+ChannelProperties *Channel::getProperties()
 {
 	return this->properties;
 }
@@ -50,7 +58,7 @@ void Channel::setUniqueId(size_t uniqueId)
 	this->uniqueId = uniqueId;
 }
 
-void Channel::setProperties(const ChannelProperties &properties)
+void Channel::setProperties(ChannelProperties *properties)
 {
 	this->properties = properties;
 }
@@ -65,9 +73,9 @@ std::vector<User *> Channel::getChannelsUsers() const
 	return this->_usersInChannel;
 }
 
-User *Channel::getUserByName(const std::string &name)  throw (ChannelGetException)
+User *Channel::getUserByNickname(const std::string &name)  throw (ChannelGetException)
 {
-	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateUsername(name));
+	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateNickname(name));
 	if (it != this->_usersInChannel.end())
 		return *it;
 	std::string chanName = this->name;
@@ -76,8 +84,21 @@ User *Channel::getUserByName(const std::string &name)  throw (ChannelGetExceptio
 
 bool Channel::isUserInChannel(const std::string &name)
 {
-	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateUsername(name));
+	std::vector<User *>::iterator it = std::find_if(this->_usersInChannel.begin(), this->_usersInChannel.end(), UserPredicateNickname(name));
 	if (it != this->_usersInChannel.end())
 		return true;
 	return false;
+}
+
+std::string Channel::getUserList()
+{
+	std::string result;
+
+	for (std::vector<User *>::iterator it = this->_usersInChannel.begin() ; it != this->_usersInChannel.end() ; ++it)
+	{
+		result += (*it)->getNickname();
+		result += " ";
+	}
+	StringUtils::trim(result, " ");
+	return result;
 }

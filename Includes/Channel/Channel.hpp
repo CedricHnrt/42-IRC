@@ -9,6 +9,7 @@
 	#include <IRCPredicate.hpp>
 	#include <PrimitivePredicate.hpp>
 	#include "ChannelExceptions.hpp"
+	#include "StringUtils.hpp"
 
 	class User;
 
@@ -19,7 +20,7 @@
 			size_t uniqueId;
 			std::string topic;
 			std::string password;
-			ChannelProperties properties;
+			ChannelProperties *properties;
 			std::vector<User *> _usersInChannel;
 			Channel();
 		public:
@@ -27,11 +28,13 @@
 			std::string getTopic() const;
 			std::string getPassword() const;
 			size_t getUniqueId() const;
-			ChannelProperties getProperties() const;
+			ChannelProperties *getProperties();
 			void addUserToChannel(User *user);
 			std::vector<User *> getChannelsUsers() const;
-			User *getUserByName(const std::string &name) throw (ChannelGetException);
+			User *getUserByNickname(const std::string &name) throw (ChannelGetException);
 			bool isUserInChannel(const std::string &name);
+			std::string getUserList();
+			~Channel();
 		private:
 			friend class ChannelCacheManager;
 			friend class ChannelBuilder;
@@ -39,8 +42,7 @@
 			void setTopic(const std::string& topic);
 			void setPassword(const std::string& password);
 			void setUniqueId(size_t uniqueId);
-			void setProperties(const ChannelProperties& properties);
-
+			void setProperties(ChannelProperties *properties);
 	};
 
 #endif

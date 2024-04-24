@@ -33,6 +33,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	std::vector<std::string> Channels = StringUtils::split(args.front(), ',');
 	std::vector<std::string> Passwords;
 	IrcLogger *logger = IrcLogger::getLogger();
+	ChannelProperties *properties;
 
 	if (args.size() > 1) {
 		Passwords = StringUtils::split(args[1], ',');
@@ -79,23 +80,28 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			//[4]
 			try {
 				Channel *existingChannel = ChanManager->getFromCacheString(channelName);
+				properties = existingChannel->getProperties();
 				if (existingChannel->isUserInChannel(user->getUserName())) {
 					sendServerReply(user->getUserSocketFd(),
 								ERR_USERONCHANNEL(user->getUserName(), user->getNickname(), existingChannel->getName()),
 								RED, DEFAULT);
 					return;
 				}
-				if (it->second != existingChannel->getPassword()) {
+				if (properties->isPasswordSet() == true && it->second != properties->getPassword()) {
 				sendServerReply(user->getUserSocketFd(),
 								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), RED, BOLDR);
 				return;
 				}
+				user->addChannelToList(existingChannel);
+				properties->addUserToChannel(user->getUniqueId());
 				existingChannel->addUserToChannel(user);
-				sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getNickname(), user->getUserName()), existingChannel->getName()), -1, DEFAULT);
-				if (existingChannel->getTopic().empty())
-					sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getUserName(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
-				else
-					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
+				sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), existingChannel->getName()), -1, DEFAULT);
+//				if (existingChannel->getTopic().empty())
+//					sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
+//				else
+//					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getNickname(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
+				std::string userList = existingChannel->getUserList();
+				sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", existingChannel->getName(), userList), -1, DEFAULT);
 			}
 			catch (ChannelCacheException &e)
 			{
@@ -124,9 +130,17 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				logger->log(IrcLogger::ERROR, e.what());
 				return ;
 			}
+
+			properties = newChannel->getProperties();
+			properties->addUserToChannel(user->getUniqueId());
+			properties->addModeToUser(user->getUniqueId(), 0, OPERATOR);
+			properties->setPasswordStatus(false);
+
+			newChannel->addUserToChannel(user);
 			user->addChannelToList(newChannel);
 			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), -1, DEFAULT);
 //			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", newChannel->getName(), user->getNickname()), -1, DEFAULT);
 			//[3]
 		}
 	}

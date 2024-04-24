@@ -1,6 +1,7 @@
 #include "StringUtils.hpp"
 
 #include <IrcLogger.hpp>
+//#include <regex>
 #include <stdexcept>
 
 bool StringUtils::isAscii(const std::string str)
@@ -163,4 +164,59 @@ std::string StringUtils::ltos(long value)
 		value /= 10;
 	}
 	return result;
+}
+
+
+void StringUtils::keepOnlyUsefulChar(std::string &input, const std::string toKeep)
+{
+	for (std::string::iterator it = input.begin(); it != input.end(); ++it) {
+		if (toKeep.find(*it) == std::string::npos)
+			input.erase(it);
+	}
+}
+
+static std::string generateCensuredWord(std::string word, char c)
+{
+	std::string censuredWord = "";
+	std::string::iterator begin = word.begin();
+	while (begin != word.end())
+	{
+		censuredWord += c;
+		censuredWord += c;
+		++begin;
+	}
+	return censuredWord;
+}
+
+std::vector<std::string> StringUtils::generateCensuredStrings(std::vector<std::string> words)
+{
+	std::vector<std::string> censuredWords;
+	int index = 32;
+	int limit = 126;
+	std::vector<std::string>::iterator it = words.begin();
+	while (it != words.end())
+	{
+		std::string UPPER_WORD = *it;
+		StringUtils::toUpper(UPPER_WORD);
+		while (index < limit)
+		{
+			char c = index;
+			censuredWords.push_back(generateCensuredWord(UPPER_WORD, c));
+			++index;
+		}
+		++it;
+	}
+	return censuredWords;
+}
+
+std::pair<bool, std::string> StringUtils::hasCensuredWord(std::string word, std::vector<std::string> censuredWords)
+{
+	std::vector<std::string>::iterator it = censuredWords.begin();
+	while (it != censuredWords.end())
+	{
+		if (word.find(*it) != std::string::npos)
+			return std::make_pair(true, *it);
+		++it;
+	}
+	return std::make_pair(false, "");
 }

@@ -5,6 +5,8 @@
 #include "CommandManager.hpp"
 
 #include <Part.hpp>
+#include <Ping.hpp>
+#include <Pong.hpp>
 #include "Join.hpp"
 #include "Part.hpp"
 #include "Ping.hpp"
@@ -12,6 +14,7 @@
 #include "Who.hpp"
 #include "Invite.hpp"
 #include "List.hpp"
+#include "Mode.hpp"
 
 CommandManager* CommandManager::instance = NULL;
 
@@ -27,6 +30,8 @@ CommandManager::CommandManager()
 	this->_commandsMap["INVITE"] = new Invite();
 	this->_commandsMap["LIST"] = new List();
 	this->_commandsMap["PING"] = new Ping();
+	this->_commandsMap["PONG"] = new Pong();
+	this->_commandsMap["MODE"] = new Mode();
 }
 
 CommandManager::~CommandManager()

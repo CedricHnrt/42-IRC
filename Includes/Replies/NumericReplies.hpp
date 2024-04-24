@@ -39,7 +39,7 @@ enum COLORS
 
 void	sendServerReply(int const client_fd, std::string client_buffer, int color, std::string mode);
 
-# define user_id(nickname, username) (":" + nickname + "!" + username + "@localhost")
+# define user_id(nickname, username) (":" + nickname + "!" + username + "@124.0.0.1")
 
 # define RPL_WELCOME(user_id, nickname) (":localhost 001 " + nickname + " :Welcome to the Internet Relay Network " + user_id + "\r\n")
 # define RPL_YOURHOST(client, servername, version) (":localhost 002 " + client + " :Your host is " + servername + " (localhost), running version " + version + "\r\n")
@@ -127,7 +127,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define ERR_PASSWDMISMATCH(client) (":localhost 464 " + client + " :Password incorrect.\r\n")
 
 // PING
-# define RPL_PING(nick, time) ("Ping reply for " + nick + ":" + time + " second(s)" + "\r\n")
+# define RPL_PONG(user_id, token) (user_id + " PONG : " + token + "\r\n")
 
 // QUIT
 # define RPL_QUIT(user_id, reason) (user_id + " QUIT : " + reason + "\r\n")
