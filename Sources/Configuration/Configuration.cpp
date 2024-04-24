@@ -119,6 +119,18 @@ ConfigurationSection *Configuration::getSection(const std::string &name)
 	return NULL;
 }
 
+void Configuration::setCensoredWords(std::vector<std::string> censoredWords)
+{
+	this->_censoredWords = censoredWords;
+}
+
+
+std::vector<std::string> Configuration::getCensoredWords()
+{
+	return this->_censoredWords;
+}
+
+
 Configuration* Configuration::getInstance(const std::string& file)
 {
 	return instance == NULL ? instance = new Configuration(file) : instance;

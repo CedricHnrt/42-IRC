@@ -19,7 +19,7 @@ std::string User::getIpAddr() const
 	return ipAddr;
 }
 
-long User::getLastPingTimestamp() const
+size_t User::getLastPingTimestamp() const
 {
 	return lastPingTimestamp;
 }
@@ -54,7 +54,7 @@ void User::setUniqueId(const size_t& uniqueId)
 	this->uniqueId = uniqueId;
 }
 
-void User::setLastPingTimestamp(long timestamp)
+void User::setLastPingTimestamp(size_t timestamp)
 {
 	this->lastPingTimestamp = timestamp;
 }

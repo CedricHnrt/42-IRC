@@ -42,8 +42,9 @@ Server::Server() throw(ServerInitializationException)
 
 	std::vector<std::string> banned = section->getVectorValue("censored");
 	if (!banned.empty())
-			_censoredWords = StringUtils::generateCensuredStrings(banned);
-
+			Configuration::getInstance()->setCensoredWords(StringUtils::generateCensuredStrings(banned));
+	else
+		Configuration::getInstance()->setCensoredWords(std::vector<std::string>());
 	/*create the server*/
 
 	//creation du socket (fd / interface)
@@ -280,6 +281,7 @@ void Server::handleIncomingRequest(int incomingFD)
 		this->handleKnownClient(incomingFD, buffer);
 		return;
 	}
+	std::vector<std::string> censoredWords = Configuration::getInstance()->getCensoredWords();
 	try
 	{
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
@@ -287,9 +289,9 @@ void Server::handleIncomingRequest(int incomingFD)
 		{
 			User *user = this->_danglingUsers.at(incomingFD).build();
 
-			if (StringUtils::hasCensuredWord(user->getNickname(), getCensoredWords()).first || \
-				StringUtils::hasCensuredWord(user->getUserName(), getCensoredWords()).first || \
-					StringUtils::hasCensuredWord(user->getRealName(), getCensoredWords()).first)
+			if (StringUtils::hasCensuredWord(user->getNickname(), censoredWords).first || \
+				StringUtils::hasCensuredWord(user->getUserName(), censoredWords).first || \
+					StringUtils::hasCensuredWord(user->getRealName(), censoredWords).first)
 			{
 				std::string bannedMessage = "Sorry, this nickname is banned from this server";
 				sendServerReply(incomingFD, ERR_YOUREBANNED(user->getNickname(), bannedMessage), RED, BOLDR);

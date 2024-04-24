@@ -6,7 +6,7 @@
 /*   By: jbadaire <jbadaire@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/23 14:48:17 by jbadaire          #+#    #+#             */
-/*   Updated: 2024/04/23 14:48:17 by jbadaire         ###   ########.fr       */
+/*   Updated: 2024/04/24 18:17:57 by jbadaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,36 +27,47 @@ void Nick::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void)user;
 	(void)args;
+	(void)channel;
 
 	std::string newNick = args[0];
+	IrcLogger::getLogger()->log(IrcLogger::DEBUG, "New nickname: " + newNick);
 	bool newNickIsOk = true;
 
-	//TODO: Check if the nickname is already taken
-
+	//Check if the nickname is already taken
 	try
 	{
 		UsersCacheManager::getInstance()->getFromNickname(newNick);
 		newNickIsOk = false;
 	}
-	catch (UserCacheException &ignored)
+	catch (UserCacheExceptionString &ignored)
 	{}
 
-	//TODO: Check if the nickname is banned from the channel
+	//Check if the nickname is banned from the channel
+	if (newNickIsOk)
+	{
+		std::vector<Channel *> inChannels = user->getChannelList();
+		for (std::vector<Channel *>::iterator it = inChannels.begin(); it != inChannels.end(); it++)
+		{
+			Channel *channel = *it;
+			if (channel->getProperties()->doesUserHaveMode(user->getUniqueId(), 'b'))
+			{
+				newNickIsOk = false;
+				break;
+			}
+		}
+	}
 
-	//std::vector<Channel *> inChannels = user->getChannelList();
-	//for (std::vector<Channel *>::iterator it = inChannels.begin(); it != inChannels.end(); it++)
-	//{
-//		Channel *channel = *it;
-	//	std::list<User *> bannedUsers = channel->getBannedUsers();
-//	}
+	//Check if the nickname is censorred
+	if (newNickIsOk && StringUtils::hasCensuredWord(newNick, Configuration::getInstance()->getCensoredWords()).first)
+		newNickIsOk = false;
 
-	//TODO: Check if the nickname is censorred
+	if (!newNickIsOk)
+	{
+		std::string serverName = Configuration::getInstance()->getSection("SERVER")->getStringValue("name", "IRCServer");
+		sendServerReply(user->getUserSocketFd(), ERR_NICKNAMEINUSE(user->getUserName(), user->getNickname()), RED, BOLDR);
+		return;
+	}
 
-
-	//if (StringUtils::hasCensuredWord(newNick, Server::getCensoredWords()).first)
-	//{
-	//	std::string bannedMessage = "Sorry, this nickname is banned from this server";
-	//	sendServerReply(incomingFD, ERR_YOUREBANNED(user->getNickname(), bannedMessage), RED, BOLDR);
-	//	return ;
-	//}
+	sendServerReply(user->getUserSocketFd(), RPL_NICK(user->getNickname(), user->getUserName(), newNick), -1, DEFAULT);
+	user->setNickname(newNick);
 }
