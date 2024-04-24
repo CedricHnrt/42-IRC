@@ -70,9 +70,12 @@ bool UsersCacheManager::doesNicknameAlreadyExist(const std::string &nickname) co
 void UsersCacheManager::deleteTimeoutUsers(std::string serverName)
 {
 	long currentTimestamp = TimeUtils::getCurrentTimeMillis();
-	std::list<User *>::iterator users = getCache().begin();
+	std::list<User *>userList = getCache();
+	if (!userList.size())
+		return ;
+	std::list<User *>::iterator users = userList.begin();
 	size_t maxDifference = Configuration::getInstance()->getSection("SERVER")->getNumericValue("user_timeout", 78000);
-	while (users != getCache().end())
+	while (users != userList.end())
 	{
 		User *user = *users;
 		size_t total = user->getLastPingTimestamp() + maxDifference;
