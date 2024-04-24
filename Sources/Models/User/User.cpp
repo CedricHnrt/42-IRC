@@ -21,7 +21,7 @@ std::string User::getIpAddr() const
 
 long User::getLastPingTimestamp() const
 {
-	return lastPingTimestamp;
+	return this->lastPingTimestamp;
 }
 
 size_t User::getUniqueId() const
