@@ -1,5 +1,7 @@
 #include "ChannelProperties.hpp"
 
+ChannelProperties::ChannelProperties() : hasPassword(false), limitIsSet(false) {}
+
 std::list<size_t> ChannelProperties::getUsersInChannel()
 {
 	return this->usersInChannel;
@@ -121,4 +123,36 @@ void ChannelProperties::setTopic(size_t userId, const std::string &newTopic)
 {
 	if (doesUserHaveMode(userId, OPERATOR))
 		this->topic = newTopic;
+}
+
+int ChannelProperties::getUserLimit() const
+{
+	return this->userLimit;
+}
+
+void ChannelProperties::setUserLimit(int limit)
+{
+	this->userLimit = limit;
+}
+
+bool ChannelProperties::getUserLimitStatus() const
+{
+	return this->limitIsSet;
+}
+
+void ChannelProperties::setUserLimitStatus(bool value)
+{
+	this->limitIsSet = value;
+}
+
+int ChannelProperties::getNumberOfUsers() const
+{
+	return this->userModes.size();
+}
+
+bool ChannelProperties::isChannelFull() const
+{
+	if (this->getUserLimitStatus() == false)
+		return false;
+	return (getNumberOfUsers() >= this->userLimit ? true : false);
 }

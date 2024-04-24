@@ -65,29 +65,41 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 	}
 }
 
-//static void handleBanMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
-//{
-//	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
-//	ChannelProperties *properties = targetChannel->getProperties();
-//	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
-//
-//	if (mode == PLUS)
-//		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), 'b');
-//	else
-//		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), 'b');
-//}
-//
-//static void handleTopicMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
-//{
-//	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
-//	ChannelProperties *properties = targetChannel->getProperties();
-//	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
-//
-//	if (mode == PLUS)
-//		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), 'b');
-//	else
-//		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), 'b');
-//}
+static void handleLimitMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+{
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
+
+	if (properties->doesUserHaveMode(user->getUniqueId(), 'o') == false)
+	{
+		std::cout << "user is not op" << std::endl;
+		return ;
+	}
+
+	if (mode == PLUS)
+	{
+		if (args.size() < 2)
+		{
+			std::cout << "insufficient arguments" << std::endl;
+			return ;
+		}
+		if (!StringUtils::isOnlyDigits(args[1]))
+		{
+			std::cout << "limits must be digit" << std::endl;
+			return ;
+		}
+
+		char *pEnd;
+		double newLimit = strtod(args[1].c_str(), &pEnd);
+		if (newLimit > INT_MAX)
+		{
+			std::cout << "limit is too high" << std::endl;
+			return ;
+		}
+		properties->setUserLimit(static_cast<int>(newLimit));
+		properties->setUserLimitStatus(true);
+	}
+}
 
 static void handleUserMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
 {
@@ -105,9 +117,19 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
 }
 
-static void handleAwayMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+static void handleChannelMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
 {
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
 
+	if (args.size() < 1){
+		std::cout << "insufficient arguments" << std::endl;
+	}
+
+	if (mode == PLUS)
+		properties->addModeToChannel(user->getUniqueId(), c);
+	else
+		properties->removeModeToChannel(user->getUniqueId(), c);
 }
 
 void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
@@ -170,7 +192,8 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	printVvector(argV);
 
 
-	std::string userModes = "otvbi";
+	std::string userModes = "ovbi";
+	std::string channelModes = "t";
 
 	for (std::vector<std::vector<std::string> >::iterator it = argV.begin() ; it != argV.end() ; ++it)
 	{
@@ -182,18 +205,19 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 				mode = PLUS;
 			if (*sIt == '-')
 				mode = MINUS;
-//			if (*sIt == 'a') {
-//				try {
-//					handleAwayMode(user, channelNew, *it, mode);
-//				}
-//				catch (std::exception &e) {
-//					std::cout << e.what() << std::endl;
-//				}
-//			}
 			if (*sIt == 'k')
 			{
 				try {
 					handleKeyMode(user, channelNew, *it, mode);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+			if (*sIt == 'l')
+			{
+				try {
+					handleLimitMode(user, channelNew, *it, mode);
 				}
 				catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
@@ -207,11 +231,14 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 					std::cout << e.what() << std::endl;
 				}
 			}
-
-//			if (*sIt == 'b')
-//				handleBanMode(user, channelNew, *it, mode);
-//			if (*sIt == 't')
-//				handleTopicMode(user, channelNew, *it, mode);
+			if (channelModes.find(*sIt) != std::string::npos) {
+				try {
+					handleChannelMode(user, channelNew, *it, mode, *sIt);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
 		}
 	}
 
