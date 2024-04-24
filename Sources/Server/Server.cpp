@@ -124,9 +124,8 @@ void Server::serverUp() throw (ServerStartingException)
 	logger->log(IrcLogger::INFO, "Server is up !");
 	this->sigHandler();
 	CommandManager::getInstance();
-	servUp = true;
 	std::string serverName = Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH");
-
+	servUp = true;
 	while (servUp)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
@@ -371,29 +370,29 @@ static void sigMessage(int signal)
 	if (signal == SIGINT)
 	{
 		std::cout << "\b\b  \b\b";
-		Server::servUp = false;
 		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Interrupted. Exiting...");
 	}
-	if (signal == SIGQUIT)
+	else if (signal == SIGQUIT)
 	{
-		Server::servUp = false;
 		std::cout << "\b\b  \b\b";
 		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Quit. Exiting...");
 	}
+	else if (signal == SIGTERM)
+	{
+		std::cout << "\b\b  \b\b";
+		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Terminated. Exiting...");
+	}
+	Server::servUp = false;
 }
 
 void Server::sigHandler()
 {
 	if (std::signal(SIGINT, sigMessage) == SIG_ERR)
-	{
-		servUp = false;
 		throw ServerStartingException("Signal failed");
-	}
 	if (std::signal(SIGQUIT, sigMessage) == SIG_ERR)
-	{
-		servUp = false;
 		throw ServerStartingException("Signal failed");
-	}
+	if (std::signal(SIGTERM, sigMessage) == SIG_ERR)
+		throw ServerStartingException("Signal failed");
 }
 
 Server::~Server()
