@@ -93,7 +93,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				}
 				if (properties->isPasswordSet() == true && it->second != properties->getPassword()) {
 				sendServerReply(user->getUserSocketFd(),
-								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), RED, BOLDR);
+								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
 				return;
 				}
 				user->addChannelToList(existingChannel);
