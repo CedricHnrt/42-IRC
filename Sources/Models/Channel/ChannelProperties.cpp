@@ -156,3 +156,20 @@ bool ChannelProperties::isChannelFull() const
 		return false;
 	return (getNumberOfUsers() >= this->userLimit ? true : false);
 }
+
+bool ChannelProperties::isUserOperator(size_t userId) const
+{
+	return this->doesUserHaveMode(userId, 'o');
+}
+
+bool ChannelProperties::isUserInvited(size_t userId) const
+{
+	return (std::find(this->invited.begin(), this->invited.end(), userId) != this->invited.end());
+}
+
+void ChannelProperties::addToInvitedUsers(size_t userId)
+{
+	if (this->isUserInvited(userId))
+		return ;
+	this->invited.push_back(userId);
+}

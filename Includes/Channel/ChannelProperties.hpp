@@ -3,6 +3,7 @@
 	#include <list>
 	#include <map>
 	#include <string>
+	#include <algorithm>
 
 	#include "ChannelExceptions.hpp"
 	#include "User.hpp"
@@ -68,6 +69,10 @@
 			void setUserLimitStatus(bool value);
 			int getNumberOfUsers() const;
 			bool isChannelFull() const;
+			bool isUserOperator(size_t userId) const;
+
+			void addToInvitedUsers(size_t userId);
+			bool isUserInvited(size_t userId) const;
 
 			std::string &getTopic();
 			void setTopic(size_t userId, const std::string &newTopic);

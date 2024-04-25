@@ -96,6 +96,15 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
 				return;
 				}
+				if (properties->doesChannelHaveMode('i'))
+				{
+					if (!properties->isUserInvited(user->getUniqueId()))
+					{
+						sendServerReply(user->getUserSocketFd(), ERR_INVITEONLYCHAN(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
+						return ;
+					}
+
+				}
 				user->addChannelToList(existingChannel);
 				properties->addUserToChannel(user->getUniqueId());
 				existingChannel->addUserToChannel(user);

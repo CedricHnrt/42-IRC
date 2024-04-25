@@ -68,4 +68,8 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 	invitedUserP = userManager->getFromNickname(invitedUser);
 	sendServerReply(user->getUserSocketFd(), RPL_INVITING(user_id(user->getNickname(), user->getUserName()), user->getNickname(), invitedUser, channelName), -1, DEFAULT);
 	sendServerReply(invitedUserP->getUserSocketFd(), RPL_INVITE(user_id(user->getNickname(), user->getUserName()), invitedUserP->getNickname(), channelName), -1, DEFAULT);
+
+	ChannelProperties *properties = channelP->getProperties();
+	// if (properties->doesChannelHaveMode('i'))
+		properties->addToInvitedUsers(invitedUserP->getUniqueId());
 }

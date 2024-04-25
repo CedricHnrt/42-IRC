@@ -101,6 +101,20 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 	}
 }
 
+// static void handleInviteMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+// {
+// 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+// 	ChannelProperties *properties = targetChannel->getProperties();
+// 	// User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
+// 	if (args.size() > 1)
+// 	{
+// 		if (mode == PLUS)
+// 			properties->addModeToChannel(user->getUniqueId(), 'i');
+// 		else
+// 			properties->removeModeToChannel(user->getUniqueId(), 'i');
+// 	}
+// }
+
 static void handleUserMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
 {
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
@@ -109,6 +123,7 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 
 	if (args.size() < 2){
 		std::cout << "insufficient arguments" << std::endl;
+		return ;
 	}
 
 	if (mode == PLUS)
@@ -188,8 +203,8 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			--it;
 	}
 
-	std::string userModes = "ovbi";
-	std::string channelModes = "t";
+	std::string userModes = "ovb";
+	std::string channelModes = "ti";
 
 	for (std::vector<std::vector<std::string> >::iterator it = argV.begin() ; it != argV.end() ; ++it)
 	{

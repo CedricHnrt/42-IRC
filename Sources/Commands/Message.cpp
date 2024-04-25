@@ -55,7 +55,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 			for (std::vector<User *>::iterator it = usersInChannel.begin(); it != usersInChannel.end(); ++it) {
 				if ((*it)->getNickname() != user->getNickname())
 					sendServerReply((*it)->getUserSocketFd(),
-									RPL_PRIVMSG(user->getUserName(), user->getNickname(), recipient, message), -1,
+									RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1,
 									DEFAULT);
 			}
 		}

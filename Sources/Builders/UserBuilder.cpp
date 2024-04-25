@@ -157,7 +157,7 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 			return false;
 		}
 		this->userName = username[1];
-		StringUtils::trim(username[4], " :\n");
+		StringUtils::trim(username[4], " :\n\r");
 		this->realName = username[4];
 
 		IrcLogger *logger = IrcLogger::getLogger();
