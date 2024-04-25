@@ -1,4 +1,5 @@
 #include "Part.hpp"
+#include <algorithm>
 
 Part::Part()
 {
@@ -26,7 +27,7 @@ void Part::execute(User *user, Channel *channel, std::vector<std::string> args)
 		channel = ChannelCacheManager::getInstance()->getFromCacheString(args.front().substr(1));
 		args.erase(args.begin());
 		std::string reason = StringUtils::getMessage(args);
-		reason.pop_back();
+//		reason.pop_back();
 		sendPartMessageToChan(user, channel, reason);
 		channel->removeUserFromChannel(user);
 	}
