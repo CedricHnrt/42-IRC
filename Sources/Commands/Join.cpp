@@ -81,6 +81,10 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			try {
 				Channel *existingChannel = ChanManager->getFromCacheString(channelName);
 				properties = existingChannel->getProperties();
+				if (properties->isChannelFull()) {
+					sendServerReply(user->getUserSocketFd(), ERR_CHANNELISFULL(user->getNickname(), channelName), -1, DEFAULT);
+					return ;
+				}
 				if (existingChannel->isUserInChannel(user->getUserName())) {
 					sendServerReply(user->getUserSocketFd(),
 								ERR_USERONCHANNEL(user->getUserName(), user->getNickname(), existingChannel->getName()),
@@ -89,8 +93,17 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				}
 				if (properties->isPasswordSet() == true && it->second != properties->getPassword()) {
 				sendServerReply(user->getUserSocketFd(),
-								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), RED, BOLDR);
+								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
 				return;
+				}
+				if (properties->doesChannelHaveMode('i'))
+				{
+					if (!properties->isUserInvited(user->getUniqueId()))
+					{
+						sendServerReply(user->getUserSocketFd(), ERR_INVITEONLYCHAN(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
+						return ;
+					}
+
 				}
 				user->addChannelToList(existingChannel);
 				properties->addUserToChannel(user->getUniqueId());

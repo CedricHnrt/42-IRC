@@ -45,8 +45,8 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 		try {
 			Channel *currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 			ChannelProperties *chanProp = currentChannel->getProperties();
-			if (chanProp->doesUserHaveMode(user->getUniqueId(), 'b') == true) {
-				std::cout << "dude's banned" << std::endl;
+			if (chanProp->doesUserHaveMode(user->getUniqueId(), 'q') == true) {
+				std::cout << "dude's silenced" << std::endl;
 				sendServerReply(user->getUserSocketFd(), ERR_BANNEDFROMCHAN(user->getNickname(), currentChannel->getName()), -1, DEFAULT);
 				return ;
 			}
@@ -55,7 +55,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 			for (std::vector<User *>::iterator it = usersInChannel.begin(); it != usersInChannel.end(); ++it) {
 				if ((*it)->getNickname() != user->getNickname())
 					sendServerReply((*it)->getUserSocketFd(),
-									RPL_PRIVMSG(user->getUserName(), user->getNickname(), recipient, message), -1,
+									RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1,
 									DEFAULT);
 			}
 		}

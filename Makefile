@@ -78,8 +78,9 @@ FILES =	Server/Server						\
 		Commands/Invite						\
 		Commands/Ping						\
 		Commands/Pong						\
-		Commands/Mode           \
-		Commands/Nick
+		Commands/Mode           			\
+		Commands/Nick						\
+		Commands/Topic
 
 MAIN_FILES =	$(FILES)	\
 				main
