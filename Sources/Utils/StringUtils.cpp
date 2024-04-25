@@ -220,3 +220,15 @@ std::pair<bool, std::string> StringUtils::hasCensuredWord(std::string word, std:
 	}
 	return std::make_pair(false, "");
 }
+
+std::string StringUtils::getMessage(std::vector<std::string>& args)
+{
+	std::string message;
+	for (std::vector<std::string>::iterator itMsg = args.begin(); itMsg != args.end(); itMsg++)
+	{
+		if (itMsg == args.begin())
+			*itMsg = (*itMsg).substr(1);
+		message += *itMsg + " ";
+	}
+	return message;
+}
