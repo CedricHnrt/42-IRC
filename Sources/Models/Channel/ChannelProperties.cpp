@@ -1,5 +1,7 @@
 #include "ChannelProperties.hpp"
 
+ChannelProperties::ChannelProperties() : canalModes("t"), hasPassword(false), limitIsSet(false) {}
+
 std::list<size_t> ChannelProperties::getUsersInChannel()
 {
 	return this->usersInChannel;
@@ -50,6 +52,15 @@ void ChannelProperties::addModeToChannel(size_t callingUserId, char c) throw(Cha
 	this->canalModes += c;
 }
 
+void ChannelProperties::removeModeToChannel(size_t callingUserId, char c) throw(ChannelGetException)
+{
+	if (!doesUserHaveMode(callingUserId, OPERATOR))
+		throw (ChannelGetException("Error: User is not Operator"));
+	if (!doesChannelHaveMode(c))
+		throw (ChannelGetException("Error: Channel doesn't have this mode"));
+	this->canalModes.erase(canalModes.find(c));
+}
+
 void ChannelProperties::addModeToUser(size_t targetId, size_t callingUserId, char c) throw(ChannelGetException)
 {
 	if (callingUserId != 0) {
@@ -58,7 +69,20 @@ void ChannelProperties::addModeToUser(size_t targetId, size_t callingUserId, cha
 	}
 	if (doesUserHaveMode(targetId, c))
 		throw (ChannelGetException("Error: User already has this mode"));
+
 	this->userModes.find(targetId)->second += c;
+}
+
+void ChannelProperties::removeModeToUser(size_t targetId, size_t callingUserId, char c) throw(ChannelGetException)
+{
+	if (callingUserId != 0) {
+		if (doesUserHaveMode(callingUserId, OPERATOR) == false)
+			throw (ChannelGetException("Error: User is not Operator"));
+	}
+	if (!doesUserHaveMode(targetId, c))
+		throw (ChannelGetException("Error: User doesn't have this mode"));
+
+	this->userModes[targetId].erase(this->userModes[targetId].find(c));
 }
 
 void ChannelProperties::addUserToChannel(size_t userId)
@@ -95,8 +119,60 @@ std::string &ChannelProperties::getTopic()
 	return this->topic;
 }
 
+#include <iostream>
+
 void ChannelProperties::setTopic(size_t userId, const std::string &newTopic)
 {
+	std::cout << this->userModes.size() << std::endl;
 	if (doesUserHaveMode(userId, OPERATOR))
 		this->topic = newTopic;
+}
+
+int ChannelProperties::getUserLimit() const
+{
+	return this->userLimit;
+}
+
+void ChannelProperties::setUserLimit(int limit)
+{
+	this->userLimit = limit;
+}
+
+bool ChannelProperties::getUserLimitStatus() const
+{
+	return this->limitIsSet;
+}
+
+void ChannelProperties::setUserLimitStatus(bool value)
+{
+	this->limitIsSet = value;
+}
+
+int ChannelProperties::getNumberOfUsers() const
+{
+	return this->userModes.size();
+}
+
+bool ChannelProperties::isChannelFull() const
+{
+	if (this->getUserLimitStatus() == false)
+		return false;
+	return (getNumberOfUsers() >= this->userLimit ? true : false);
+}
+
+bool ChannelProperties::isUserOperator(size_t userId) const
+{
+	return this->doesUserHaveMode(userId, 'o');
+}
+
+bool ChannelProperties::isUserInvited(size_t userId) const
+{
+	return (std::find(this->invited.begin(), this->invited.end(), userId) != this->invited.end());
+}
+
+void ChannelProperties::addToInvitedUsers(size_t userId)
+{
+	if (this->isUserInvited(userId))
+		return ;
+	this->invited.push_back(userId);
 }

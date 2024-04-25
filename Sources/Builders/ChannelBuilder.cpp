@@ -64,6 +64,7 @@ Channel *ChannelBuilder::build() {
 	channel->setPassword(this->password);
 	//TODO: FIX NULL POINTER EXCEPTION WHEN PROPERTIES IS NOT SET
 	//user->setProperties(this->properties);
+
 	clearBuilder();
 
 	return (channel);
