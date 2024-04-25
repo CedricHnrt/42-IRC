@@ -14,6 +14,7 @@
 #include "Who.hpp"
 #include "Invite.hpp"
 #include "Mode.hpp"
+#include "Topic.hpp"
 
 CommandManager* CommandManager::instance = NULL;
 
@@ -30,6 +31,7 @@ CommandManager::CommandManager()
 	this->_commandsMap["PING"] = new Ping();
 	this->_commandsMap["PONG"] = new Pong();
 	this->_commandsMap["MODE"] = new Mode();
+	this->_commandsMap["TOPIC"] = new Topic();
 }
 
 CommandManager::~CommandManager()

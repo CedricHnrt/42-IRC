@@ -39,28 +39,30 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
 
-	if (properties->doesUserHaveMode(user->getUniqueId(), 'o') == false)
-	{
-		std::cout << "user is not op" << std::endl;
-		return ;
-	}
+//	if (properties->doesUserHaveMode(user->getUniqueId(), 'o') == false)
+//	{
+//		std::cout << "user is not op" << std::endl;
+//		return ;
+//	}
 
 	if (mode == PLUS)
 	{
 		if (args.size() < 2)
 		{
-			std::cout << "insufficient arguments to add keyword" << std::endl;
+			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
 			return ;
 		}
 		std::string keyword = args[1];
 		properties->setPassword(keyword);
 		properties->setPasswordStatus(true);
+		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelName, "k", properties->getPassword()), -1, DEFAULT);
 		std::cout << "new pass set" << std::endl;
 	}
 	else
 	{
 		properties->setPassword("");
 		properties->setPasswordStatus(false);
+		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelName, "-k"), -1, DEFAULT);
 		std::cout << "pass deleted" << std::endl;
 	}
 }
@@ -70,21 +72,16 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
 
-	if (properties->doesUserHaveMode(user->getUniqueId(), 'o') == false)
-	{
-		std::cout << "user is not op" << std::endl;
-		return ;
-	}
-
 	if (mode == PLUS)
 	{
 		if (args.size() < 2)
 		{
-			std::cout << "insufficient arguments" << std::endl;
+			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
 			return ;
 		}
 		if (!StringUtils::isOnlyDigits(args[1]))
 		{
+			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
 			std::cout << "limits must be digit" << std::endl;
 			return ;
 		}
@@ -108,7 +105,7 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
 
 	if (args.size() < 2){
-		std::cout << "insufficient arguments" << std::endl;
+		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
 		return ;
 	}
 
@@ -124,7 +121,7 @@ static void handleChannelMode(User *user, std::string channelName, std::vector<s
 	ChannelProperties *properties = targetChannel->getProperties();
 
 	if (args.size() < 1){
-		std::cout << "insufficient arguments" << std::endl;
+		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
 	}
 
 	if (mode == PLUS)
@@ -139,20 +136,23 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	(void) user;
 
 
-	std::string channelNew = "";
+	std::string channelNew;
 
-	if (args[0][0] == '#') {
+	if (args[0][0] != '#') {
+		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), this->_name), -1, DEFAULT);
+		return;
+	}
+
 		channelNew = args[0];
 		StringUtils::trim(channelNew, "#");
 		args.erase(args.begin());
-	}
 
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
 	ChannelProperties *properties = targetChannel->getProperties();
 
 	if (properties->isUserOperator(user->getUniqueId()))
 	{
-		sendServerReply(user->getUserSocketFd(), ERR_NOPRIVILEGES(user->getNickname()), -1, DEFAULT);
+		sendServerReply(user->getUserSocketFd(), ERR_CHANOPRIVSNEEDED(user->getNickname(), channelNew), -1, DEFAULT);
 		return ;
 	}
 

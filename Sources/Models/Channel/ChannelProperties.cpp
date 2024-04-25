@@ -1,6 +1,6 @@
 #include "ChannelProperties.hpp"
 
-ChannelProperties::ChannelProperties() : hasPassword(false), limitIsSet(false) {}
+ChannelProperties::ChannelProperties() : canalModes("t"), hasPassword(false), limitIsSet(false) {}
 
 std::list<size_t> ChannelProperties::getUsersInChannel()
 {
@@ -119,8 +119,11 @@ std::string &ChannelProperties::getTopic()
 	return this->topic;
 }
 
+#include <iostream>
+
 void ChannelProperties::setTopic(size_t userId, const std::string &newTopic)
 {
+	std::cout << this->userModes.size() << std::endl;
 	if (doesUserHaveMode(userId, OPERATOR))
 		this->topic = newTopic;
 }
