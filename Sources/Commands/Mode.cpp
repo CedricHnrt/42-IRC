@@ -101,20 +101,6 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 	}
 }
 
-// static void handleInviteMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
-// {
-// 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
-// 	ChannelProperties *properties = targetChannel->getProperties();
-// 	// User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
-// 	if (args.size() > 1)
-// 	{
-// 		if (mode == PLUS)
-// 			properties->addModeToChannel(user->getUniqueId(), 'i');
-// 		else
-// 			properties->removeModeToChannel(user->getUniqueId(), 'i');
-// 	}
-// }
-
 static void handleUserMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
 {
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
@@ -159,6 +145,15 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 		channelNew = args[0];
 		StringUtils::trim(channelNew, "#");
 		args.erase(args.begin());
+	}
+
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
+	ChannelProperties *properties = targetChannel->getProperties();
+
+	if (properties->isUserOperator(user->getUniqueId()))
+	{
+		sendServerReply(user->getUserSocketFd(), ERR_NOPRIVILEGES(user->getNickname()), -1, DEFAULT);
+		return ;
 	}
 
 	bool New = true;
