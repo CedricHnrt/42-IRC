@@ -198,7 +198,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			--it;
 	}
 
-	std::string userModes = "ovb";
+	std::string userModes = "ovq";
 	std::string channelModes = "ti";
 
 	for (std::vector<std::vector<std::string> >::iterator it = argV.begin() ; it != argV.end() ; ++it)
