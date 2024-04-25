@@ -9,13 +9,25 @@ Quit::Quit()
 	this->_expectedArgs.push_back(STRING);
 }
 
-void Quit::sendQuitMessageToChan(Channel *channel, User *leftUser, std::string message) {
+static std::string getMessage(std::vector<std::string>& args)
+{
+	std::string message;
+	for (std::vector<std::string>::iterator itMsg = args.begin(); itMsg != args.end(); itMsg++)
+	{
+		if (itMsg == args.begin())
+			*itMsg = (*itMsg).substr(1);
+		message += *itMsg + " ";
+	}
+	return message;
+}
+
+void Quit::sendQuitMessageToChan(Channel *channel, User *leftUser, std::vector<std::string> args) {
 	std::vector<User *> userList = channel->getChannelsUsers();
+	std::string message = getMessage(args);
 	for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
-		if (*it != leftUser)
-			sendServerReply((*it)->getUserSocketFd(),
-							RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
-							WHITE, DEFAULT);
+		sendServerReply((*it)->getUserSocketFd(),
+						RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
+						-1, DEFAULT);
 	}
 }
 
@@ -26,7 +38,7 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	std::vector<Channel *> channelList = user->getChannelList();
 	for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++) {
-		this->sendQuitMessageToChan(*it, user, args.front().substr(1));
+		this->sendQuitMessageToChan(*it, user, args);
 		(*it)->removeUserFromChannel(user);
 	}
 	try
