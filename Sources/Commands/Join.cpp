@@ -32,7 +32,6 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	std::vector<std::pair<std::string, std::string> > ChannelsPasswords;
 	std::vector<std::string> Channels = StringUtils::split(args.front(), ',');
 	std::vector<std::string> Passwords;
-	IrcLogger *logger = IrcLogger::getLogger();
 	ChannelProperties *properties;
 
 	if (args.size() > 1) {
@@ -70,12 +69,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	{
 		std::string channelName = it->first;
 		StringUtils::trim(channelName, "#");
-		if (it->first[0] != '#')
-		{
-			logger->log(IrcLogger::ERROR, "/join: missing '#'");
-			sendServerReply(user->getUserSocketFd(), ERR_ARG(user->getNickname(), this->_name, this->_usage), RED, BOLDR);
-		}
-		else if (ChanManager->doesChannelExist(channelName))
+		if (ChanManager->doesChannelExist(channelName))
 		{
 			//[4]
 			try {
