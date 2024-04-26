@@ -21,6 +21,7 @@ public:
 	static void keepOnlyUsefulChar(std::string &input, const std::string toKeep);
 	static std::vector<std::string> generateCensuredStrings(std::vector<std::string> words);
 	static std::pair<bool, std::string> hasCensuredWord(std::string word, std::vector<std::string> censuredWords);
+	static std::string getMessage(std::vector<std::string>& args);
 };
 
 #endif //STRINGUTILS_H
