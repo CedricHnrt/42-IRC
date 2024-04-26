@@ -8,6 +8,10 @@
 	#include "ChannelExceptions.hpp"
 	#include "User.hpp"
 
+	#include "UsersCacheManager.hpp"
+
+	#include "NumericReplies.hpp"
+
 //canal modes
 #define NOEXTRENALMESSAGES 'n'
 #define SECRET 's'
@@ -81,7 +85,7 @@
 			std::string &getTopic();
 			void setTopic(size_t userId, const std::string &newTopic);
 
-
+			std::map<size_t, std::string> &getMap();
 	};
 
 #endif

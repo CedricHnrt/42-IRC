@@ -196,3 +196,8 @@ std::string ChannelProperties::getChannelModes() const
 {
 	return this->canalModes;
 }
+
+std::map<size_t, std::string> &ChannelProperties::getMap()
+{
+	return this->userModes;
+}
