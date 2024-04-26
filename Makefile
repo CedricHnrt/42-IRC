@@ -75,6 +75,7 @@ FILES =	Server/Server						\
 		Commands/Quit						\
 		Commands/List						\
 		Commands/Who						\
+		Commands/WhoIs						\
 		Commands/Invite						\
 		Commands/Ping						\
 		Commands/Pong						\
