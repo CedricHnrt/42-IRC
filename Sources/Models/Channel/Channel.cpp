@@ -110,6 +110,18 @@ void Channel::removeUserFromChannel(User *user) {
 	}
 }
 
+void Channel::whoReplyAll()
+{
+	ChannelProperties *properties = this->getProperties();
+	std::map<size_t, std::string> map = properties->getMap();
+
+	for (std::map<size_t , std::string >::iterator it =map.begin() ; it != map.end() ; ++it)
+	{
+		User *currentUser = UsersCacheManager::getInstance()->getFromCache(it->first);
+		sendServerReply(currentUser->getUserSocketFd(), RPL_NAMREPLY(currentUser->getNickname(), "<@|*=|:|>", this->name, this->getUserList()), -1, DEFAULT);
+	}
+}
+
 void Channel::nameReplyAll()
 {
 	ChannelProperties *properties = this->getProperties();

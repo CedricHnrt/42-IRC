@@ -39,6 +39,7 @@
 			void nameReplyAll();
 			void nameReplyAllExceptCaller(const std::string &callerName);
 			void joinReplyAll(const std::string &newUser);
+			void whoReplyAll();
 
 			~Channel();
 		private:
