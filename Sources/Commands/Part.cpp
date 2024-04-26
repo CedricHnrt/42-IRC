@@ -30,6 +30,8 @@ void Part::execute(User *user, Channel *channel, std::vector<std::string> args)
 		reason = " " + reason;
 		sendPartMessageToChan(user, channel, reason);
 		channel->removeUserFromChannel(user);
+
+		channel->nameReplyAllExceptCaller(user->getNickname());
 	}
 	catch (ChannelCacheException &exception)
 	{
