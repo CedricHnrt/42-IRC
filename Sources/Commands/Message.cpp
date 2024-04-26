@@ -65,6 +65,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 		}
 		catch (ChannelCacheException &e)
 		{
+			sendServerReply(user->getUserSocketFd(), ERR_CANNOTSENDTOCHAN(user->getNickname(), channelName), -1, DEFAULT);
 			IrcLogger *logger = IrcLogger::getLogger();
 			logger->log(IrcLogger::ERROR, e.what());
 			return ;

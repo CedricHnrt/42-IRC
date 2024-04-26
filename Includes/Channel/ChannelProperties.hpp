@@ -8,6 +8,10 @@
 	#include "ChannelExceptions.hpp"
 	#include "User.hpp"
 
+	#include "UsersCacheManager.hpp"
+
+	#include "NumericReplies.hpp"
+
 //canal modes
 #define NOEXTRENALMESSAGES 'n'
 #define SECRET 's'
@@ -58,6 +62,8 @@
 			void removeModeToUser(size_t targetId, size_t callingUserId, char c) throw (ChannelGetException);
 			void addUserToChannel(size_t userId);
 
+			std::string getChannelModes() const;
+
 			std::string &getPassword();
 			void setPassword(const std::string &newPassword);
 			bool isPasswordSet() const;
@@ -70,6 +76,8 @@
 			int getNumberOfUsers() const;
 			bool isChannelFull() const;
 			bool isUserOperator(size_t userId) const;
+			std::string &getUserModes(size_t userId)  throw (ChannelGetException);
+			bool isUserOnChannel(size_t userId) const;
 
 			void addToInvitedUsers(size_t userId);
 			bool isUserInvited(size_t userId) const;
@@ -77,7 +85,7 @@
 			std::string &getTopic();
 			void setTopic(size_t userId, const std::string &newTopic);
 
-
+			std::map<size_t, std::string> &getMap();
 	};
 
 #endif
