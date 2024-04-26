@@ -12,9 +12,11 @@ Quit::Quit()
 void Quit::sendQuitMessageToChan(Channel *channel, User *leftUser, const std::string& message) {
 	std::vector<User *> userList = channel->getChannelsUsers();
 	for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
-		sendServerReply((*it)->getUserSocketFd(),
-						RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
-						-1, DEFAULT);
+		if ((*it)->getNickname() != leftUser->getNickname()) {
+			sendServerReply((*it)->getUserSocketFd(),
+							RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
+							-1, DEFAULT);
+		}
 	}
 }
 

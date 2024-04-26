@@ -121,3 +121,16 @@ void Channel::nameReplyAll()
 		sendServerReply(currentUser->getUserSocketFd(), RPL_NAMREPLY(currentUser->getNickname(), "<@|*=|:|>", this->name, this->getUserList()), -1, DEFAULT);
 	}
 }
+
+void Channel::joinReplyAll(const std::string &newUser)
+{
+	ChannelProperties *properties = this->getProperties();
+	std::map<size_t, std::string> map = properties->getMap();
+
+	for (std::map<size_t , std::string >::iterator it =map.begin() ; it != map.end() ; ++it)
+	{
+		User *currentUser = UsersCacheManager::getInstance()->getFromCache(it->first);
+		if (currentUser->getNickname() != newUser)
+			sendServerReply(currentUser->getUserSocketFd(), RPL_JOIN(user_id(currentUser->getNickname(), newUser), this->getName()), -1, DEFAULT);
+	}
+}
