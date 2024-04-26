@@ -70,6 +70,8 @@
 			int getNumberOfUsers() const;
 			bool isChannelFull() const;
 			bool isUserOperator(size_t userId) const;
+			std::string &getUserModes(size_t userId)  throw (ChannelGetException);
+			bool isUserOnChannel(size_t userId) const;
 
 			void addToInvitedUsers(size_t userId);
 			bool isUserInvited(size_t userId) const;

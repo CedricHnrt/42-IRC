@@ -34,8 +34,11 @@ bool ChannelProperties::doesChannelHaveMode(char c) const
 	return false;
 }
 
+#include <iostream>
+
 bool ChannelProperties::doesUserHaveMode(size_t UserId, char c) const throw (ChannelGetException)
 {
+//	std::cout << "iin does user have mode" << std::endl;
 	if (this->userModes.find(UserId) == userModes.end())
 		throw (ChannelGetException("Error: No user with this ID"));
 	if (this->userModes.find(UserId)->second.find(c) != std::string::npos)
@@ -175,4 +178,16 @@ void ChannelProperties::addToInvitedUsers(size_t userId)
 	if (this->isUserInvited(userId))
 		return ;
 	this->invited.push_back(userId);
+}
+
+bool ChannelProperties::isUserOnChannel(size_t userId) const
+{
+	return (this->userModes.find(userId) != userModes.end());
+}
+
+std::string &ChannelProperties::getUserModes(size_t userId) throw (ChannelGetException)
+{
+	if (this->isUserOnChannel(userId))
+		return (this->userModes[userId]);
+	throw (ChannelGetException("Error: User is not Operator"));
 }

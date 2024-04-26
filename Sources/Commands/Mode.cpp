@@ -72,6 +72,7 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
 
+
 	if (mode == PLUS)
 	{
 		if (args.size() < 2)
@@ -150,11 +151,16 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
 	ChannelProperties *properties = targetChannel->getProperties();
 
-	if (properties->isUserOperator(user->getUniqueId()))
+//	std::cout << "on mode: user:" << user->getNickname() << ", modes: " << properties->getUserModes(user->getUniqueId()) << std::endl;
+
+
+	if (properties->isUserOperator(user->getUniqueId()) == false)
 	{
 		sendServerReply(user->getUserSocketFd(), ERR_CHANOPRIVSNEEDED(user->getNickname(), channelNew), -1, DEFAULT);
 		return ;
 	}
+
+//	std::cout << "in" << std::endl;
 
 	bool New = true;
 
