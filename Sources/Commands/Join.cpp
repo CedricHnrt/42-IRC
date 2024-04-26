@@ -32,7 +32,6 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	std::vector<std::pair<std::string, std::string> > ChannelsPasswords;
 	std::vector<std::string> Channels = StringUtils::split(args.front(), ',');
 	std::vector<std::string> Passwords;
-	IrcLogger *logger = IrcLogger::getLogger();
 	ChannelProperties *properties;
 
 	if (args.size() > 1) {
@@ -70,12 +69,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	{
 		std::string channelName = it->first;
 		StringUtils::trim(channelName, "#");
-		if (it->first[0] != '#')
-		{
-			logger->log(IrcLogger::ERROR, "/join: missing '#'");
-			sendServerReply(user->getUserSocketFd(), ERR_ARG(user->getNickname(), this->_name, this->_usage), RED, BOLDR);
-		}
-		else if (ChanManager->doesChannelExist(channelName))
+		if (ChanManager->doesChannelExist(channelName))
 		{
 			//[4]
 			try {
@@ -85,9 +79,9 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 					sendServerReply(user->getUserSocketFd(), ERR_CHANNELISFULL(user->getNickname(), channelName), -1, DEFAULT);
 					return ;
 				}
-				if (existingChannel->isUserInChannel(user->getUserName())) {
+				if (existingChannel->isUserInChannel(user->getNickname())) {
 					sendServerReply(user->getUserSocketFd(),
-								ERR_USERONCHANNEL(user->getUserName(), user->getNickname(), existingChannel->getName()),
+								ERR_USERONCHANNEL(user->getNickname(), user->getUserName(), existingChannel->getName()),
 								RED, DEFAULT);
 					return;
 				}
@@ -109,12 +103,12 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				properties->addUserToChannel(user->getUniqueId());
 				existingChannel->addUserToChannel(user);
 				sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), existingChannel->getName()), -1, DEFAULT);
-//				if (existingChannel->getTopic().empty())
-//					sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
-//				else
-//					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getNickname(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
-				std::string userList = existingChannel->getUserList();
-				sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", existingChannel->getName(), userList), -1, DEFAULT);
+				if (existingChannel->getTopic().empty())
+					sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
+				else
+					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getNickname(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
+
+				existingChannel->nameReplyAll();
 			}
 			catch (ChannelCacheException &e)
 			{
@@ -148,8 +142,6 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			properties->addUserToChannel(user->getUniqueId());
 			properties->addModeToUser(user->getUniqueId(), 0, OPERATOR);
 			properties->setPasswordStatus(false);
-
-			newChannel->addUserToChannel(user);
 			user->addChannelToList(newChannel);
 			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), -1, DEFAULT);
 //			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);

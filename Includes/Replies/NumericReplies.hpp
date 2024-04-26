@@ -87,7 +87,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 #define MODE_CHANNELMSGWITHPARAM(channel, mode, param) (":localhost MODE #" + channel + " " + mode + " " + param + "\r\n")
 #define RPL_CHANNELMODEIS(client, channel, mode) (":localhost 324 " + client + " #" + channel + " " + mode + "\r\n")
 #define RPL_CHANNELMODEISWITHKEY(client, channel, mode, password) (":localhost 324 " + client + " #" + channel + " " + mode + " " + password + "\r\n")
-#define ERR_CANNOTSENDTOCHAN(client, channel) ("404 " + client + " #" + channel + " :Cannot send to channel\r\n")
+#define ERR_CANNOTSENDTOCHAN(client, channel) (":localhost 404 " + client + " #" + channel + " :Cannot send to channel\r\n")
 #define ERR_CHANNELISFULL(client, channel) ("471 " + client + " #" + channel + " :Cannot join channel (+l)\r\n")
 #define ERR_CHANOPRIVSNEEDED(client, channel) (":localhost 482 " + client + " #" + channel + " :You're not channel operator\r\n")
 #define ERR_INVALIDMODEPARAM(client, channel, mode, password) ("696 " + client + " #" + channel + " " + mode + " " + password + " : password must only contained alphabetic character\r\n")
@@ -153,6 +153,13 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 
 //WHO
 # define RPL_WHOREPLY(channel, callerUsername, onChannelUsername) (":localhost 352 " + callerUsername + " #" + channel + " " + onChannelUsername)
+
+//WHOIS
+# define RPL_WHOISUSER(nickname, username, hostname, realname) (":localhost 311 " + nickname + " " + username + " " + hostname + " * :" + realname + "\r\n")
+# define RPL_WHOISCHANNELS(nickname, channels) (":localhost 319 " + nickname + " :" + channels + "\r\n")
+# define RPL_WHOISSERVER(nickname, servername) (":localhost 312 " + nickname + " " + servername + " :Server's info\r\n")
+# define RPL_WHOISOPERATOR(nickname) (":localhost 313 " + nickname + " :is an IRC operator\r\n")
+# define RPL_ENDOFWHOIS(nickname) (":localhost 318 " + nickname + " :End of WHOIS list\r\n")
 
 //ARGERROR
 #define ERR_ARG(callerUsername, command, usage) (":localhost 461" + callerUsername + " " + command + ":Usage: " + usage + "\r\n")

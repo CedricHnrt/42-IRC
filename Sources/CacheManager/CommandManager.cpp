@@ -12,6 +12,7 @@
 #include "Ping.hpp"
 #include "Quit.hpp"
 #include "Who.hpp"
+#include "WhoIs.hpp"
 #include "Invite.hpp"
 #include "List.hpp"
 #include "Mode.hpp"
@@ -28,6 +29,8 @@ CommandManager::CommandManager()
 	this->_commandsMap["QUIT"] = new Quit();
 	this->_commandsMap["PRIVMSG"] = new Message();
 	this->_commandsMap["WHO"] = new Who();
+	this->_commandsMap["WHOIS"] = new WhoIs();
+	this->_commandsMap["whois"] = new WhoIs();
 	this->_commandsMap["INVITE"] = new Invite();
 	this->_commandsMap["LIST"] = new List();
 	this->_commandsMap["PING"] = new Ping();
