@@ -55,6 +55,7 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 		std::string keyword = args[1];
 		properties->setPassword(keyword);
 		properties->setPasswordStatus(true);
+		properties->addModeToChannel(user->getUniqueId(), 'k');
 		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelName, "k", properties->getPassword()), -1, DEFAULT);
 		std::cout << "new pass set" << std::endl;
 	}
@@ -64,6 +65,7 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 		properties->setPasswordStatus(false);
 		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelName, "-k"), -1, DEFAULT);
 		std::cout << "pass deleted" << std::endl;
+		properties->removeModeToChannel(user->getUniqueId(), 'k');
 	}
 }
 
@@ -94,8 +96,15 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 			std::cout << "limit is too high" << std::endl;
 			return ;
 		}
+		properties->addModeToChannel(user->getUniqueId(), 'l');
 		properties->setUserLimit(static_cast<int>(newLimit));
 		properties->setUserLimitStatus(true);
+	}
+	else
+	{
+		properties->setUserLimit(-1);
+		properties->setUserLimitStatus(false);
+		properties->removeModeToChannel(user->getUniqueId(), 'l');
 	}
 }
 
@@ -136,7 +145,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	(void) channel;
 	(void) user;
 
-
 	std::string channelNew;
 
 	if (args[0][0] != '#') {
@@ -144,23 +152,34 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 		return;
 	}
 
-		channelNew = args[0];
-		StringUtils::trim(channelNew, "#");
-		args.erase(args.begin());
+	channelNew = args[0];
+	StringUtils::trim(channelNew, "#");
+	args.erase(args.begin());
 
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
 	ChannelProperties *properties = targetChannel->getProperties();
 
-//	std::cout << "on mode: user:" << user->getNickname() << ", modes: " << properties->getUserModes(user->getUniqueId()) << std::endl;
 
+	if (properties->isUserOnChannel(user->getUniqueId()) == false)
+	{
+		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channelNew), -1, DEFAULT);
+		return ;
+	}
+
+	if (args.size() == 0)
+	{
+		if (properties->isPasswordSet() == true)
+			sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelNew, properties->getChannelModes(), properties->getPassword()), -1, DEFAULT);
+		else
+			sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelNew, properties->getChannelModes()), -1, DEFAULT);
+		return ;
+	}
 
 	if (properties->isUserOperator(user->getUniqueId()) == false)
 	{
 		sendServerReply(user->getUserSocketFd(), ERR_CHANOPRIVSNEEDED(user->getNickname(), channelNew), -1, DEFAULT);
 		return ;
 	}
-
-//	std::cout << "in" << std::endl;
 
 	bool New = true;
 

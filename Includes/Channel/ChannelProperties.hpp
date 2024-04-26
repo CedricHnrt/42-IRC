@@ -58,6 +58,8 @@
 			void removeModeToUser(size_t targetId, size_t callingUserId, char c) throw (ChannelGetException);
 			void addUserToChannel(size_t userId);
 
+			std::string getChannelModes() const;
+
 			std::string &getPassword();
 			void setPassword(const std::string &newPassword);
 			bool isPasswordSet() const;

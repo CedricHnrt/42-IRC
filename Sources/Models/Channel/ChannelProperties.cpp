@@ -191,3 +191,8 @@ std::string &ChannelProperties::getUserModes(size_t userId) throw (ChannelGetExc
 		return (this->userModes[userId]);
 	throw (ChannelGetException("Error: User is not Operator"));
 }
+
+std::string ChannelProperties::getChannelModes() const
+{
+	return this->canalModes;
+}
