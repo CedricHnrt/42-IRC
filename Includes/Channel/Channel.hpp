@@ -37,6 +37,7 @@
 
 			void removeUserFromChannel(User *user);
 			void nameReplyAll();
+			void nameReplyAllExceptCaller(const std::string &callerName);
 			void joinReplyAll(const std::string &newUser);
 
 			~Channel();

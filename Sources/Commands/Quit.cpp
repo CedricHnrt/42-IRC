@@ -26,6 +26,7 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 	std::vector<Channel *> channelList = user->getChannelList();
 	for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++) {
 		this->sendQuitMessageToChan(*it, user, StringUtils::getMessage(args));
+		(*it)->nameReplyAllExceptCaller(user->getNickname());
 		(*it)->removeUserFromChannel(user);
 	}
 	try
