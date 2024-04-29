@@ -91,9 +91,6 @@ void StringUtils::trim(std::string &str, const char *characters)
 		logger->log(error, "An error occured during the trim() function");
 		logger->log(error, "StringUtils.Cpp : trim() : std::string::substr() L.78");
 		logger->log(error, "String : " + str);
-		std::cout << "Characters : " << characters << std::endl;
-		std::cout << "First : " << first << std::endl;
-		std::cout << "Last : " << last << std::endl;
 		logger->log(error, exception.what());
 	}
 }
