@@ -176,7 +176,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	buffer = currentUser->getReceivedBuffer();
 	currentUser->clearBuffer();
 
-	StringUtils::trim(buffer, "\r\n");
+	StringUtils::trim(buffer, " \r\n");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "New message : " + buffer);
 	IrcLogger::getLogger()->log(IrcLogger::INFO,

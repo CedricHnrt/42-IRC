@@ -271,4 +271,5 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			}
 		}
 	}
+	targetChannel->nameReplyAll();
 }

@@ -70,6 +70,8 @@ bool StringUtils::isPrintable(const std::string str)
 	return true;
 }
 
+#include <iostream>
+
 void StringUtils::trim(std::string &str, const char *characters)
 {
 	size_t first = str.find_first_not_of(characters);
@@ -142,14 +144,18 @@ void StringUtils::replaceAll(std::string &line, const std::string &key, const st
 
 std::vector<std::string> StringUtils::split(const std::string &input, int c)
 {
+//	std::cout << "in split" << std::endl;
+
 	std::vector<std::string> result;
 	if (input.empty())
 		return result;
+	std::string trimmed = input;
 
 	if (input.find(c) == std::string::npos)
 	{
 		StringUtils::trim(const_cast<std::string &>(input), "\r\n ");
 		result.push_back(input);
+
 		IrcLogger::getLogger()->log(IrcLogger::WARN, "No delimiter found in the input string");
 		return result;
 	}
@@ -201,7 +207,11 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 	{
 		StringUtils::trim(*it, "\r\n ");
 	}
+//	for (std::vector<std::string >::iterator it = result.begin() ; it != result.end() ; ++it)
+//		std::cout << *it << std::endl;
+
 	return result;
+
 }
 
 std::string StringUtils::ltos(long value)
