@@ -125,9 +125,8 @@ void Server::serverUp() throw (ServerStartingException)
 	logger->log(IrcLogger::INFO, "Server is up !");
 	this->sigHandler();
 	CommandManager::getInstance();
-	servUp = true;
 	std::string serverName = Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH");
-
+	servUp = true;
 	while (servUp)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
@@ -289,8 +288,7 @@ void Server::handleIncomingRequest(int incomingFD)
 		{
 			User *user = this->_danglingUsers.at(incomingFD).build();
 
-			if (StringUtils::hasCensuredWord(user->getNickname(), censoredWords).first || \
-				StringUtils::hasCensuredWord(user->getUserName(), censoredWords).first || \
+			if (StringUtils::hasCensuredWord(user->getNickname(), censoredWords).first || StringUtils::hasCensuredWord(user->getUserName(), censoredWords).first || \
 					StringUtils::hasCensuredWord(user->getRealName(), censoredWords).first)
 			{
 				std::string bannedMessage = "Sorry, this nickname is banned from this server";
@@ -298,7 +296,7 @@ void Server::handleIncomingRequest(int incomingFD)
 				close(user->getUserSocketFd());
 				return ;
 			}
-
+      
 			this->_danglingUsers.erase(incomingFD);
 			UsersCacheManager *UManager = UsersCacheManager::getInstance();
 			UManager->addToCache(user);
@@ -373,29 +371,29 @@ static void sigMessage(int signal)
 	if (signal == SIGINT)
 	{
 		std::cout << "\b\b  \b\b";
-		Server::servUp = false;
 		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Interrupted. Exiting...");
 	}
-	if (signal == SIGQUIT)
+	else if (signal == SIGQUIT)
 	{
-		Server::servUp = false;
 		std::cout << "\b\b  \b\b";
 		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Quit. Exiting...");
 	}
+	else if (signal == SIGTERM)
+	{
+		std::cout << "\b\b  \b\b";
+		IrcLogger::getLogger()->log(IrcLogger::INFO, "Server Terminated. Exiting...");
+	}
+	Server::servUp = false;
 }
 
 void Server::sigHandler()
 {
 	if (std::signal(SIGINT, sigMessage) == SIG_ERR)
-	{
-		servUp = false;
 		throw ServerStartingException("Signal failed");
-	}
 	if (std::signal(SIGQUIT, sigMessage) == SIG_ERR)
-	{
-		servUp = false;
 		throw ServerStartingException("Signal failed");
-	}
+	if (std::signal(SIGTERM, sigMessage) == SIG_ERR)
+		throw ServerStartingException("Signal failed");
 }
 
 Server::~Server()

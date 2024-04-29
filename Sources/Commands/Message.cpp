@@ -57,8 +57,12 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 		try {
 			Channel *currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 			ChannelProperties *chanProp = currentChannel->getProperties();
-			if (chanProp->doesUserHaveMode(user->getUniqueId(), 'b') == true) {
-				std::cout << "dude's banned" << std::endl;
+			if (!currentChannel->isUserInChannel(user->getNickname())) {
+				sendServerReply(user->getUserSocketFd(), ERR_CANNOTSENDTOCHAN(user->getNickname(), channelName), -1, DEFAULT);
+				return ;
+			}
+			if (chanProp->doesUserHaveMode(user->getUniqueId(), 'q') == true) {
+				std::cout << "dude's silenced" << std::endl;
 				sendServerReply(user->getUserSocketFd(), ERR_BANNEDFROMCHAN(user->getNickname(), currentChannel->getName()), -1, DEFAULT);
 				return ;
 			}
@@ -73,6 +77,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 		}
 		catch (ChannelCacheException &e)
 		{
+			sendServerReply(user->getUserSocketFd(), ERR_CANNOTSENDTOCHAN(user->getNickname(), channelName), -1, DEFAULT);
 			IrcLogger *logger = IrcLogger::getLogger();
 			logger->log(IrcLogger::ERROR, e.what());
 			return ;

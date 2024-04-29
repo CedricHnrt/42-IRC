@@ -9,14 +9,23 @@ Quit::Quit()
 	this->_expectedArgs.push_back(STRING);
 }
 
+void Quit::sendQuitMessageToChan(Channel *channel, User *leftUser, const std::string& message) {
+	std::vector<User *> userList = channel->getChannelsUsers();
+	for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
+		sendServerReply((*it)->getUserSocketFd(),
+						RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
+						-1, DEFAULT);
+	}
+}
+
 void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void)channel;
-	(void)args;
-//	if (!args.empty())
-//		sendServerReply(user->getUserSocketFd(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), args.front()), GREY, ITALIC);
-//	else
-//		sendServerReply(user->getUserSocketFd(), RPL_QUIT(user_id(user->getNickname(), user->getUserName()), ""), GREY, ITALIC);
+	std::vector<Channel *> channelList = user->getChannelList();
+	for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++) {
+		this->sendQuitMessageToChan(*it, user, StringUtils::getMessage(args));
+		(*it)->removeUserFromChannel(user);
+	}
 	try
 	{
 		UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());

@@ -6,6 +6,10 @@
 #define MODE_HPP
 
 #include "ICommand.hpp"
+#include <climits>
+
+#define PLUS  1
+#define MINUS -1
 
 
 class Mode : public ICommand {

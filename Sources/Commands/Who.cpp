@@ -36,7 +36,8 @@ void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 		for (std::vector<User *>::iterator it = userList.begin() ; it != userList.end() ; ++it)
 		{
-			sendServerReply(user->getUserSocketFd(), RPL_WHOREPLY(ChannelName, user->getUserName(), (*it)->getUserName()), -1, DEFAULT);
+			if (*it != user)
+				sendServerReply(user->getUserSocketFd(), RPL_WHOREPLY(ChannelName, user->getUserName(), (*it)->getUserName()), -1, DEFAULT);
 		}
 	}
 	catch (ChannelCacheException &e)

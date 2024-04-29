@@ -32,8 +32,6 @@ void Nick::execute(User *user, Channel *channel, std::vector<std::string> args)
 	std::string newNick = args[0];
 	IrcLogger::getLogger()->log(IrcLogger::DEBUG, "New nickname: " + newNick);
 	bool newNickIsOk = true;
-
-	//Check if the nickname is already taken
 	try
 	{
 		UsersCacheManager::getInstance()->getFromNickname(newNick);

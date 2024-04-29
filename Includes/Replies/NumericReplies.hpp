@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <iostream>
 #include <sstream>
+#include "StringUtils.hpp"
 
 enum COLORS
 {
@@ -64,6 +65,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_JOIN(user_id, channel) (user_id + " JOIN :#" +  channel + "\r\n")
 # define ERR_BANNEDFROMCHAN(client, channel) ("474 " + client + " #" + channel + " :Cannot join channel (+b)\r\n")
 # define ERR_BADCHANNELKEY(client, channel) ("475 " + client + " #" + channel + " :Cannot join channel (+k)\r\n")
+# define ERR_INVITEONLYCHAN(nickname, channel) (":localhost 473 " + nickname + " #" + channel + " :Cannot join channel (+i)\r\n")
 
 // KICK
 # define ERR_USERNOTINCHANNEL(client, nickname, channel) ("441 " + client + " " + nickname + " #" + channel + " :They aren't on that channel\r\n")
@@ -71,7 +73,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_KICK(user_id, channel, kicked, reason) (user_id + " KICK #" + channel + " " + kicked + " " + reason + "\r\n")
 
 // KILL
-# define ERR_NOPRIVILEGES(client) ("481 " + client + " :Permission Denied- You're not an IRC operator\r\n")
+# define ERR_NOPRIVILEGES(client) ("481 " + client + " :Permission Denied - You're not an IRC operator\r\n")
 # define RPL_KILL(user_id, killed, comment) (user_id + " KILL " + killed + " " + comment + "\r\n")
 
 // MODE
@@ -85,7 +87,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 #define MODE_CHANNELMSGWITHPARAM(channel, mode, param) (":localhost MODE #" + channel + " " + mode + " " + param + "\r\n")
 #define RPL_CHANNELMODEIS(client, channel, mode) (":localhost 324 " + client + " #" + channel + " " + mode + "\r\n")
 #define RPL_CHANNELMODEISWITHKEY(client, channel, mode, password) (":localhost 324 " + client + " #" + channel + " " + mode + " " + password + "\r\n")
-#define ERR_CANNOTSENDTOCHAN(client, channel) ("404 " + client + " #" + channel + " :Cannot send to channel\r\n")
+#define ERR_CANNOTSENDTOCHAN(client, channel) (":localhost 404 " + client + " #" + channel + " :Cannot send to channel\r\n")
 #define ERR_CHANNELISFULL(client, channel) ("471 " + client + " #" + channel + " :Cannot join channel (+l)\r\n")
 #define ERR_CHANOPRIVSNEEDED(client, channel) (":localhost 482 " + client + " #" + channel + " :You're not channel operator\r\n")
 #define ERR_INVALIDMODEPARAM(client, channel, mode, password) ("696 " + client + " #" + channel + " " + mode + " " + password + " : password must only contained alphabetic character\r\n")
@@ -145,8 +147,19 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 // USER
 # define ERR_ALREADYREGISTERED(client) (":localhost 462 " + client + " :You may not reregister.\r\n")
 
+// LIST
+# define RPL_LIST(client, channel, visible, topic) (":localhost 322 " + client + " " + channel + " " + StringUtils::ltos(visible) + " :" + topic + "\r\n")
+# define RPL_LISTEND(client) (":localhost 323 " + client + " :End of /LIST\r\n")
+
 //WHO
 # define RPL_WHOREPLY(channel, callerUsername, onChannelUsername) (":localhost 352 " + callerUsername + " #" + channel + " " + onChannelUsername)
+
+//WHOIS
+# define RPL_WHOISUSER(nickname, username, hostname, realname) (":localhost 311 " + nickname + " " + username + " " + hostname + " * :" + realname + "\r\n")
+# define RPL_WHOISCHANNELS(nickname, channels) (":localhost 319 " + nickname + " :" + channels + "\r\n")
+# define RPL_WHOISSERVER(nickname, servername) (":localhost 312 " + nickname + " " + servername + " :Server's info\r\n")
+# define RPL_WHOISOPERATOR(nickname) (":localhost 313 " + nickname + " :is an IRC operator\r\n")
+# define RPL_ENDOFWHOIS(nickname) (":localhost 318 " + nickname + " :End of WHOIS list\r\n")
 
 //ARGERROR
 #define ERR_ARG(callerUsername, command, usage) (":localhost 461" + callerUsername + " " + command + ":Usage: " + usage + "\r\n")

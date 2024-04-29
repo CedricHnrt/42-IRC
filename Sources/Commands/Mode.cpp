@@ -14,140 +14,261 @@ Mode::Mode()
 	(void)this->_expectedArgs;
 }
 
+//static void printvector(std::vector<std::string> vec)
+//{
+//	for (std::vector<std::string >::iterator it = vec.begin() ; it != vec.end() ; ++it)
+//	{
+//		std::cout << *it << std::endl;
+//	}
+//}
+//
+//static void printVvector(std::vector<std::vector<std::string> > vec)
+//{
+//	size_t i = 0;
+//	for (std::vector<std::vector<std::string> >::iterator it = vec.begin() ; it != vec.end() ; ++it)
+//	{
+//		std::cout << "vector " << i << ":" << std::endl;
+//		printvector(*it);
+//		std::cout << std::endl;
+//		i++;
+//	}
+//}
+
+static void handleKeyMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+{
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
+
+//	if (properties->doesUserHaveMode(user->getUniqueId(), 'o') == false)
+//	{
+//		std::cout << "user is not op" << std::endl;
+//		return ;
+//	}
+
+	if (mode == PLUS)
+	{
+		if (args.size() < 2)
+		{
+			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+			return ;
+		}
+		std::string keyword = args[1];
+		properties->setPassword(keyword);
+		properties->setPasswordStatus(true);
+		properties->addModeToChannel(user->getUniqueId(), 'k');
+		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelName, "k", properties->getPassword()), -1, DEFAULT);
+		std::cout << "new pass set" << std::endl;
+	}
+	else
+	{
+		properties->setPassword("");
+		properties->setPasswordStatus(false);
+		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelName, "-k"), -1, DEFAULT);
+		std::cout << "pass deleted" << std::endl;
+		properties->removeModeToChannel(user->getUniqueId(), 'k');
+	}
+}
+
+static void handleLimitMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+{
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
+
+
+	if (mode == PLUS)
+	{
+		if (args.size() < 2)
+		{
+			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+			return ;
+		}
+		if (!StringUtils::isOnlyDigits(args[1]))
+		{
+			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+			std::cout << "limits must be digit" << std::endl;
+			return ;
+		}
+
+		char *pEnd;
+		double newLimit = strtod(args[1].c_str(), &pEnd);
+		if (newLimit > INT_MAX)
+		{
+			std::cout << "limit is too high" << std::endl;
+			return ;
+		}
+		properties->addModeToChannel(user->getUniqueId(), 'l');
+		properties->setUserLimit(static_cast<int>(newLimit));
+		properties->setUserLimitStatus(true);
+	}
+	else
+	{
+		properties->setUserLimit(-1);
+		properties->setUserLimitStatus(false);
+		properties->removeModeToChannel(user->getUniqueId(), 'l');
+	}
+}
+
+static void handleUserMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
+{
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
+	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
+
+	if (args.size() < 2){
+		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+		return ;
+	}
+
+	if (mode == PLUS)
+		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
+	else
+		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
+}
+
+static void handleChannelMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
+{
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
+
+	if (args.size() < 1){
+		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+	}
+
+	if (mode == PLUS)
+		properties->addModeToChannel(user->getUniqueId(), c);
+	else
+		properties->removeModeToChannel(user->getUniqueId(), c);
+}
+
 void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void) channel;
+	(void) user;
 
+	std::string channelNew;
 
-//	std::string channelNew = "";
-//
-//	if (args[0][0] == '#') {
-//		channelNew = args[0];
-//		args.erase(args.begin());
-//	}
-//
-//	std::vector<std::vector<std::string > >argV;
-//	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
-//	{
-//		size_t i = 0;
-//		if (it == args.begin())
-//		{
-//			std::string res;
-//			while (it != args.end() && (*(it + 1))[0] != '+' && (*(it + 1))[0] != '-') {
-//				res += *it;
-//				res += ' ';
-//				i++;
-//				if (i == 5)
-//					break ;
-//			}
-//			std::cout << "res = " << res << std::endl;
-//		}
-//	}
-
-
-
-
-
-	if (!args.size())
-		return ;
-	std::string recipient = args[0];
-	std::string modes;
-	std::string target = "";
-	bool onChannel = false;
-	Channel *targetChannel;
-//	User *targetUser;
-	std::string channelName;
-	ChannelProperties *TargetChanProperties;
-
-	std::cout << "got in MODE" << std::endl;
-
-	if (recipient[0] == '#')
-	{
-		if (args.size() < 2)
-			return ;
-		onChannel = true;
-		channelName = recipient;
-		StringUtils::trim(channelName, "#");
-		try {
-			targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
-		}
-		catch (std::exception &e) {
-			std::cout << "targetChannel failed" << std::endl;
-			std::cout << e.what() << std::endl;
-			return ;
-		}
-		modes = args[1];
-		if (args.size() > 2)
-			target = args[2];
+	if (args[0][0] != '#') {
+		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), this->_name), -1, DEFAULT);
+		return;
 	}
-	else
-		modes = args[1];
 
-	std::string prefix;
-	prefix += modes[0];
-	StringUtils::keepOnlyUsefulChar(modes, "tnsmikpovbai");
-	prefix += modes;
-	modes = prefix;
+	channelNew = args[0];
+	StringUtils::trim(channelNew, "#");
+	args.erase(args.begin());
 
-	if (modes[0] == '+')
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
+	ChannelProperties *properties = targetChannel->getProperties();
+
+
+	if (properties->isUserOnChannel(user->getUniqueId()) == false)
 	{
-		std::cout << "got in +" << std::endl;
-		StringUtils::trim(modes, "+");
-		TargetChanProperties = targetChannel->getProperties();
-		if (onChannel)
-		{
-			//modifying channel;
-				std::cout << "calling user: " << user->getNickname() << ". his modes: " <<
-				std::cout << "got in target not empty" << std::endl;
-				for (std::string::iterator it = modes.begin() ; it != modes.end() ; ++it)
+		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channelNew), -1, DEFAULT);
+		return ;
+	}
+
+	if (args.size() == 0)
+	{
+		if (properties->isPasswordSet() == true)
+			sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelNew, properties->getChannelModes(), properties->getPassword()), -1, DEFAULT);
+		else
+			sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelNew, properties->getChannelModes()), -1, DEFAULT);
+		return ;
+	}
+
+	if (properties->isUserOperator(user->getUniqueId()) == false)
+	{
+		sendServerReply(user->getUserSocketFd(), ERR_CHANOPRIVSNEEDED(user->getNickname(), channelNew), -1, DEFAULT);
+		return ;
+	}
+
+	bool New = true;
+
+	std::vector<std::vector<std::string > >argV;
+	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
+	{
+		std::string res;
+		while (it != args.end()) {
+			if (New)
+			{
+				res += *it;
+				res += ' ';
+				it++;
+				New = false;
+			}
+			else
+			{
+				if (((*it)[0] != '+' && (*it)[0] != '-'))
 				{
-					try {
-//						TargetChanProperties->addModeToChannel(user->getUniqueId(), *it);
-						if (*it == 'k')
-						{
-							std::cout << "gotta handle password" << std::endl;
-							TargetChanProperties->setPassword(target);
-							TargetChanProperties->setPasswordStatus(true);
-							return ;
-						}
-						if (*it == 'b')
-						{
-							User *targetUser = UsersCacheManager::getInstance()->getFromNickname(target);
-							TargetChanProperties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), *it);
-						}
-						if (*it == 't')
-						{
-							TargetChanProperties->setTopic(user->getUniqueId(), target);
-						}
-					}
-					catch (std::exception &e)
-					{
-						std::cout << "channel mode failed" << std::endl;
-						std::cout << e.what() << std::endl;
-					}
+					New = false;
+					res += *it;
+					res += ' ';
+					it++;
+					if (it == args.end())
+						break;
+				}
+				else
+				{
+					New = true;
+					break;
 				}
 			}
-//			else
-//			{
-//				try {
-//					targetUser = UsersCacheManager::getInstance()->getFromNickname(target);
-//				}
-//				catch (std::exception &e)
-//				{
-//					std::cout << e.what() << std::endl;
-//					return;
-//				}
-//				for (std::string::iterator it = modes.begin() ; it != modes.end() ; ++it)
-//				{
-//					chanProperties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), *it);
-//				}
-//			}
 		}
-//		else
-//		{
-//			if (modes.find('a') != std::string::npos)
-//				chanProperties->addModeToUser(user->getUniqueId(), 0, 'a');
-//		}
-//	}
+		StringUtils::trim(res, " ");
+		argV.push_back(StringUtils::split(res, ' '));
+		if (it == args.end())
+			break ;
+		res.clear();
+		New = true;
+		if ((*it)[0] == '+' || (*it)[0] == '-')
+			--it;
+	}
 
+	std::string userModes = "ovq";
+	std::string channelModes = "ti";
+
+	for (std::vector<std::vector<std::string> >::iterator it = argV.begin() ; it != argV.end() ; ++it)
+	{
+		int mode;
+		for (std::string::iterator sIt = (*it)[0].begin() ; sIt != (*it)[0].end() ; ++sIt)
+		{
+			if (*sIt == '+')
+				mode = PLUS;
+			if (*sIt == '-')
+				mode = MINUS;
+			if (*sIt == 'k')
+			{
+				try {
+					handleKeyMode(user, channelNew, *it, mode);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+			if (*sIt == 'l')
+			{
+				try {
+					handleLimitMode(user, channelNew, *it, mode);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+			if (userModes.find(*sIt) != std::string::npos) {
+				try {
+					handleUserMode(user, channelNew, *it, mode, *sIt);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+			if (channelModes.find(*sIt) != std::string::npos) {
+				try {
+					handleChannelMode(user, channelNew, *it, mode, *sIt);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+		}
+	}
 }

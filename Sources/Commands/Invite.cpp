@@ -21,6 +21,7 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 
 	ChannelCacheManager *ChanManager = ChannelCacheManager::getInstance();
 	UsersCacheManager *userManager = UsersCacheManager::getInstance();
+	ChannelProperties *properties;
 	Channel *channelP;
 	User *invitedUserP;
 	IrcLogger *logger = IrcLogger::getLogger();
@@ -38,6 +39,25 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 	std::string channelName = channelHash;
 	StringUtils::trim(channelName, "#");
 
+	try {
+		channelP = ChanManager->getFromCacheString(channelName);
+	}
+	catch (ChannelCacheException &e)
+	{
+		logger->log(IrcLogger::ERROR, ("/invite: Error: " + user->getNickname() + "is not on channel " + channelName));
+		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channelName), RED, BOLDR);
+		return ;
+	}
+
+	properties = channelP->getProperties();
+
+
+	if (properties->isUserOperator(user->getUniqueId()))
+	{
+		sendServerReply(user->getUserSocketFd(), ERR_NOPRIVILEGES(user->getNickname()), -1, DEFAULT);
+		return ;
+	}
+
 	if (!userManager->doesNicknameAlreadyExist(invitedUser))
 	{
 		logger->log(IrcLogger::ERROR, ("/invite: Error: " + invitedUser + ": no such user"));
@@ -47,15 +67,6 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 	{
 		logger->log(IrcLogger::ERROR, ("/invite: Error: " + channelName + ": no such channel"));
 		sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), channelName), RED, BOLDR);
-		return ;
-	}
-	try {
-		channelP = ChanManager->getFromCacheString(channelName);
-	}
-	catch (ChannelCacheException &e)
-	{
-		logger->log(IrcLogger::ERROR, ("/invite: Error: " + user->getNickname() + "is not on channel " + channelName));
-		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channelName), RED, BOLDR);
 		return ;
 	}
 	if (channelP->isUserInChannel(invitedUser))
@@ -68,4 +79,7 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 	invitedUserP = userManager->getFromNickname(invitedUser);
 	sendServerReply(user->getUserSocketFd(), RPL_INVITING(user_id(user->getNickname(), user->getUserName()), user->getNickname(), invitedUser, channelName), -1, DEFAULT);
 	sendServerReply(invitedUserP->getUserSocketFd(), RPL_INVITE(user_id(user->getNickname(), user->getUserName()), invitedUserP->getNickname(), channelName), -1, DEFAULT);
+
+	// if (properties->doesChannelHaveMode('i'))
+		properties->addToInvitedUsers(invitedUserP->getUniqueId());
 }

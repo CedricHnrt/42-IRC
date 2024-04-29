@@ -73,12 +73,15 @@ FILES =	Server/Server						\
 		Commands/Join						\
 		Commands/Part						\
 		Commands/Quit						\
+		Commands/List						\
 		Commands/Who						\
+		Commands/WhoIs						\
 		Commands/Invite						\
 		Commands/Ping						\
 		Commands/Pong						\
-		Commands/Mode           \
-		Commands/Nick
+		Commands/Mode           			\
+		Commands/Nick						\
+		Commands/Topic
 
 MAIN_FILES =	$(FILES)	\
 				main
@@ -139,7 +142,6 @@ exec : all
 
 val : all
 		valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes ./ircserv 7777 434
-
 
 .PHONY: all clean fclean re
 
