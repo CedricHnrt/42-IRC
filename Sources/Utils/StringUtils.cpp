@@ -1,7 +1,7 @@
 #include "StringUtils.hpp"
-
 #include <IrcLogger.hpp>
 //#include <regex>
+#include <iostream>
 #include <stdexcept>
 
 bool StringUtils::isAscii(const std::string str)
@@ -74,12 +74,28 @@ bool StringUtils::isPrintable(const std::string str)
 
 void StringUtils::trim(std::string &str, const char *characters)
 {
-
-//	std::cout << "in trim" << std::endl;
-
-	const size_t first = str.find_first_not_of(characters);
-	const size_t last = str.find_last_not_of(characters);
-	str = str.substr(first, (last - first + 1));
+	size_t first = str.find_first_not_of(characters);
+	size_t last = str.find_last_not_of(characters);
+	if (first == std::string::npos)
+		first = 0;
+	if (last == std::string::npos)
+		last = str.size();
+	try
+	{
+		str = str.substr(first, (last - first + 1));
+	}
+	catch (const std::exception &exception)
+	{
+		IrcLogger *logger = IrcLogger::getLogger();
+		IrcLogger::LogLevel error = IrcLogger::ERROR;
+		logger->log(error, "An error occured during the trim() function");
+		logger->log(error, "StringUtils.Cpp : trim() : std::string::substr() L.78");
+		logger->log(error, "String : " + str);
+		std::cout << "Characters : " << characters << std::endl;
+		std::cout << "First : " << first << std::endl;
+		std::cout << "Last : " << last << std::endl;
+		logger->log(error, exception.what());
+	}
 }
 
 void StringUtils::toUpper(std::string &str)
@@ -87,7 +103,7 @@ void StringUtils::toUpper(std::string &str)
 	for (std::string::size_type i = 0; i < str.size(); ++i)
 	{
 		char &character = (str[i]);
-		character = static_cast<char> (std::toupper(character));
+		character = static_cast<char>(std::toupper(character));
 	}
 }
 
@@ -96,7 +112,7 @@ void StringUtils::toLower(std::string &str)
 	for (std::string::size_type i = 0; i < str.size(); ++i)
 	{
 		char &character = (str[i]);
-		character = static_cast<char> (std::tolower(character));
+		character = static_cast<char>(std::tolower(character));
 	}
 }
 
@@ -105,18 +121,21 @@ void StringUtils::replaceAll(std::string &line, const std::string &key, const st
 	const std::size_t keyLen = key.length();
 	const std::size_t valueLen = value.length();
 
-	try {
-			const std::size_t stringLen = line.length();
-			for (std::size_t charIndex = 0; charIndex < stringLen; charIndex++) {
-				size_t pos = line.find(key, charIndex);
-				if (pos == std::string::npos)
-					continue;
-				line.erase(pos, keyLen);
-				line.insert(pos, value);
-				charIndex = pos + valueLen;
-			}
+	try
+	{
+		const std::size_t stringLen = line.length();
+		for (std::size_t charIndex = 0; charIndex < stringLen; charIndex++)
+		{
+			size_t pos = line.find(key, charIndex);
+			if (pos == std::string::npos)
+				continue;
+			line.erase(pos, keyLen);
+			line.insert(pos, value);
+			charIndex = pos + valueLen;
+		}
 	}
-	catch (const std::exception &e) {
+	catch (const std::exception &e)
+	{
 		std::string trace = "Exception throws during replace :";
 		trace.append(e.what());
 		throw std::out_of_range(trace);
@@ -132,15 +151,11 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 		return result;
 	std::string trimmed = input;
 
-	char buff[2];
-	buff[0] = c;
-	buff[1] = 0;
+	if (input.find(c) == std::string::npos)
+	{
+		StringUtils::trim(const_cast<std::string &>(input), "\r\n ");
+		result.push_back(input);
 
-	StringUtils::trim(trimmed, buff);
-
-	if (trimmed.find(c) == std::string::npos) {
-		StringUtils::trim(const_cast<std::string &>(input),"\r\n ");
-		result.push_back(trimmed);
 		IrcLogger::getLogger()->log(IrcLogger::WARN, "No delimiter found in the input string");
 		return result;
 	}
@@ -149,22 +164,48 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 	size_t j = 0;
 	std::string line;
 
-	while (trimmed[i])
+	while (input[i])
 	{
-		i = trimmed.find(c, j);
-		if (i == std::string::npos) {
-			result.push_back(trimmed.substr(j, i - j));
-			break;
+		i = input.find(c, j);
+		if (i == std::string::npos)
+		{
+			try
+			{
+				std::string subbed = input.substr(j, input.size() - j);
+				result.push_back(subbed);
+				break;
+			}
+			catch (const std::exception &exception)
+			{
+				IrcLogger *logger = IrcLogger::getLogger();
+				IrcLogger::LogLevel error = IrcLogger::ERROR;
+				logger->log(error, "An error occured during the split() function");
+				logger->log(error, "StringUtils.Cpp : split() : std::string::substr() L.160");
+				logger->log(error, "String : " + input);
+				logger->log(error, exception.what());
+			}
 		}
-		line = trimmed.substr(j, i - j);
-		i++;
-		j = i;
-		result.push_back(line);
-		line.clear();
+		try
+		{
+			line = input.substr(j, i - j);
+			i++;
+			j = i;
+			result.push_back(line);
+			line.clear();
+		}
+		catch (std::exception &exception)
+		{
+			IrcLogger *logger = IrcLogger::getLogger();
+			IrcLogger::LogLevel error = IrcLogger::ERROR;
+			logger->log(error, "An error occured during the split() function");
+			logger->log(error, "StringUtils.Cpp : split() : std::string::substr() L.176");
+			logger->log(error, "String : " + input);
+			logger->log(error, exception.what());
+		}
 	}
 	for (std::vector<std::string>::iterator it = result.begin(); it != result.end(); ++it)
 	{
-		StringUtils::trim(*it,"\r\n ");
+		StringUtils::trim(*it, "\r\n ");
 	}
 //	for (std::vector<std::string >::iterator it = result.begin() ; it != result.end() ; ++it)
 //		std::cout << *it << std::endl;
@@ -184,10 +225,10 @@ std::string StringUtils::ltos(long value)
 	return result;
 }
 
-
 void StringUtils::keepOnlyUsefulChar(std::string &input, const std::string toKeep)
 {
-	for (std::string::iterator it = input.begin(); it != input.end(); ++it) {
+	for (std::string::iterator it = input.begin(); it != input.end(); ++it)
+	{
 		if (toKeep.find(*it) == std::string::npos)
 			input.erase(it);
 	}
@@ -239,14 +280,27 @@ std::pair<bool, std::string> StringUtils::hasCensuredWord(std::string word, std:
 	return std::make_pair(false, "");
 }
 
-std::string StringUtils::getMessage(std::vector<std::string>& args)
+std::string StringUtils::getMessage(std::vector<std::string> &args)
 {
 	std::string message;
 	for (std::vector<std::string>::iterator itMsg = args.begin(); itMsg != args.end(); itMsg++)
 	{
-		if (itMsg == args.begin())
-			*itMsg = (*itMsg).substr(1);
-		message += *itMsg + " ";
+		try
+		{
+			if (itMsg == args.begin())
+				*itMsg = (*itMsg).substr(1);
+			message += *itMsg + " ";
+		}
+		catch (const std::exception &exception)
+		{
+			IrcLogger *logger = IrcLogger::getLogger();
+			IrcLogger::LogLevel error = IrcLogger::ERROR;
+			logger->log(error, "An error occured during the getMessage() function");
+			logger->log(error, "StringUtils.Cpp : getMessage() : std::string::substr() L.273");
+			logger->log(error, "String : " + *itMsg);
+			logger->log(error, exception.what());
+			break;
+		}
 	}
 	return message;
 }
