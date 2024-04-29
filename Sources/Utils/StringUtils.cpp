@@ -72,8 +72,10 @@ bool StringUtils::isPrintable(const std::string str)
 
 void StringUtils::trim(std::string &str, const char *characters)
 {
-	const size_t first = str.find_first_not_of(characters);
+	size_t first = str.find_first_not_of(characters);
 	size_t last = str.find_last_not_of(characters);
+	if (first == std::string::npos)
+		first = 0;
 	if (last == std::string::npos)
 		last = str.size();
 	try
