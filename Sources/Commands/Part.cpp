@@ -57,6 +57,7 @@ void Part::execute(User *user, Channel *channel, std::vector<std::string> args)
 						DEFAULT);
 		channel->removeUserFromChannel(user);
 		sendPartMessageToChan(user, channel, reason);
+		channel->nameReplyAllExceptCaller(user->getNickname());
 	}
 	catch (ChannelCacheException &exception) {
 		IrcLogger *logger = IrcLogger::getLogger();

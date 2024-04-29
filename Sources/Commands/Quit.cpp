@@ -40,6 +40,7 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 			return;
 		}
 		for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++) {
+			(*it)->nameReplyAllExceptCaller(user->getNickname());
 			(*it)->removeUserFromChannel(user);
 			sendQuitMessageToChannel(*it, user, StringUtils::getMessage(args));
 		}

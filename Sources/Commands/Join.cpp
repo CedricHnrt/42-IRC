@@ -109,6 +109,8 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getNickname(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
 
 				existingChannel->nameReplyAll();
+				existingChannel->joinReplyAll(user->getNickname());
+
 			}
 			catch (ChannelCacheException &e)
 			{
