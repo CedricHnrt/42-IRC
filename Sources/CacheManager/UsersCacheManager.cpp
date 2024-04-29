@@ -6,7 +6,7 @@
 /*   By: jbadaire <jbadaire@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/23 14:35:07 by jbadaire          #+#    #+#             */
-/*   Updated: 2024/04/23 14:35:07 by jbadaire         ###   ########.fr       */
+/*   Updated: 2024/04/23 19:34:10 by jbadaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,17 +69,19 @@ bool UsersCacheManager::doesNicknameAlreadyExist(const std::string &nickname) co
 
 void UsersCacheManager::deleteTimeoutUsers(std::string serverName)
 {
-	long currentTimestamp = TimeUtils::getCurrentTimeMillis();
-	std::list<User *>userList = getCache();
-	if (!userList.size())
+	size_t currentTimestamp = TimeUtils::getCurrentTimeMillis();
+	std::list<User *> cachedUsers = getCache();
+	if (!cachedUsers.size())
 		return ;
-	std::list<User *>::iterator users = userList.begin();
+	std::list<User *>::iterator users = cachedUsers.begin();
 	size_t maxDifference = Configuration::getInstance()->getSection("SERVER")->getNumericValue("user_timeout", 78000);
-	while (users != userList.end())
+	while (users != cachedUsers.end())
 	{
 		User *user = *users;
+		if (user == NULL)
+			continue;
 		size_t total = user->getLastPingTimestamp() + maxDifference;
-		if (static_cast<size_t>(currentTimestamp) > total)
+		if (currentTimestamp > total)
 		{
 			try
 			{

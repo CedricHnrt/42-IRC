@@ -4,6 +4,7 @@
 
 #include "CommandManager.hpp"
 
+#include <Nick.hpp>
 #include <Part.hpp>
 #include <Ping.hpp>
 #include <Pong.hpp>
@@ -36,6 +37,7 @@ CommandManager::CommandManager()
 	this->_commandsMap["PING"] = new Ping();
 	this->_commandsMap["PONG"] = new Pong();
 	this->_commandsMap["MODE"] = new Mode();
+	this->_commandsMap["NICK"] = new Nick();
 	this->_commandsMap["TOPIC"] = new Topic();
 }
 

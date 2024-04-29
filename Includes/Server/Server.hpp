@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jbadaire <jbadaire@student.42lyon.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/23 19:11:07 by jbadaire          #+#    #+#             */
+/*   Updated: 2024/04/23 19:11:07 by jbadaire         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
@@ -56,7 +68,6 @@ class Server
 		void closeOpenedSockets();
 		void sigHandler();
 		bool serverIsRunning();
-		std::vector<std::string> getCensoredWords();
 };
 
 
