@@ -69,6 +69,7 @@ void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 		catch (std::exception &e) {
 			std::cout << e.what() << std::endl;
 		}
+		//TODO: Send reply to all users in a channel
 		sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), currentChannel->getName(), properties->getTopic()), -1, DEFAULT);
 	}
 }

@@ -25,6 +25,8 @@ Join::Join()
  * 		- if the user is already on the channel --> return
  * 		- check if a password is set and compare it to the one given to the client
  * 		*/
+
+//TODO: FIX LE SEND DU TOPIC (BACK)
 void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 {
 	(void)user;

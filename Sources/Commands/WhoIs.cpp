@@ -12,6 +12,7 @@ WhoIs::WhoIs()
 void WhoIs::execute(User *user, Channel *channel, std::vector<std::string> args) {
 	(void)channel;
 	try {
+		//TODO: CHECK IF WHOIS NEED MORE INFORMATIONS
 		User *searchedUser = UsersCacheManager::getInstance()->getFromNickname(args.front());
 		sendServerReply(user->getUserSocketFd(),
 						RPL_WHOISUSER(searchedUser->getNickname(), searchedUser->getUserName(), "", searchedUser->getRealName()),

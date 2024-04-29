@@ -1,6 +1,8 @@
 #include "UserBuilder.hpp"
 
 #include <TimeUtils.hpp>
+#include <csignal>
+
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
 
 UserBuilder& UserBuilder::setName(const std::string& name) {
@@ -145,9 +147,19 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 
 		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname)) {
 			sendServerReply(this->userSocketFd, ERR_ALREADYREGISTERED(this->nickname), RED, BOLDR);
+			close(this->userSocketFd);
 			throw UserBuildException("Nickname already exists");
 		}
 
+		std::vector<std::string> censoredWords = Configuration::getInstance()->getCensoredWords();
+
+		if (StringUtils::hasCensuredWord(this->nickname, censoredWords).first)
+		{
+			std::string bannedMessage = "Sorry, this nickname is banned from this server";
+			sendServerReply(this->userSocketFd, ERR_YOUREBANNED(this->nickname, bannedMessage), RED, BOLDR);
+			close(this->userSocketFd);
+			throw UserBuildException(bannedMessage);
+		}
 
 		this->connectionInfos.erase(this->connectionInfos.begin());
 

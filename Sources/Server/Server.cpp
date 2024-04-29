@@ -227,30 +227,30 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 					return;
 				}
 			}
-			if (*ExpectedIt == CHANNEL)
-			{
-				if (splittedIterator->at(0) == '#')
-				{
-					std::string channelName = *splittedIterator;
-					StringUtils::trim(channelName, "#" );
-					try {
-						currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
-					}
-					catch (ChannelCacheException &exception)
-					{
-						//Wrong argument
-						IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
-						currentChannel = NULL;
-						return;
-					}
-				}
-				else
-				{
-					//Wrong argument
-					currentChannel = NULL;
-					return;
-				}
-			}
+//			if (*ExpectedIt == CHANNEL)
+//			{
+//				if (splittedIterator->at(0) == '#')
+//				{
+//					std::string channelName = *splittedIterator;
+//					StringUtils::trim(channelName, "#" );
+//					try {
+//						currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+//					}
+//					catch (ChannelCacheException &exception)
+//					{
+//						//Wrong argument
+//						IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+//						currentChannel = NULL;
+//						return;
+//					}
+//				}
+//				else
+//				{
+//					//Wrong argument
+//					currentChannel = NULL;
+//					return;
+//				}
+//			}
 			//etc...
 			splittedIterator++;
 		}
@@ -285,7 +285,7 @@ static void sendMessageOfTheDay(const User &user)
 	sendServerReply(user.getUserSocketFd(), RPL_ENDOFMOTD(user.getNickname()), GREEN, ITALIC);
 }
 
-
+//TODO: check isbufferonlyASCII
 void Server::handleIncomingRequest(int incomingFD)
 {
 	char buffer[512];
@@ -305,27 +305,16 @@ void Server::handleIncomingRequest(int incomingFD)
 		this->handleKnownClient(incomingFD, buffer);
 		return;
 	}
-	std::vector<std::string> censoredWords = Configuration::getInstance()->getCensoredWords();
 	try
 	{
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
 		if (this->_danglingUsers.at(incomingFD).isBuilderComplete())
 		{
 			User *user = this->_danglingUsers.at(incomingFD).build();
-
-			if (StringUtils::hasCensuredWord(user->getNickname(), censoredWords).first || StringUtils::hasCensuredWord(user->getUserName(), censoredWords).first || \
-					StringUtils::hasCensuredWord(user->getRealName(), censoredWords).first)
-			{
-				std::string bannedMessage = "Sorry, this nickname is banned from this server";
-				sendServerReply(incomingFD, ERR_YOUREBANNED(user->getNickname(), bannedMessage), RED, BOLDR);
-				close(user->getUserSocketFd());
-				return ;
-			}
       
 			this->_danglingUsers.erase(incomingFD);
 			UsersCacheManager *UManager = UsersCacheManager::getInstance();
 			UManager->addToCache(user);
-
 
 			sendServerReply(incomingFD,
 				RPL_WELCOME(user_id(user->getNickname(), user->getUserName()), user->getUserName()), RED, BOLDR);

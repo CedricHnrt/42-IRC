@@ -8,6 +8,7 @@ List::List()
 	this->_permissionLevel = 0;
 }
 
+//TODO: Ajouter les topic dans le /list
 void List::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void)args;
