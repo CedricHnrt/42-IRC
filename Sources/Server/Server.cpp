@@ -227,30 +227,31 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 					return;
 				}
 			}
-//			if (*ExpectedIt == CHANNEL)
-//			{
-//				if (splittedIterator->at(0) == '#')
-//				{
-//					std::string channelName = *splittedIterator;
-//					StringUtils::trim(channelName, "#" );
-//					try {
-//						currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
-//					}
-//					catch (ChannelCacheException &exception)
-//					{
-//						//Wrong argument
-//						IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
-//						currentChannel = NULL;
-//						return;
-//					}
-//				}
-//				else
-//				{
-//					//Wrong argument
-//					currentChannel = NULL;
-//					return;
-//				}
-//			}
+			if (*ExpectedIt == CHANNEL)
+			{
+				if (splittedIterator->at(0) == '#')
+				{
+					std::string channelName = *splittedIterator;
+					StringUtils::trim(channelName, "#" );
+
+					try {
+						currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+					}
+					catch (ChannelCacheException &exception)
+					{
+						//Wrong argument
+						IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+						currentChannel = NULL;
+						return;
+					}
+				}
+				else
+				{
+					//Wrong argument
+					currentChannel = NULL;
+					return;
+				}
+			}
 			//etc...
 			splittedIterator++;
 		}

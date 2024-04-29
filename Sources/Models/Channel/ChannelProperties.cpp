@@ -201,3 +201,9 @@ std::map<size_t, std::string> &ChannelProperties::getMap()
 {
 	return this->userModes;
 }
+
+void ChannelProperties::removeUserFromChannel(size_t userId)
+{
+	if (this->userModes.find(userId) != userModes.end())
+		userModes.erase(userId);
+}
