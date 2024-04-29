@@ -107,6 +107,7 @@ void Channel::removeUserFromChannel(User *user) {
 	std::vector<User *>::iterator it = find(this->_usersInChannel.begin(), this->_usersInChannel.end(), user);
 	if (it != this->_usersInChannel.end()) {
 		this->_usersInChannel.erase(it);
+		this->properties->getMap().erase(user->getUniqueId());
 	}
 }
 
@@ -115,9 +116,13 @@ void Channel::nameReplyAll()
 	ChannelProperties *properties = this->getProperties();
 	std::map<size_t, std::string> map = properties->getMap();
 
-	for (std::map<size_t , std::string >::iterator it =map.begin() ; it != map.end() ; ++it)
-	{
-		User *currentUser = UsersCacheManager::getInstance()->getFromCache(it->first);
-		sendServerReply(currentUser->getUserSocketFd(), RPL_NAMREPLY(currentUser->getNickname(), "<@|*=|:|>", this->name, this->getUserList()), -1, DEFAULT);
+	for (std::map<size_t, std::string>::iterator it = map.begin(); it != map.end(); ++it) {
+		try {
+			User *currentUser = UsersCacheManager::getInstance()->getFromCache(it->first);
+			sendServerReply(currentUser->getUserSocketFd(),
+							RPL_NAMREPLY(currentUser->getNickname(), "<@|*=|:|>", this->name, this->getUserList()), -1,
+							DEFAULT);
+		}
+		catch (const UserCacheException &ignored) {}
 	}
 }

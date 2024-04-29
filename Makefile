@@ -96,7 +96,7 @@ DEBUG = false
 
 $(NAME): $(OBJS)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(OBJS) -o $(NAME) -O0 -fno-omit-frame-pointer
+	$(CC) $(OBJS) -o $(NAME)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 debug: fclean $(DEBUG_OBJS)

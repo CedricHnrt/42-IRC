@@ -9,8 +9,19 @@ Quit::Quit()
 	this->_expectedArgs.push_back(STRING);
 }
 
-void Quit::sendQuitMessageToChan(Channel *channel, User *leftUser, const std::string& message) {
+static void sendQuitMessageToChannel(Channel *channel, User *leftUser, const std::string &message)
+{
 	std::vector<User *> userList = channel->getChannelsUsers();
+	if (userList.empty()) {
+		try {
+			ChannelCacheManager::getInstance()->deleteFromCache(channel->getUniqueId());
+			delete channel;
+		}
+		catch (ChannelCacheException &exception) {
+			IrcLogger *logger = IrcLogger::getLogger();
+			logger->log(IrcLogger::ERROR, exception.what());
+		}
+	}
 	for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
 		sendServerReply((*it)->getUserSocketFd(),
 						RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
@@ -20,19 +31,20 @@ void Quit::sendQuitMessageToChan(Channel *channel, User *leftUser, const std::st
 
 void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
-	(void)channel;
-	std::vector<Channel *> channelList = user->getChannelList();
-	for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++) {
-		this->sendQuitMessageToChan(*it, user, StringUtils::getMessage(args));
-		(*it)->removeUserFromChannel(user);
+	(void) channel;
+	try {
+		std::vector<Channel *> channelList = user->getChannelList();
+		if (channelList.empty()) {
+			UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
+			UsersCacheManager::getInstance()->addToLeftCache(user);
+			return;
+		}
+		for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++) {
+			(*it)->removeUserFromChannel(user);
+			sendQuitMessageToChannel(*it, user, StringUtils::getMessage(args));
+		}
 	}
-	try
-	{
-		UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
-		UsersCacheManager::getInstance()->addToLeftCache(user);
-	}
-	catch (UserCacheException &exception)
-	{
+	catch (UserCacheException &exception) {
 		IrcLogger::getLogger()->log(IrcLogger::ERROR, "An error occurred during user quit command !");
 		IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
 	}

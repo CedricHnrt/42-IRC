@@ -212,6 +212,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		}
 
 		std::vector<std::string>::iterator splittedIterator = splitted.begin();
+		Channel *currentChannel = NULL;
 
 		for (std::vector<ArgumentsType>::iterator ExpectedIt = ExpectedArgs.begin();
 		     ExpectedIt != ExpectedArgs.end(); ++ExpectedIt)
@@ -226,12 +227,36 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 					return;
 				}
 			}
+			if (*ExpectedIt == CHANNEL)
+			{
+				if (splittedIterator->at(0) == '#')
+				{
+					std::string channelName = *splittedIterator;
+					StringUtils::trim(channelName, "#" );
+					try {
+						currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+					}
+					catch (ChannelCacheException &exception)
+					{
+						//Wrong argument
+						IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+						currentChannel = NULL;
+						return;
+					}
+				}
+				else
+				{
+					//Wrong argument
+					currentChannel = NULL;
+					return;
+				}
+			}
 			//etc...
 			splittedIterator++;
 		}
 
 		User *currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
-		Command->execute(currentUser, NULL, splitted);
+		Command->execute(currentUser, currentChannel, splitted);
 	}
 }
 

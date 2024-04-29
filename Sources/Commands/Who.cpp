@@ -31,14 +31,17 @@ void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	try {
 		currentChannel = ChannelCacheManager::getInstance()->getFromCacheString(ChannelName);
-		currentChannel->getUserByNickname(user->getNickname());
-		std::vector<User *> userList = currentChannel->getChannelsUsers();
+		try {
+			currentChannel->getUserByNickname(user->getNickname());
+			std::vector<User *> userList = currentChannel->getChannelsUsers();
 
-		for (std::vector<User *>::iterator it = userList.begin() ; it != userList.end() ; ++it)
-		{
-			if (*it != user)
-				sendServerReply(user->getUserSocketFd(), RPL_WHOREPLY(ChannelName, user->getUserName(), (*it)->getUserName()), -1, DEFAULT);
+			for (std::vector<User *>::iterator it = userList.begin() ; it != userList.end() ; ++it)
+			{
+				if (*it != user)
+					sendServerReply(user->getUserSocketFd(), RPL_WHOREPLY(ChannelName, user->getUserName(), (*it)->getUserName()), -1, DEFAULT);
+			}
 		}
+		catch (ChannelGetException &ignored) {}
 	}
 	catch (ChannelCacheException &e)
 	{

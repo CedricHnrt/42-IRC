@@ -7,7 +7,6 @@ class Quit : public ICommand {
 	public:
 		Quit();
 		void execute(User *user, Channel *channel, std::vector<std::string>args);
-		void sendQuitMessageToChan(Channel *channel, User *leftUser, const std::string& message);
 };
 
 #endif //IRC_QUIT_HPP
