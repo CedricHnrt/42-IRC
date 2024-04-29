@@ -70,8 +70,13 @@ bool StringUtils::isPrintable(const std::string str)
 	return true;
 }
 
+#include <iostream>
+
 void StringUtils::trim(std::string &str, const char *characters)
 {
+
+//	std::cout << "in trim" << std::endl;
+
 	const size_t first = str.find_first_not_of(characters);
 	const size_t last = str.find_last_not_of(characters);
 	str = str.substr(first, (last - first + 1));
@@ -120,13 +125,22 @@ void StringUtils::replaceAll(std::string &line, const std::string &key, const st
 
 std::vector<std::string> StringUtils::split(const std::string &input, int c)
 {
+//	std::cout << "in split" << std::endl;
+
 	std::vector<std::string> result;
 	if (input.empty())
 		return result;
+	std::string trimmed = input;
 
-	if (input.find(c) == std::string::npos) {
+	char buff[2];
+	buff[0] = c;
+	buff[1] = 0;
+
+	StringUtils::trim(trimmed, buff);
+
+	if (trimmed.find(c) == std::string::npos) {
 		StringUtils::trim(const_cast<std::string &>(input),"\r\n ");
-		result.push_back(input);
+		result.push_back(trimmed);
 		IrcLogger::getLogger()->log(IrcLogger::WARN, "No delimiter found in the input string");
 		return result;
 	}
@@ -135,14 +149,14 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 	size_t j = 0;
 	std::string line;
 
-	while (input[i])
+	while (trimmed[i])
 	{
-		i = input.find(c, j);
+		i = trimmed.find(c, j);
 		if (i == std::string::npos) {
-			result.push_back(input.substr(j, i - j));
+			result.push_back(trimmed.substr(j, i - j));
 			break;
 		}
-		line = input.substr(j, i - j);
+		line = trimmed.substr(j, i - j);
 		i++;
 		j = i;
 		result.push_back(line);
@@ -152,7 +166,11 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 	{
 		StringUtils::trim(*it,"\r\n ");
 	}
+//	for (std::vector<std::string >::iterator it = result.begin() ; it != result.end() ; ++it)
+//		std::cout << *it << std::endl;
+
 	return result;
+
 }
 
 std::string StringUtils::ltos(long value)
