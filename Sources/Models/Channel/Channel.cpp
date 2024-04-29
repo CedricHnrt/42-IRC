@@ -94,8 +94,11 @@ std::string Channel::getUserList()
 {
 	std::string result;
 
+	ChannelProperties *properties = this->getProperties();
 	for (std::vector<User *>::iterator it = this->_usersInChannel.begin() ; it != this->_usersInChannel.end() ; ++it)
 	{
+		if (properties->doesUserHaveMode((*it)->getUniqueId(), 'o'))
+			result += "@";
 		result += (*it)->getNickname();
 		result += " ";
 	}
@@ -134,6 +137,7 @@ void Channel::nameReplyAll()
 			sendServerReply(currentUser->getUserSocketFd(),
 							RPL_NAMREPLY(currentUser->getNickname(), "<@|*=|:|>", this->name, this->getUserList()), -1,
 							DEFAULT);
+			std::cout << "in name reply, res = " << this->getUserList() << std::endl;
 		}
 		catch (const UserCacheException &ignored) {}
 	}

@@ -16,6 +16,10 @@ Topic::Topic()
 
 void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
+
+	for (std::vector<std::string >::iterator it = args.begin() ; it != args.end() ; ++it)
+		std::cout << *it << std::endl;
+
 	(void)channel;
 	if (args.size() < 1)
 	{

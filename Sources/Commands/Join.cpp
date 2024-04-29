@@ -109,7 +109,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getNickname(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
 
 				existingChannel->nameReplyAll();
-				existingChannel->joinReplyAll(user->getNickname());
+//				existingChannel->joinReplyAll(user->getNickname());
 
 			}
 			catch (ChannelCacheException &e)
@@ -146,8 +146,8 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			properties->setPasswordStatus(false);
 			user->addChannelToList(newChannel);
 			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), -1, DEFAULT);
-//			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
-			sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", newChannel->getName(), user->getNickname()), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", newChannel->getName(),newChannel->getUserList()), -1, DEFAULT);
 			//[3]
 		}
 	}
