@@ -37,13 +37,11 @@ void Part::sendPartMessageToChan(User *user, Channel *channel, const std::string
 
 void Part::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
-	if (channel == NULL)
-		return;
-
 	if (std::find_if(channel->getChannelsUsers().begin(), channel->getChannelsUsers().end(),
 					 UserPredicateNickname(user->getNickname())) == channel->getChannelsUsers().end()) {
 		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channel->getName()), -1,
 						DEFAULT);
+		std::cout << "in part if" << std::endl;
 		return;
 	}
 

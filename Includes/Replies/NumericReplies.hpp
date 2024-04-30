@@ -69,7 +69,6 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 
 // KICK
 # define ERR_USERNOTINCHANNEL(client, nickname, channel) ("441 " + client + " " + nickname + " #" + channel + " :They aren't on that channel\r\n")
-// # define ERR_CHANOPRIVSNEEDED(client, channel) ("482 " + client + " #" +  channel + " :You're not channel operator\r\n")
 # define RPL_KICK(user_id, channel, kicked, reason) (user_id + " KICK #" + channel + " " + kicked + " " + reason + "\r\n")
 
 // KILL
@@ -141,7 +140,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_PRIVMSG(nick, username, target, message) (":" + nick + "!" + username + "@localhost PRIVMSG " + target + " " + message + "\r\n")
 
 // TOPIC
-# define RPL_TOPIC(client, channel, topic) (":localhost 332 " + client + " #" + channel + " : " + topic + "\r\n")
+# define RPL_TOPIC(client, channel, topic) (":localhost 332 " + client + " #" + channel + " :" + topic + "\r\n")
 # define RPL_NOTOPIC(client, channel) (":localhost 331 " + client + " #" + channel + " :No topic is set\r\n")
 
 // USER
@@ -162,7 +161,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_ENDOFWHOIS(nickname) (":localhost 318 " + nickname + " :End of WHOIS list\r\n")
 
 //ARGERROR
-#define ERR_ARG(callerUsername, command, usage) (":localhost 461" + callerUsername + " " + command + ":Usage: " + usage + "\r\n")
+#define ERR_ARG(callerNickname, command, usage) (":localhost 461" + callerNickname + " " + command + ":Usage: " + usage + "\r\n")
 
 #endif
 

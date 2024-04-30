@@ -81,7 +81,8 @@ FILES =	Server/Server						\
 		Commands/Pong						\
 		Commands/Mode           			\
 		Commands/Nick						\
-		Commands/Topic
+		Commands/Topic						\
+		Commands/Kick
 
 MAIN_FILES =	$(FILES)	\
 				main
