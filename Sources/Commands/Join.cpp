@@ -99,7 +99,11 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 						sendServerReply(user->getUserSocketFd(), ERR_INVITEONLYCHAN(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
 						return ;
 					}
-
+				}
+				if (properties->isUserBanned(user->getUniqueId()))
+				{
+//					sendServerReply
+					return ;
 				}
 				user->addChannelToList(existingChannel);
 				properties->addUserToChannel(user->getUniqueId());

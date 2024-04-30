@@ -27,6 +27,8 @@ static void kickReplyServer(Channel *channel, User *userToKick, std::string reas
 	}
 }
 
+#include <iostream>
+
 void Kick::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void)user;
@@ -57,6 +59,7 @@ void Kick::execute(User *user, Channel *channel, std::vector<std::string> args)
 		return ;
 	}
 
+	properties->addUserToBannedUsers(userToKick->getUniqueId());
 	std::cout << "before" << std::endl;
 	channel->removeUserFromChannel(userToKick);
 	std::cout << "after remove" << std::endl;
