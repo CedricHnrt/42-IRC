@@ -71,7 +71,9 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	{
 		std::string channelName = it->first;
 		StringUtils::trim(channelName, "#");
-		if (ChanManager->doesChannelExist(channelName))
+		if (it->first[0] != '#')
+			sendServerReply(user->getUserSocketFd(), RPL_NOTICE(user->getNickname(), user->getUserName(), "/join", "needs '#' before channel name"), -1, DEFAULT);
+		else if (ChanManager->doesChannelExist(channelName))
 		{
 			//[4]
 			try {
