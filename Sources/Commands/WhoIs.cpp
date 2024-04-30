@@ -19,7 +19,7 @@ void WhoIs::execute(User *user, Channel *channel, std::vector<std::string> args)
 						-1, DEFAULT);
 		sendServerReply(user->getUserSocketFd(), RPL_ENDOFWHOIS(searchedUser->getNickname()), -1, DEFAULT);
 	}
-	catch (UserCacheException &exception)
+	catch (UserCacheExceptionString &exception)
 	{
 		IrcLogger *logger = IrcLogger::getLogger();
 		logger->log(IrcLogger::ERROR, exception.what());
