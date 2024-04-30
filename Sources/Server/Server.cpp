@@ -214,11 +214,16 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		std::vector<std::string>::iterator splittedIterator = splitted.begin();
 		Channel *currentChannel = NULL;
 
+		std::cout << "splitted size = " << splitted.size() << std::endl;
 		for (std::vector<ArgumentsType>::iterator ExpectedIt = ExpectedArgs.begin();
 		     ExpectedIt != ExpectedArgs.end(); ++ExpectedIt)
 		{
-			if (*ExpectedIt == STRING)
-				continue;
+			if (*ExpectedIt == STRING) {
+				std::cout << "STRING EXPECTED" << std::endl;
+				std::cout << "str[0]: " << (*splittedIterator)[0] << std::endl;
+//				splittedIterator++;
+//				continue;
+			}
 			if (*ExpectedIt == NUMBER)
 			{
 				if (!StringUtils::isOnlyDigits(*splittedIterator))
@@ -229,7 +234,10 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 			}
 			if (*ExpectedIt == CHANNEL)
 			{
-				if (splittedIterator->at(0) == '#')
+				std::cout << "CHANNEL EXPECTED" << std::endl;
+				std::cout << "str[0]: " << (*splittedIterator)[0] << std::endl;
+
+				if ((*splittedIterator)[0] == '#')
 				{
 					std::string channelName = *splittedIterator;
 					StringUtils::trim(channelName, "#" );
