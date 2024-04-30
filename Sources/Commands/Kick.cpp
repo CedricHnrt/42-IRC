@@ -59,15 +59,15 @@ void Kick::execute(User *user, Channel *channel, std::vector<std::string> args)
 		return ;
 	}
 
-	properties->addUserToBannedUsers(userToKick->getUniqueId());
-	std::cout << "before" << std::endl;
+//	properties->addUserToBannedUsers(userToKick->getUniqueId());
+//	std::cout << "before" << std::endl;
 	channel->removeUserFromChannel(userToKick);
-	std::cout << "after remove" << std::endl;
-	sendServerReply(userToKick->getUserSocketFd(), RPL_NOTICE(userToKick->getNickname(), userToKick->getUserName(), user->getNickname(), "You've been kicked"), -1, DEFAULT);
-	std::string reason2 = "you've been kicked out";
+//	std::cout << "after remove" << std::endl;
+//	sendServerReply(userToKick->getUserSocketFd(), RPL_NOTICE(userToKick->getNickname(), userToKick->getUserName(), user->getNickname(), "You've been kicked"), -1, DEFAULT);
+	std::string reason2 = "you've been kicked out of #" + channel->getName();
 	sendServerReply(userToKick->getUserSocketFd(), RPL_PART(user_id(userToKick->getNickname(), userToKick->getUserName()), channel->getName(), reason2), -1, DEFAULT);
 	kickReplyServer(channel, userToKick, reason);
-	std::cout << "after reply 1" << std::endl;
+//	std::cout << "after reply 1" << std::endl;
 	channel->nameReplyAll();
-	std::cout << "after reply 2" << std::endl;
+//	std::cout << "after reply 2" << std::endl;
 }

@@ -81,43 +81,42 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				properties = existingChannel->getProperties();
 				if (properties->isChannelFull()) {
 					sendServerReply(user->getUserSocketFd(), ERR_CHANNELISFULL(user->getNickname(), channelName), -1, DEFAULT);
-					return ;
 				}
-				if (existingChannel->isUserInChannel(user->getNickname())) {
+				else if (existingChannel->isUserInChannel(user->getNickname())) {
 					sendServerReply(user->getUserSocketFd(),
 								ERR_USERONCHANNEL(user->getNickname(), user->getUserName(), existingChannel->getName()),
 								RED, DEFAULT);
-					return;
 				}
-				if (properties->isPasswordSet() == true && it->second != properties->getPassword()) {
+				else if (properties->isPasswordSet() == true && it->second != properties->getPassword()) {
 				sendServerReply(user->getUserSocketFd(),
 								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
-				return;
 				}
-				if (properties->doesChannelHaveMode('i'))
+				else if (properties->doesChannelHaveMode('i'))
 				{
 					if (!properties->isUserInvited(user->getUniqueId()))
-					{
 						sendServerReply(user->getUserSocketFd(), ERR_INVITEONLYCHAN(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
-						return ;
-					}
 				}
-				if (properties->isUserBanned(user->getUniqueId()))
+				else if (properties->isUserBanned(user->getUniqueId()))
 				{
-//					sendServerReply
-					return ;
+					sendServerReply(user->getUserSocketFd(), ERR_BANNEDFROMCHAN(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
 				}
-				user->addChannelToList(existingChannel);
-				properties->addUserToChannel(user->getUniqueId());
-				existingChannel->addUserToChannel(user);
-				sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), existingChannel->getName()), -1, DEFAULT);
-				if (!existingChannel->getTopic().empty())
-					sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(), ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
-				else
-					sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getNickname(), ChanManager->getCache().front()->getName()), GREEN, DEFAULT);
+				else {
+					user->addChannelToList(existingChannel);
+					properties->addUserToChannel(user->getUniqueId());
+					existingChannel->addUserToChannel(user);
+					sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()),
+																	  existingChannel->getName()), -1, DEFAULT);
+					if (!existingChannel->getTopic().empty())
+						sendServerReply(user->getUserSocketFd(),
+										RPL_TOPIC(user->getNickname(), ChanManager->getCache().front()->getName(),
+												  ChanManager->getCache().back()->getTopic()), GREEN, BOLDR);
+					else
+						sendServerReply(user->getUserSocketFd(),
+										RPL_NOTOPIC(user->getNickname(), ChanManager->getCache().front()->getName()),
+										GREEN, DEFAULT);
 
-				existingChannel->nameReplyAll();
-//				existingChannel->joinReplyAll(user->getNickname());
+					existingChannel->nameReplyAll();
+				}
 
 			}
 			catch (ChannelCacheException &e)

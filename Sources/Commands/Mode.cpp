@@ -34,16 +34,41 @@ Mode::Mode()
 //	}
 //}
 
+
+static void handleBanMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
+{
+	(void)user;
+
+	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
+	ChannelProperties *properties = targetChannel->getProperties();
+	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
+
+	if (mode == PLUS)
+	{
+		if (targetChannel->isUserInChannel(targetUser->getNickname()))
+		{
+			std::string message = "You've been banned from #" + channelName;
+			sendServerReply(targetUser->getUserSocketFd(), RPL_NOTICE(targetUser->getNickname(), targetUser->getUserName(), user->getNickname(), message), -1, DEFAULT);
+			properties->addUserToBannedUsers(targetUser->getUniqueId());
+		}
+	}
+	else
+	{
+		if (properties->isUserBanned(targetUser->getUniqueId())) {
+			std::string message = "You've been unbanned from #" + channelName;
+			sendServerReply(targetUser->getUserSocketFd(),
+							RPL_NOTICE(targetUser->getNickname(), targetUser->getUserName(), user->getNickname(),
+									   message), -1, DEFAULT);
+			properties->removeUserFromBannedUsers(targetUser->getUniqueId());
+		}
+	}
+
+}
+
 static void handleKeyMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
 {
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
-
-//	if (properties->doesUserHaveMode(user->getUniqueId(), 'o') == false)
-//	{
-//		std::cout << "user is not op" << std::endl;
-//		return ;
-//	}
 
 	if (mode == PLUS)
 	{
@@ -59,7 +84,7 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelName, "k", properties->getPassword()), -1, DEFAULT);
 		std::cout << "new pass set" << std::endl;
 	}
-	else
+	else if (mode == MINUS)
 	{
 		properties->setPassword("");
 		properties->setPasswordStatus(false);
@@ -100,7 +125,7 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 		properties->setUserLimit(static_cast<int>(newLimit));
 		properties->setUserLimitStatus(true);
 	}
-	else
+	else if (mode == MINUS)
 	{
 		properties->setUserLimit(-1);
 		properties->setUserLimitStatus(false);
@@ -118,11 +143,12 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
 		return ;
 	}
-
 	if (mode == PLUS)
 		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
-	else
+	else if (mode == MINUS)
 		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
+	if (c == 'o' && mode == PLUS)
+		sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname()), -1, DEFAULT);
 }
 
 static void handleChannelMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
@@ -136,7 +162,7 @@ static void handleChannelMode(User *user, std::string channelName, std::vector<s
 
 	if (mode == PLUS)
 		properties->addModeToChannel(user->getUniqueId(), c);
-	else
+	else if (mode == MINUS)
 		properties->removeModeToChannel(user->getUniqueId(), c);
 }
 
@@ -228,7 +254,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	for (std::vector<std::vector<std::string> >::iterator it = argV.begin() ; it != argV.end() ; ++it)
 	{
-		int mode;
+		int mode = 42;
 		for (std::string::iterator sIt = (*it)[0].begin() ; sIt != (*it)[0].end() ; ++sIt)
 		{
 			if (*sIt == '+')
@@ -244,7 +270,9 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 					std::cout << e.what() << std::endl;
 				}
 			}
-			if (*sIt == 'l')
+			if (mode == 42)
+				sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+			else if (*sIt == 'l')
 			{
 				try {
 					handleLimitMode(user, channelNew, *it, mode);
@@ -253,7 +281,16 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 					std::cout << e.what() << std::endl;
 				}
 			}
-			if (userModes.find(*sIt) != std::string::npos) {
+			else if (*sIt == 'b')
+			{
+				try {
+					handleBanMode(user, channelNew, *it, mode);
+				}
+				catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+			else if (userModes.find(*sIt) != std::string::npos) {
 				try {
 					handleUserMode(user, channelNew, *it, mode, *sIt);
 				}
@@ -261,7 +298,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 					std::cout << e.what() << std::endl;
 				}
 			}
-			if (channelModes.find(*sIt) != std::string::npos) {
+			else if (channelModes.find(*sIt) != std::string::npos) {
 				try {
 					handleChannelMode(user, channelNew, *it, mode, *sIt);
 				}
