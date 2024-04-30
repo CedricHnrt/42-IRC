@@ -48,8 +48,6 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 
 	if (recipient[0] == '#') //msg on a channel
 	{
-		std::cout << "message sent on a server" << std::endl;
-
 //		StringUtils::trim(recipient, "#");
 		std::string channelName = recipient;
 		StringUtils::trim(channelName, "#");
@@ -67,7 +65,6 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 				return ;
 			}
 			std::vector < User * > usersInChannel = currentChannel->getChannelsUsers();
-			std::cout << "Users on channel: " << usersInChannel.size() << std::endl;
 			for (std::vector<User *>::iterator it = usersInChannel.begin(); it != usersInChannel.end(); ++it) {
 				if ((*it)->getNickname() != user->getNickname())
 					sendServerReply((*it)->getUserSocketFd(),

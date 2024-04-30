@@ -152,8 +152,6 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 	{
 		StringUtils::trim(const_cast<std::string &>(input), "\r\n ");
 		result.push_back(input);
-
-		IrcLogger::getLogger()->log(IrcLogger::WARN, "No delimiter found in the input string");
 		return result;
 	}
 
