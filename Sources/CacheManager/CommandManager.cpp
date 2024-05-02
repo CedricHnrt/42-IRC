@@ -18,6 +18,7 @@
 #include "List.hpp"
 #include "Mode.hpp"
 #include "Topic.hpp"
+#include "Kick.hpp"
 
 CommandManager* CommandManager::instance = NULL;
 
@@ -39,6 +40,7 @@ CommandManager::CommandManager()
 	this->_commandsMap["MODE"] = new Mode();
 	this->_commandsMap["NICK"] = new Nick();
 	this->_commandsMap["TOPIC"] = new Topic();
+	this->_commandsMap["KICK"] = new Kick();
 }
 
 CommandManager::~CommandManager()

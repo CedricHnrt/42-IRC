@@ -201,3 +201,32 @@ std::map<size_t, std::string> &ChannelProperties::getMap()
 {
 	return this->userModes;
 }
+
+void ChannelProperties::removeUserFromChannel(size_t userId)
+{
+	if (this->userModes.find(userId) != userModes.end())
+		userModes.erase(userId);
+}
+
+void ChannelProperties::addUserToBannedUsers(size_t userId)
+{
+	std::list<size_t >::iterator it = std::find(this->bannedUsers.begin(), this->bannedUsers.end(), userId);
+
+	if (it == this->bannedUsers.end())
+		this->bannedUsers.push_back(userId);
+}
+
+void ChannelProperties::removeUserFromBannedUsers(size_t userId)
+{
+	std::list<size_t >::iterator it = std::find(this->bannedUsers.begin(), this->bannedUsers.end(), userId);
+
+	if (it != this->bannedUsers.end())
+		this->bannedUsers.erase(it);
+}
+
+bool ChannelProperties::isUserBanned(size_t userId) const
+{
+	std::list<size_t >::const_iterator it = std::find(this->bannedUsers.begin(), this->bannedUsers.end(), userId);
+
+	return (it != this->bannedUsers.end());
+}

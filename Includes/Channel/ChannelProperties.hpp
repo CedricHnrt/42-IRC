@@ -86,6 +86,14 @@
 			void setTopic(size_t userId, const std::string &newTopic);
 
 			std::map<size_t, std::string> &getMap();
+
+			void removeUserFromChannel(size_t userId);
+
+			void addUserToBannedUsers(size_t userId);
+
+			void removeUserFromBannedUsers(size_t userId);
+
+			bool isUserBanned(size_t userId) const;
 	};
 
 #endif

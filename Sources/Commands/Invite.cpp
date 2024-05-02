@@ -29,8 +29,6 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 	std::string invitedUser = args[0];
 	std::string channelHash = args[1];
 
-	std::cout << "got in invite" << std::endl;
-
 	if (channelHash[0] != '#')
 	{
 		logger->log(IrcLogger::ERROR, ("/invite: Error: Wrong usage:" + this->_usage));
@@ -56,7 +54,7 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 
 	if (!properties->isUserOperator(user->getUniqueId()))
 	{
-		std::cout << "KO 1" << std::endl;
+//		std::cout << "KO 1" << std::endl;
 		sendServerReply(user->getUserSocketFd(), ERR_NOPRIVILEGES(user->getNickname()), -1, DEFAULT);
 		return ;
 	}
@@ -78,7 +76,7 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 		sendServerReply(user->getUserSocketFd(), ERR_USERONCHANNEL(user->getNickname(), invitedUser, channelName), RED, BOLDR);
 		return ;
 	}
-//	std::cout << "so far so good" << std::endl;
+	std::cout << "so far so good" << std::endl;
 	invitedUserP = userManager->getFromNickname(invitedUser);
 	sendServerReply(user->getUserSocketFd(), RPL_INVITING(user_id(user->getNickname(), user->getUserName()), user->getNickname(), invitedUser, channelName), -1, DEFAULT);
 	sendServerReply(invitedUserP->getUserSocketFd(), RPL_INVITE(user_id(user->getNickname(), user->getUserName()), invitedUserP->getNickname(), channelName), -1, DEFAULT);
