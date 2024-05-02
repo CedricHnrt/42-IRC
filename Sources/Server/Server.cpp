@@ -152,8 +152,13 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	if (buffer.empty())
 		return;
 
+
+//	std::cout << "in handle known client, buffer =" << buffer << std::endl;
+
 	IrcLogger *logger = IrcLogger::getLogger();
 	User *currentUser;
+
+//	std::cout << "before try 1" << std::endl;
 	try
 	{
 		currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
@@ -164,17 +169,21 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		return ;
 	}
 
+
+//	std::cout << "before if 2" << std::endl;
+
 	currentUser->addToBuffer(buffer);
 	if (currentUser->isBufferValid() == WAITING) {
 		return;
 	}
+//	std::cout << "before if 3" << std::endl;
 	if (currentUser->isBufferValid() == KO)
 	{
 		currentUser->clearBuffer();
 		return ;
 	}
-	buffer = currentUser->getReceivedBuffer();
-	currentUser->clearBuffer();
+//	buffer = currentUser->getReceivedBuffer();
+//	currentUser->clearBuffer();
 
 	StringUtils::trim(buffer, " \r\n");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
@@ -188,14 +197,17 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	{
 		if (splitted.front()[0] == '/')
 		{
-			splitted.front().erase(0);
+			splitted.front().erase(0, 1);
 			StringUtils::toUpper(splitted.front());
+			std::cout << splitted[0] << std::endl;
 		}
 		//	std::cout << "splitted[0] = " << splitted.front() << std::endl;
 		CommandManager *CManager = CommandManager::getInstance();
 		ICommand *Command = CManager->getCommand(splitted.front());
 		if (!Command)
 		{
+//			std::cout << "before if 4" << std::endl;
+
 			sendServerReply(incomingFD, ERR_UNKNOWNCOMMAND(
 				Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH"),
 				splitted[0]), RED, BOLDR);
@@ -227,6 +239,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 			}
 			if (*ExpectedIt == CHANNEL)
 			{
+//				std::cout << "before if 5" << std::endl;
 				if ((*splittedIterator)[0] == '#')
 				{
 					std::string channelName = *splittedIterator;
@@ -245,6 +258,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 				}
 				else
 				{
+//					std::cout << "before if 6" << std::endl;
 					//Wrong argument
 					currentChannel = NULL;
 					return;
@@ -255,6 +269,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		}
 
 		User *currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+//		std::cout << "before execute" << std::endl;
 		Command->execute(currentUser, currentChannel, splitted);
 	}
 }
@@ -288,6 +303,7 @@ static void sendMessageOfTheDay(const User &user)
 void Server::handleIncomingRequest(int incomingFD)
 {
 	char buffer[512];
+	User *user;
 
 	int size = recv(incomingFD, buffer, 512, 0);
 	if (size == -1)
@@ -295,15 +311,57 @@ void Server::handleIncomingRequest(int incomingFD)
 	buffer[size] = '\0';
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 
+//	std::cout << "buffer: " << buffer << std::endl;
+
 	std::string parse = buffer;
+	IrcLogger *logger = IrcLogger::getLogger();
+	logger->log(IrcLogger::DEBUG, ("Received buffer (raw): " + parse));
+
+	if (parse.empty())
+	{
+		if (it != this->_danglingUsers.end()) {
+			this->_danglingUsers.erase(incomingFD);
+			close(incomingFD);
+		}
+		return;
+	}
+
+	if (parse.find("\r\n") != std::string::npos)
+//		std::cout << "Initial buffer has delimiter" << std::endl;
 	if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
 		return ;
 
 	if (it == this->_danglingUsers.end())
 	{
-		this->handleKnownClient(incomingFD, buffer);
+		try {
+			user = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+			if (!parse.empty())
+				user->addToBuffer(parse);
+			parse = user->getReceivedBuffer();
+
+//			std::cout << "in not dangling, parse = " << parse << std::endl;
+//			if (parse.find("\r\n") != std::string::npos)
+//				std::cout << "this non dangling has delimiter" << std::endl;
+
+
+		}
+		catch (std::exception &e)
+		{
+			std::cout << e.what() << std::endl;
+		}
+		if (parse.find("\r\n") != std::string::npos) {
+//			std::cout << "before known client" << std::endl;
+			this->handleKnownClient(incomingFD, parse);
+			user->clearBuffer();
+		}
 		return;
 	}
+
+
+	if (parse.find("\r\n") == std::string::npos) {
+//		std::cout << "no delimiter found" << std::endl;
+	}
+
 	try
 	{
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);

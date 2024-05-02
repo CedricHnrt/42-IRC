@@ -101,7 +101,14 @@ void User::addChannelToList(Channel *newChannel)
 
 void User::addToBuffer(const std::string &incomingBuffer)
 {
-	this->receivedBuffer += incomingBuffer;
+	std::string temp = incomingBuffer;
+//	StringUtils::trim(temp, "\n");
+	if (temp.find(4) != std::string::npos)
+		temp.erase(temp.find(4));
+	if (incomingBuffer.find("/r/n") != std::string::npos)
+		this->receivedBuffer += incomingBuffer;
+	else
+		this->receivedBuffer += temp;
 }
 
 std::string &User::getReceivedBuffer()
@@ -112,11 +119,12 @@ std::string &User::getReceivedBuffer()
 #include <iostream>
 int User::isBufferValid() const
 {
-	if (receivedBuffer.find("\r\n", receivedBuffer.size() - 2) != std::string::npos)
-		return OK;
-	if (receivedBuffer.find("\r\n") != std::string::npos)
-		return KO;
-	return WAITING;
+//	if (receivedBuffer.find("\r\n", receivedBuffer.size() - 2) != std::string::npos)
+//		return OK;
+//	if (receivedBuffer.find("\r\n") != std::string::npos)
+//		return KO;
+//	return WAITING;
+	return OK;
 }
 
 void User::clearBuffer()
