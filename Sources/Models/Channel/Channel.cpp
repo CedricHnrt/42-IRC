@@ -168,3 +168,16 @@ void Channel::joinReplyAll(const std::string &newUser)
 			sendServerReply(currentUser->getUserSocketFd(), RPL_JOIN(user_id(currentUser->getNickname(), newUser), this->getName()), -1, DEFAULT);
 	}
 }
+
+void Channel::quitReplyAll(User *leftUser, const std::string &message)
+{
+	std::vector<User *> userList = this->getChannelsUsers();
+	if (userList.empty()) {
+			delete this;
+	}
+	for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
+		sendServerReply((*it)->getUserSocketFd(),
+						RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
+						-1, DEFAULT);
+	}
+}

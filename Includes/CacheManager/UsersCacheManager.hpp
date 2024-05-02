@@ -3,6 +3,8 @@
 
 	#include "User.hpp"
 	#include "UserExceptions.hpp"
+
+//	#include "Channel.hpp"
 	#include <list>
 
 	class UsersCacheManager
