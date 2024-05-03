@@ -21,6 +21,8 @@
 #include <NumericReplies.hpp>
 #include <TimeUtils.hpp>
 #include <unistd.h>
+#include "ChannelCacheManager.hpp"
+
 UsersCacheManager* UsersCacheManager::instance = NULL;
 
 UsersCacheManager::UsersCacheManager() : users(std::list<User *>()), uniqueIdCounter(1)  {}
@@ -71,6 +73,8 @@ void UsersCacheManager::deleteTimeoutUsers(std::string serverName)
 {
 	size_t currentTimestamp = TimeUtils::getCurrentTimeMillis();
 	std::list<User *> cachedUsers = getCache();
+	std::vector<Channel *> channelList;
+
 	if (!cachedUsers.size())
 		return ;
 	std::list<User *>::iterator users = cachedUsers.begin();
@@ -90,11 +94,18 @@ void UsersCacheManager::deleteTimeoutUsers(std::string serverName)
 				addToLeftCache(user);
 				sendServerReply(userFd, ERR_REQUESTTIMEOUT(StringUtils::ltos(userFd), serverName), RED,BOLDR);
 				close(userFd);
+				channelList = user->getChannelList();
+				for (std::vector<Channel *>::iterator it = channelList.begin() ; it != channelList.end() ; ++it) {
+					(*it)->removeUserFromChannel(user);
+					(*it)->quitReplyAll(user, "Timeout");
+					(*it)->nameReplyAll();
+				}
 			}
 			catch (UserCacheException &exception)
 			{
 				IrcLogger::getLogger()->log(IrcLogger::ERROR, "An error occurred during user timeout fixer !");
 				IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+
 			}
 		}
 		++users;

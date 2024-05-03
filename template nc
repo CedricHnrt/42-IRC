@@ -1,0 +1,4 @@
+CAP LS 302
+PASS 434
+NICK user2
+USER user1 0 * :pgouasmi
