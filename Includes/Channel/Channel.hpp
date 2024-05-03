@@ -40,6 +40,7 @@
 			void nameReplyAllExceptCaller(const std::string &callerName);
 			void joinReplyAll(const std::string &newUser);
 			void whoReplyAll();
+			void quitReplyAll(User *leftUser, const std::string &message);
 
 			~Channel();
 		private:

@@ -9,25 +9,25 @@ Quit::Quit()
 	this->_expectedArgs.push_back(STRING);
 }
 
-static void sendQuitMessageToChannel(Channel *channel, User *leftUser, const std::string &message)
-{
-	std::vector<User *> userList = channel->getChannelsUsers();
-	if (userList.empty()) {
-		try {
-			ChannelCacheManager::getInstance()->deleteFromCache(channel->getUniqueId());
-			delete channel;
-		}
-		catch (ChannelCacheException &exception) {
-			IrcLogger *logger = IrcLogger::getLogger();
-			logger->log(IrcLogger::ERROR, exception.what());
-		}
-	}
-	for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
-		sendServerReply((*it)->getUserSocketFd(),
-						RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
-						-1, DEFAULT);
-	}
-}
+//static void sendQuitMessageToChannel(Channel *channel, User *leftUser, const std::string &message)
+//{
+//	std::vector<User *> userList = channel->getChannelsUsers();
+//	if (userList.empty()) {
+//		try {
+//			ChannelCacheManager::getInstance()->deleteFromCache(channel->getUniqueId());
+//			delete channel;
+//		}
+//		catch (ChannelCacheException &exception) {
+//			IrcLogger *logger = IrcLogger::getLogger();
+//			logger->log(IrcLogger::ERROR, exception.what());
+//		}
+//	}
+//	for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
+//		sendServerReply((*it)->getUserSocketFd(),
+//						RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
+//						-1, DEFAULT);
+//	}
+//}
 
 void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
@@ -42,7 +42,8 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 		for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++) {
 			(*it)->nameReplyAllExceptCaller(user->getNickname());
 			(*it)->removeUserFromChannel(user);
-			sendQuitMessageToChannel(*it, user, StringUtils::getMessage(args));
+//			sendQuitMessageToChannel(*it, user, StringUtils::getMessage(args));
+			(*it)->quitReplyAll(user, StringUtils::getMessage(args));
 		}
 	}
 	catch (UserCacheException &exception) {
