@@ -16,6 +16,6 @@ void List::execute(User *user, Channel *channel, std::vector<std::string> args)
 	ChannelCacheManager *manager = ChannelCacheManager::getInstance();
 	std::list<Channel *> channelList = manager->getCache();
 	for (std::list<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++)
-		sendServerReply(user->getUserSocketFd(), RPL_LIST(user->getUserName(), (*it)->getName(), (*it)->getChannelsUsers().size(), (*it)->getTopic()), -1, DEFAULT);
+		sendServerReply(user->getUserSocketFd(), RPL_LIST(user->getUserName(), "#" + (*it)->getName(), (*it)->getChannelsUsers().size(), (*it)->getTopic()), -1, DEFAULT);
 	sendServerReply(user->getUserSocketFd(), RPL_LISTEND(user->getUserName()), -1, DEFAULT);
 }
