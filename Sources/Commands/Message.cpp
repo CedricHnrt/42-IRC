@@ -71,6 +71,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 									RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1,
 									DEFAULT);
 			}
+			std::cout << "nb of users in server: " << UsersCacheManager::getInstance()->getCache().size() << std::endl;
 		}
 		catch (ChannelCacheException &e)
 		{
@@ -88,7 +89,7 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 							RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1, DEFAULT);
 		}
 		catch (UserCacheExceptionString &exception) {
-			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), RED, BOLDR);
+			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), -1, DEFAULT);
 			IrcLogger *logger = IrcLogger::getLogger();
 			logger->log(IrcLogger::ERROR, "An error occurred during message sending !");
 			logger->log(IrcLogger::ERROR, exception.what());
