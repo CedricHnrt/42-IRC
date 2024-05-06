@@ -22,6 +22,8 @@ public:
 	static std::vector<std::string> generateCensuredStrings(std::vector<std::string> words);
 	static std::pair<bool, std::string> hasCensuredWord(std::string word, std::vector<std::string> censuredWords);
 	static std::string getMessage(std::vector<std::string>& args);
+	static void printvector(std::vector<std::string> vec);
+	static void printVvector(std::vector<std::vector<std::string> > vec);
 };
 
 #endif //STRINGUTILS_H
