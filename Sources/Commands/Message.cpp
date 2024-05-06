@@ -39,6 +39,19 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 
 	std::string message;
 
+	if (args.size() < 1)
+	{
+		sendServerReply(user->getUserSocketFd(), ERR_NORECIPIENT(user->getNickname()), -1, DEFAULT);
+		return;
+	}
+
+	if (args.size() < 2)
+	{
+		sendServerReply(user->getUserSocketFd(), ERR_NOTEXTTOSEND(user->getNickname()), -1, DEFAULT);
+		return;
+	}
+
+
 	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
 	{
 		message += *it;

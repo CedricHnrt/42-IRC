@@ -78,6 +78,11 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 			return ;
 		}
 		std::string keyword = args[1];
+		if (!StringUtils::isAlpha(keyword))
+		{
+			sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEPARAM(user->getNickname(), channelName, properties->getChannelModes(), keyword), -1, DEFAULT);
+			return;
+		}
 		properties->setPassword(keyword);
 		properties->setPasswordStatus(true);
 		properties->addModeToChannel(user->getUniqueId(), 'k');
@@ -207,6 +212,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelNew, properties->getChannelModes(), properties->getPassword()), -1, DEFAULT);
 		else
 			sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelNew, properties->getChannelModes()), -1, DEFAULT);
+//		sendServerReply(user->getUserSocketFd(), MODE_CHANNELMSG(channelNew, properties->getChannelModes()), -1, DEFAULT);
 		return ;
 	}
 

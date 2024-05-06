@@ -137,7 +137,7 @@ void Channel::nameReplyAll()
 			sendServerReply(currentUser->getUserSocketFd(),
 							RPL_NAMREPLY(currentUser->getNickname(), "<@|*=|:|>", this->name, this->getUserList()), -1,
 							DEFAULT);
-			std::cout << "in name reply, res = " << this->getUserList() << std::endl;
+			sendServerReply(currentUser->getUserSocketFd(), RPL_ENDOFNAMES(currentUser->getNickname(), this->name), -1, DEFAULT);
 		}
 		catch (const UserCacheException &ignored) {}
 	}
@@ -151,8 +151,13 @@ void Channel::nameReplyAllExceptCaller(const std::string &callerName)
 	for (std::map<size_t , std::string >::iterator it =map.begin() ; it != map.end() ; ++it)
 	{
 		User *currentUser = UsersCacheManager::getInstance()->getFromCache(it->first);
-		if (currentUser->getNickname() != callerName)
-			sendServerReply(currentUser->getUserSocketFd(), RPL_NAMREPLY(currentUser->getNickname(), "<@|*=|:|>", this->name, this->getUserList()), -1, DEFAULT);
+		if (currentUser->getNickname() != callerName) {
+			sendServerReply(currentUser->getUserSocketFd(),
+							RPL_NAMREPLY(currentUser->getNickname(), "<@|*=|:|>", this->name, this->getUserList()), -1,
+							DEFAULT);
+			sendServerReply(currentUser->getUserSocketFd(), RPL_ENDOFNAMES(currentUser->getNickname(), this->name), -1, DEFAULT);
+		}
+
 	}
 }
 
