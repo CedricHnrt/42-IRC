@@ -117,9 +117,21 @@ UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)
 	this->uniqueId = incomingFD;
 	std::vector<std::string> incomingData = StringUtils::split(data, '\n');
 
-	for (std::vector<std::string>::iterator it  = incomingData.begin(); it != incomingData.end(); ++it) {
-		this->connectionInfos.push_back(*it);
+	if (this->connectionInfos.size() != 0)
+	{
+		if (data.substr(0, 4) == "NICK")
+		{
+			for (std::vector<std::string>::iterator it = this->connectionInfos.begin(); it != this->connectionInfos.end(); ++it) {
+				if ((*it).substr(0, 4) == "NICK")
+					*it = incomingData[0];
+			}
+		}
+		return *this;
 	}
+
+		for (std::vector<std::string>::iterator it = incomingData.begin(); it != incomingData.end(); ++it) {
+			this->connectionInfos.push_back(*it);
+		}
 	return *this;
 }
 
@@ -146,9 +158,9 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 		this->nickname = nickname[1];
 
 		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname)) {
-			sendServerReply(this->userSocketFd, ERR_ALREADYREGISTERED(this->nickname), RED, BOLDR);
-			close(this->userSocketFd);
-			throw UserBuildException("Nickname already exists");
+			sendServerReply(this->userSocketFd, ERR_NICKNAMEINUSE(this->nickname, this->nickname), RED, BOLDR);
+//			throw UserBuildException("Nickname already exists");
+			return false;
 		}
 
 		std::vector<std::string> censoredWords = Configuration::getInstance()->getCensoredWords();
