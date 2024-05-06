@@ -124,6 +124,7 @@ all: $(NAME)
 
 clean:
 	$(PRINT) "\n${_BOLD}Cleaning Objects...${_END}"
+	$(RM) Objects
 	$(PRINT) "${_BOLD}${_GREEN}Objects cleaned.\a${_END}"
 
 fclean:
