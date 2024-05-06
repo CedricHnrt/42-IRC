@@ -299,3 +299,23 @@ std::string StringUtils::getMessage(std::vector<std::string> &args)
 	}
 	return message;
 }
+
+void StringUtils::printvector(std::vector<std::string> vec)
+{
+	for (std::vector<std::string >::iterator it = vec.begin() ; it != vec.end() ; ++it)
+	{
+		std::cout << *it << std::endl;
+	}
+}
+
+void StringUtils::printVvector(std::vector<std::vector<std::string> > vec)
+{
+	size_t i = 0;
+	for (std::vector<std::vector<std::string> >::iterator it = vec.begin() ; it != vec.end() ; ++it)
+	{
+		std::cout << "vector " << i << ":" << std::endl;
+		printvector(*it);
+		std::cout << std::endl;
+		i++;
+	}
+}

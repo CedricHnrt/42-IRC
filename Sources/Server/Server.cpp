@@ -142,7 +142,7 @@ void Server::serverUp() throw (ServerStartingException)
 			else
 				this->handleIncomingRequest(this->_fds[i].fd);
 		}
-		this->removeTimeoutDanglingUsers();
+//		this->removeTimeoutDanglingUsers();
 	}
 	closeOpenedSockets();
 }
@@ -387,8 +387,8 @@ void Server::handleIncomingRequest(int incomingFD)
 		IrcLogger *logger = IrcLogger::getLogger();
 		logger->log(IrcLogger::ERROR, "An error occurred during user building !");
 		logger->log(IrcLogger::ERROR, exception.what());
-		close(incomingFD);
-		this->_danglingUsers.erase(incomingFD);
+//		close(incomingFD);
+//		this->_danglingUsers.erase(incomingFD);
 	}
 }
 

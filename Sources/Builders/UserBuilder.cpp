@@ -115,40 +115,50 @@ UserBuilder	&UserBuilder::fillBuffer(const std::string data, int incomingFD)
 {
 	this->userSocketFd = incomingFD;
 	this->uniqueId = incomingFD;
+
 	std::vector<std::string> incomingData = StringUtils::split(data, '\n');
 
-	for (std::vector<std::string>::iterator it  = incomingData.begin(); it != incomingData.end(); ++it) {
-		this->connectionInfos.push_back(*it);
+	if (this->connectionInfos.size() == 4)
+	{
+		if (data.substr(0, 4) == "NICK")
+		{
+			for (std::vector<std::string>::iterator it = this->connectionInfos.begin(); it != this->connectionInfos.end(); ++it) {
+				if ((*it).substr(0, 4) == "NICK")
+					*it = incomingData[0];
+			}
+		}
+		return *this;
 	}
+		for (std::vector<std::string>::iterator it = incomingData.begin(); it != incomingData.end(); ++it) {
+			this->connectionInfos.push_back(*it);
+		}
 	return *this;
 }
 
 bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 {
-	if (this->connectionInfos.size() >= 3 && this->connectionInfos.back().substr(0, 4) == "USER")
+	if (this->connectionInfos.size() > 3 && this->connectionInfos.back().substr(0, 4) == "USER")
 	{
-		this->connectionInfos.erase(this->connectionInfos.begin());
 
 		std::string newUserName = "New connection";
 
 
 		/*handle the password*/
-		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos.front(), ' ');
+		std::vector<std::string> passwordV = StringUtils::split(this->connectionInfos[1], ' ');
 		if (passwordV.size() != 2 || passwordV[1] != Configuration::getInstance()->getSection("SERVER")->getStringValue("password")) {
 			sendServerReply(this->userSocketFd, ERR_PASSWDMISMATCH(newUserName), RED, BOLDR);
 			throw UserBuildException("Invalid Password");
 		}
 
-		this->connectionInfos.erase(this->connectionInfos.begin());
 
 		/*handle the nickname*/
-		std::vector<std::string> nickname = StringUtils::split(this->connectionInfos.front(), ' ');
+		std::vector<std::string> nickname = StringUtils::split(this->connectionInfos[2], ' ');
 		this->nickname = nickname[1];
 
 		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname)) {
-			sendServerReply(this->userSocketFd, ERR_ALREADYREGISTERED(this->nickname), RED, BOLDR);
-			close(this->userSocketFd);
-			throw UserBuildException("Nickname already exists");
+			sendServerReply(this->userSocketFd, ERR_NICKNAMEINUSE(this->nickname, this->nickname), RED, BOLDR);
+//			throw UserBuildException("Nickname already exists");
+			return false;
 		}
 
 		std::vector<std::string> censoredWords = Configuration::getInstance()->getCensoredWords();
@@ -161,10 +171,12 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 			throw UserBuildException(bannedMessage);
 		}
 
-		this->connectionInfos.erase(this->connectionInfos.begin());
+//		this->connectionInfos.erase(this->connectionInfos.begin());
+//		this->connectionInfos.erase(this->connectionInfos.begin());
+//		this->connectionInfos.erase(this->connectionInfos.begin());
 
 		/*handle username*/
-		std::vector<std::string> username =  StringUtils::split(this->connectionInfos.front(), ' ');
+		std::vector<std::string> username =  StringUtils::split(this->connectionInfos[3], ' ');
 		if (username.size() != 5) {
 			return false;
 		}
