@@ -17,8 +17,8 @@ Topic::Topic()
 void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 
-	for (std::vector<std::string >::iterator it = args.begin() ; it != args.end() ; ++it)
-		std::cout << *it << std::endl;
+//	for (std::vector<std::string >::iterator it = args.begin() ; it != args.end() ; ++it)
+//		std::cout << *it << std::endl;
 
 	(void)channel;
 	if (args.size() < 1)
@@ -27,7 +27,7 @@ void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 		return ;
 	}
 
-	std::cout << args.size() << std::endl;
+//	std::cout << args.size() << std::endl;
 
 	std::string channelName = args[0];
 	StringUtils::trim(channelName, "#");
