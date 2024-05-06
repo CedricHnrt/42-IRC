@@ -81,15 +81,15 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 		properties->setPassword(keyword);
 		properties->setPasswordStatus(true);
 		properties->addModeToChannel(user->getUniqueId(), 'k');
-		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelName, "k", properties->getPassword()), -1, DEFAULT);
-		std::cout << "new pass set" << std::endl;
+//		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelName, "k", properties->getPassword()), -1, DEFAULT);
+//		std::cout << "new pass set" << std::endl;
 	}
 	else if (mode == MINUS)
 	{
 		properties->setPassword("");
 		properties->setPasswordStatus(false);
-		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelName, "-k"), -1, DEFAULT);
-		std::cout << "pass deleted" << std::endl;
+//		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelName, "-k"), -1, DEFAULT);
+//		std::cout << "pass deleted" << std::endl;
 		properties->removeModeToChannel(user->getUniqueId(), 'k');
 	}
 }
@@ -149,6 +149,7 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
 	if (c == 'o' && mode == PLUS)
 		sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname()), -1, DEFAULT);
+	sendServerReply(user->getUserSocketFd(), RPL_UMODEIS(user->getNickname(), properties->getUserModes(targetUser->getUniqueId())), -1, DEFAULT);
 }
 
 static void handleChannelMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
@@ -158,6 +159,7 @@ static void handleChannelMode(User *user, std::string channelName, std::vector<s
 
 	if (args.size() < 1){
 		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+		return ;
 	}
 
 	if (mode == PLUS)
@@ -172,6 +174,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	(void) user;
 
 	std::string channelNew;
+	Channel *targetChannel;
 
 	if (args[0][0] != '#') {
 		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), this->_name), -1, DEFAULT);
@@ -182,7 +185,13 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	StringUtils::trim(channelNew, "#");
 	args.erase(args.begin());
 
-	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
+	try {
+		targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
+	}
+	catch (const std::exception &e) {
+		sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), channelNew), -1, DEFAULT);
+		return;
+	}
 	ChannelProperties *properties = targetChannel->getProperties();
 
 
@@ -206,6 +215,8 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 		sendServerReply(user->getUserSocketFd(), ERR_CHANOPRIVSNEEDED(user->getNickname(), channelNew), -1, DEFAULT);
 		return ;
 	}
+
+
 
 	bool New = true;
 
@@ -267,7 +278,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 					handleKeyMode(user, channelNew, *it, mode);
 				}
 				catch (std::exception &e) {
-					std::cout << e.what() << std::endl;
+					sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), targetChannel->getName()), -1, DEFAULT);
 				}
 			}
 			if (mode == 42)
@@ -294,7 +305,8 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 				try {
 					handleUserMode(user, channelNew, *it, mode, *sIt);
 				}
-				catch (std::exception &e) {
+				catch (UserCacheExceptionString &e) {
+					sendServerReply(user->getUserSocketFd(), ERR_USERNOTINCHANNEL(user->getNickname(), args[1], channelNew), -1, DEFAULT);
 					std::cout << e.what() << std::endl;
 				}
 			}
@@ -309,4 +321,8 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 		}
 	}
 	targetChannel->nameReplyAll();
+	if (!properties->doesChannelHaveMode('k'))
+		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), targetChannel->getName(), properties->getChannelModes()), -1, DEFAULT);
+	else
+		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), targetChannel->getName(), properties->getChannelModes(), properties->getPassword()), -1, DEFAULT);
 }

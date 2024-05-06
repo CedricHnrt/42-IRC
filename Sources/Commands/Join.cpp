@@ -93,9 +93,8 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				sendServerReply(user->getUserSocketFd(),
 								ERR_BADCHANNELKEY(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
 				}
-				else if (properties->doesChannelHaveMode('i'))
+				else if (properties->doesChannelHaveMode('i') && !properties->isUserInvited(user->getUniqueId()))
 				{
-					if (!properties->isUserInvited(user->getUniqueId()))
 						sendServerReply(user->getUserSocketFd(), ERR_INVITEONLYCHAN(user->getNickname(), existingChannel->getName()), -1, DEFAULT);
 				}
 				else if (properties->isUserBanned(user->getUniqueId()))

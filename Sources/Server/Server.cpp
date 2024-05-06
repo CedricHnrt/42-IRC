@@ -314,8 +314,6 @@ void Server::handleIncomingRequest(int incomingFD)
 //	std::cout << "buffer: " << buffer << std::endl;
 
 	std::string parse = buffer;
-	IrcLogger *logger = IrcLogger::getLogger();
-	logger->log(IrcLogger::DEBUG, ("Received buffer (raw): " + parse));
 
 	if (parse.empty())
 	{
