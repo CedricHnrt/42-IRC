@@ -41,6 +41,7 @@
 			void joinReplyAll(const std::string &newUser);
 			void whoReplyAll();
 			void quitReplyAll(User *leftUser, const std::string &message);
+			void topicReplyAll();
 
 			~Channel();
 		private:

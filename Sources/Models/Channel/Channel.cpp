@@ -186,3 +186,13 @@ void Channel::quitReplyAll(User *leftUser, const std::string &message)
 						-1, DEFAULT);
 	}
 }
+
+void Channel::topicReplyAll()
+{
+	std::vector<User *>::iterator it = this->_usersInChannel.begin();
+	while (it != this->_usersInChannel.end()) {
+		sendServerReply((*it)->getUserSocketFd(), RPL_TOPIC((*it)->getNickname(), this->name, this->topic), -1,
+						DEFAULT);
+		++it;
+	}
+}

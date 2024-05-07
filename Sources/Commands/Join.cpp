@@ -69,6 +69,9 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	//check the channel cache manager, if !exist->add new, else to implement(join existing channel with pword if necessary)
 	for (std::vector<std::pair<std::string, std::string> >::iterator it = ChannelsPasswords.begin() ; it != ChannelsPasswords.end() ; ++it)
 	{
+
+		std::cout << "got in join" << std::endl;
+
 		std::string channelName = it->first;
 //		std::cout << "in join for loop, chan name:" << channelName << std::endl;
 //		std::cout << "name size: " << channelName.size() << std::endl;
@@ -105,7 +108,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 					user->addChannelToList(existingChannel);
 					properties->addUserToChannel(user->getUniqueId());
 					existingChannel->addUserToChannel(user);
-					sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()),
+					sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getNickname(), user->getUserName()),
 																	  existingChannel->getName()), -1, DEFAULT);
 					if (existingChannel->getTopic().empty())
 						sendServerReply(user->getUserSocketFd(),
@@ -130,6 +133,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 		}
 		else
 		{
+			std::cout << "new channel" << std::endl;
 			//[3]
 			//create new channel
 			Builder.setName(channelName);
@@ -153,7 +157,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			properties->addModeToUser(user->getUniqueId(), 0, OPERATOR);
 			properties->setPasswordStatus(false);
 			user->addChannelToList(newChannel);
-			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getUserName(), user->getNickname()), newChannel->getName()), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getNickname(), user->getUserName()), newChannel->getName()), -1, DEFAULT);
 			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), -1, DEFAULT);
 			sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", newChannel->getName(),newChannel->getUserList()), -1, DEFAULT);
 			//[3]

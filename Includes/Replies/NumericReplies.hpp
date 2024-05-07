@@ -85,15 +85,16 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 #define MODE_CHANNELMSG(channel, mode) (":localhost MODE #" + channel + " " + mode + "\r\n")
 #define MODE_CHANNELMSGWITHPARAM(channel, mode, param) (":localhost MODE #" + channel + " " + mode + " " + param + "\r\n")
 #define RPL_CHANNELMODEIS(client, channel, mode) (":localhost 324 " + client + " #" + channel + " " + mode + "\r\n")
+
+#define RPL_ADDMODE(client, modifier, channel, mode) (":localhost " + client + " #" + channel + " " + modifier + " set mode " + mode + "\r\n")
+
 #define RPL_CHANNELMODEISWITHKEY(client, channel, mode, password) (":localhost 324 " + client + " #" + channel + " " + mode + " " + password + "\r\n")
 #define ERR_CANNOTSENDTOCHAN(client, channel) (":localhost 404 " + client + " #" + channel + " :Cannot send to channel\r\n")
-#define ERR_CHANNELISFULL(client, channel) ("471 " + client + " #" + channel + " :Cannot join channel (+l)\r\n")
+#define ERR_CHANNELISFULL(client, channel) (":localhost 471 " + client + " #" + channel + " :Cannot join channel (+l)\r\n")
 #define ERR_CHANOPRIVSNEEDED(client, channel) (":localhost 482 " + client + " #" + channel + " :You're not channel operator\r\n")
 #define ERR_INVALIDMODEPARAM(client, channel, mode, password) (":localhost 696 " + client + " #" + channel + " " + mode + " " + password + " : password must only contained alphabetic character\r\n")
 #define ERR_INVALIDMODEGENERAL(client, channel, mode, reason) (":localhost 696 " + client + " #" + channel + " " + mode + " : " + reason + "\r\n")
-// RPL_ERR a broadcoast quand user pas +v ou operator veut parler
-      // dans notre cas c'était tiff (client) qui voulait send a message
-      // :lair.nl.eu.dal.net 404 tiff #pop :Cannot send to channel
+#define TEST_RPL(nickname, modifier, mode, channel) (":localhost 324 " + nickname + " #" + channel + " :" + modifier + " set mode " + mode + " on #" + channel + "\r\n")
 #define RPL_ADDVOICE(nickname, username, channel, mode, param) (":" + nickname + "!" + username + "@localhost MODE #" + channel + " " + mode + " " + param + "\r\n")
 
 // MOTD
@@ -119,7 +120,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 
 // OPER
 # define ERR_NOOPERHOST(client) ("491 " + client + " :No O-lines for your host\r\n")
-# define RPL_YOUREOPER(client) ("381 " + client + " :You are now an IRC operator\r\n")
+# define RPL_YOUREOPER(client, channel) (":localhost 381 " + client + " #" + channel + " :You are now operator on channel #" + channel + "\r\n")
 
 // PART
 # define RPL_PART(user_id, channel, reason) (user_id + " PART #" + channel + " " + (reason.empty() ? "." : reason ) + "\r\n")

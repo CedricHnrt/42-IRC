@@ -45,11 +45,11 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 		return;
 	}
 
-	if (args.size() < 2)
-	{
-		sendServerReply(user->getUserSocketFd(), ERR_NOTEXTTOSEND(user->getNickname()), -1, DEFAULT);
-		return;
-	}
+//	if (args.size() < 2)
+//	{
+//		sendServerReply(user->getUserSocketFd(), ERR_NOTEXTTOSEND(user->getNickname()), -1, DEFAULT);
+//		return;
+//	}
 
 
 	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)

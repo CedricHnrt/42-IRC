@@ -126,7 +126,14 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 			std::cout << "limit is too high" << std::endl;
 			return ;
 		}
-		properties->addModeToChannel(user->getUniqueId(), 'l');
+		try {
+			properties->addModeToChannel(user->getUniqueId(), 'l');
+		}
+		catch (std::exception &e)
+		{
+			IrcLogger *logger = IrcLogger::getLogger();
+			logger->log(IrcLogger::INFO, e.what());
+		}
 		properties->setUserLimit(static_cast<int>(newLimit));
 		properties->setUserLimitStatus(true);
 	}
@@ -136,6 +143,7 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 		properties->setUserLimitStatus(false);
 		properties->removeModeToChannel(user->getUniqueId(), 'l');
 	}
+	sendServerReply(user->getUserSocketFd(), TEST_RPL(user->getNickname(), user->getNickname(), "+l", channelName), -1, DEFAULT);
 }
 
 static void handleUserMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
@@ -148,16 +156,38 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
 		return ;
 	}
-	if (mode == PLUS)
-		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
-	else if (mode == MINUS)
-		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
-	if (c == 'o') {
+	try {
 		if (mode == PLUS)
-			sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname()), -1, DEFAULT);
-		targetChannel->nameReplyAll();
+			properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
+		else if (mode == MINUS)
+			properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
+		if (c == 'o') {
+			if (mode == PLUS)
+				sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname(), channelName), -1, DEFAULT);
+			targetChannel->nameReplyAll();
+		}
+		sendServerReply(user->getUserSocketFd(), RPL_UMODEIS(user->getNickname(), properties->getUserModes(targetUser->getUniqueId())), -1, DEFAULT);
+		}
+	catch (std::exception &e) {
+		IrcLogger *logger = IrcLogger::getLogger();
+		logger->log(IrcLogger::ERROR, e.what());
+
+		std::string repMode;
+		repMode += c;
+		repMode += ": ";
+		std::string str = e.what();
+		if (str == "Error: User doesn't have this mode")
+		{
+			repMode += targetUser->getNickname();
+			repMode += " does not have this mode";
+		}
+		else
+		{
+			repMode += targetUser->getNickname();
+			repMode += " already has this mode";
+		}
+		sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEGENERAL(user->getNickname(), channelName, repMode, "impossible mode modification"), -1, DEFAULT);
 	}
-	sendServerReply(user->getUserSocketFd(), RPL_UMODEIS(user->getNickname(), properties->getUserModes(targetUser->getUniqueId())), -1, DEFAULT);
 }
 
 static void handleChannelMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
@@ -170,10 +200,19 @@ static void handleChannelMode(User *user, std::string channelName, std::vector<s
 		return ;
 	}
 
-	if (mode == PLUS)
+	std::string modeRpl;
+
+	if (mode == PLUS) {
 		properties->addModeToChannel(user->getUniqueId(), c);
-	else if (mode == MINUS)
+		modeRpl += "+";
+	}
+	else if (mode == MINUS) {
 		properties->removeModeToChannel(user->getUniqueId(), c);
+		modeRpl += "-";
+	}
+	modeRpl += c;
+//	sendServerReply(user->getUserSocketFd(), RPL_ADDMODE(user->getNickname(), user->getNickname(), channelName, modeRpl), -1, DEFAULT);
+	sendServerReply(user->getUserSocketFd(), TEST_RPL(user->getNickname(), user->getNickname(), modeRpl, channelName), -1, DEFAULT);
 }
 
 void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
@@ -329,8 +368,8 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			}
 		}
 	}
-	if (!properties->doesChannelHaveMode('k'))
-		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), targetChannel->getName(), properties->getChannelModes()), -1, DEFAULT);
-	else
-		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), targetChannel->getName(), properties->getChannelModes(), properties->getPassword()), -1, DEFAULT);
+//	if (!properties->doesChannelHaveMode('k'))
+//		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), targetChannel->getName(), properties->getChannelModes()), -1, DEFAULT);
+//	else
+//		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), targetChannel->getName(), properties->getChannelModes(), properties->getPassword()), -1, DEFAULT);
 }

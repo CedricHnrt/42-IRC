@@ -372,7 +372,7 @@ void Server::handleIncomingRequest(int incomingFD)
 			UManager->addToCache(user);
 
 			sendServerReply(incomingFD,
-				RPL_WELCOME(user_id(user->getNickname(), user->getUserName()), user->getUserName()), RED, BOLDR);
+				RPL_WELCOME(user_id(user->getNickname(), user->getUserName()), user->getNickname()), -1, DEFAULT);
 			ConfigurationSection *section = Configuration::getInstance()->getSection("SERVER");
 			sendServerReply(incomingFD,
 				RPL_YOURHOST(user->getNickname(), section->getStringValue("servername", "IRCHEH"),

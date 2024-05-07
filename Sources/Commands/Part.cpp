@@ -50,6 +50,7 @@ void Part::execute(User *user, Channel *channel, std::vector<std::string> args)
 		args.erase(args.begin());
 		std::string reason = StringUtils::getMessage(args);
 		reason = " " + reason;
+		sendServerReply(user->getUserSocketFd(), RPL_ENDOFNAMES(user->getNickname(), channel->getName()), -1, DEFAULT);
 		sendServerReply(user->getUserSocketFd(),
 						RPL_PART(user_id(user->getNickname(), user->getUserName()), channel->getName(), reason), -1,
 						DEFAULT);
