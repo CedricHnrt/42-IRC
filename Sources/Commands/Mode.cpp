@@ -74,13 +74,13 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 	{
 		if (args.size() < 2)
 		{
-			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEGENERAL(user->getNickname(), channelName, "+k", "no password provided"), -1, DEFAULT);
 			return ;
 		}
 		std::string keyword = args[1];
 		if (!StringUtils::isAlpha(keyword))
 		{
-			sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEPARAM(user->getNickname(), channelName, properties->getChannelModes(), keyword), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEPARAM(user->getNickname(), channelName, "+K", keyword), -1, DEFAULT);
 			return;
 		}
 		properties->setPassword(keyword);
@@ -152,8 +152,11 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 		properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
 	else if (mode == MINUS)
 		properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
-	if (c == 'o' && mode == PLUS)
-		sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname()), -1, DEFAULT);
+	if (c == 'o') {
+		if (mode == PLUS)
+			sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname()), -1, DEFAULT);
+		targetChannel->nameReplyAll();
+	}
 	sendServerReply(user->getUserSocketFd(), RPL_UMODEIS(user->getNickname(), properties->getUserModes(targetUser->getUniqueId())), -1, DEFAULT);
 }
 
@@ -326,7 +329,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			}
 		}
 	}
-	targetChannel->nameReplyAll();
 	if (!properties->doesChannelHaveMode('k'))
 		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), targetChannel->getName(), properties->getChannelModes()), -1, DEFAULT);
 	else
