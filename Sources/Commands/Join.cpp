@@ -69,12 +69,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 	//check the channel cache manager, if !exist->add new, else to implement(join existing channel with pword if necessary)
 	for (std::vector<std::pair<std::string, std::string> >::iterator it = ChannelsPasswords.begin() ; it != ChannelsPasswords.end() ; ++it)
 	{
-
-		std::cout << "got in join" << std::endl;
-
 		std::string channelName = it->first;
-//		std::cout << "in join for loop, chan name:" << channelName << std::endl;
-//		std::cout << "name size: " << channelName.size() << std::endl;
 		StringUtils::trim(channelName, "#");
 		if (it->first[0] != '#')
 			sendServerReply(user->getUserSocketFd(), RPL_NOTICE(user->getNickname(), user->getUserName(), "/join", "needs '#' before channel name"), -1, DEFAULT);

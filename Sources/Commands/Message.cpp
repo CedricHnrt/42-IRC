@@ -39,19 +39,6 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 
 	std::string message;
 
-	if (args.size() < 1)
-	{
-		sendServerReply(user->getUserSocketFd(), ERR_NORECIPIENT(user->getNickname()), -1, DEFAULT);
-		return;
-	}
-
-//	if (args.size() < 2)
-//	{
-//		sendServerReply(user->getUserSocketFd(), ERR_NOTEXTTOSEND(user->getNickname()), -1, DEFAULT);
-//		return;
-//	}
-
-
 	for (std::vector<std::string>::iterator it = args.begin() ; it != args.end() ; ++it)
 	{
 		message += *it;
@@ -73,7 +60,6 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 				return ;
 			}
 			if (chanProp->doesUserHaveMode(user->getUniqueId(), 'q') == true) {
-				std::cout << "dude's silenced" << std::endl;
 				sendServerReply(user->getUserSocketFd(), ERR_BANNEDFROMCHAN(user->getNickname(), currentChannel->getName()), -1, DEFAULT);
 				return ;
 			}
@@ -84,7 +70,6 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 									RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1,
 									DEFAULT);
 			}
-			std::cout << "nb of users in server: " << UsersCacheManager::getInstance()->getCache().size() << std::endl;
 		}
 		catch (ChannelCacheException &e)
 		{

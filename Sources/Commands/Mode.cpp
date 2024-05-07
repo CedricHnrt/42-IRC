@@ -14,27 +14,6 @@ Mode::Mode()
 	(void)this->_expectedArgs;
 }
 
-//static void printvector(std::vector<std::string> vec)
-//{
-//	for (std::vector<std::string >::iterator it = vec.begin() ; it != vec.end() ; ++it)
-//	{
-//		std::cout << *it << std::endl;
-//	}
-//}
-//
-//static void printVvector(std::vector<std::vector<std::string> > vec)
-//{
-//	size_t i = 0;
-//	for (std::vector<std::vector<std::string> >::iterator it = vec.begin() ; it != vec.end() ; ++it)
-//	{
-//		std::cout << "vector " << i << ":" << std::endl;
-//		printvector(*it);
-//		std::cout << std::endl;
-//		i++;
-//	}
-//}
-
-
 static void handleBanMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
 {
 	(void)user;
@@ -69,9 +48,11 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 {
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
+	std::string modeRpl;
 
 	if (mode == PLUS)
 	{
+		modeRpl += '+';
 		if (args.size() < 2)
 		{
 			sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEGENERAL(user->getNickname(), channelName, "+k", "no password provided"), -1, DEFAULT);
@@ -86,36 +67,36 @@ static void handleKeyMode(User *user, std::string channelName, std::vector<std::
 		properties->setPassword(keyword);
 		properties->setPasswordStatus(true);
 		properties->addModeToChannel(user->getUniqueId(), 'k');
-//		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelName, "k", properties->getPassword()), -1, DEFAULT);
-//		std::cout << "new pass set" << std::endl;
 	}
 	else if (mode == MINUS)
 	{
+		modeRpl += '-';
 		properties->setPassword("");
 		properties->setPasswordStatus(false);
-//		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), channelName, "-k"), -1, DEFAULT);
-//		std::cout << "pass deleted" << std::endl;
 		properties->removeModeToChannel(user->getUniqueId(), 'k');
 	}
+	modeRpl += 'k';
+	sendServerReply(user->getUserSocketFd(), RPL_ADDMODE(user->getNickname(), user->getNickname(), modeRpl, channelName), -1, DEFAULT);
 }
 
 static void handleLimitMode(User *user, std::string channelName, std::vector<std::string> args, int mode)
 {
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
-
+	std::string modeRpl;
 
 	if (mode == PLUS)
 	{
+		modeRpl += "+";
+		modeRpl += 'l';
 		if (args.size() < 2)
 		{
-			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Not enough parameters"), -1, DEFAULT);
 			return ;
 		}
 		if (!StringUtils::isOnlyDigits(args[1]))
 		{
-			sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
-			std::cout << "limits must be digit" << std::endl;
+			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Argument must be digits"), -1, DEFAULT);
 			return ;
 		}
 
@@ -123,27 +104,39 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 		double newLimit = strtod(args[1].c_str(), &pEnd);
 		if (newLimit > INT_MAX)
 		{
-			std::cout << "limit is too high" << std::endl;
+			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Limit is too high"), -1, DEFAULT);
 			return ;
 		}
 		try {
 			properties->addModeToChannel(user->getUniqueId(), 'l');
+			properties->setUserLimit(static_cast<int>(newLimit));
+			properties->setUserLimitStatus(true);
 		}
-		catch (std::exception &e)
-		{
+		catch (std::exception &e) {
 			IrcLogger *logger = IrcLogger::getLogger();
 			logger->log(IrcLogger::INFO, e.what());
+			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Channel already has this mode"), -1, DEFAULT);
+			return ;
 		}
-		properties->setUserLimit(static_cast<int>(newLimit));
-		properties->setUserLimitStatus(true);
 	}
 	else if (mode == MINUS)
 	{
-		properties->setUserLimit(-1);
-		properties->setUserLimitStatus(false);
-		properties->removeModeToChannel(user->getUniqueId(), 'l');
+		modeRpl += "-";
+		modeRpl += "l";
+		try {
+			properties->removeModeToChannel(user->getUniqueId(), 'l');
+			properties->setUserLimit(-1);
+			properties->setUserLimitStatus(false);
+			properties->removeModeToChannel(user->getUniqueId(), 'l');
+		}
+		catch (std::exception &e) {
+			IrcLogger *logger = IrcLogger::getLogger();
+			logger->log(IrcLogger::ERROR, e.what());
+			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Channel does not have this mode"), -1, DEFAULT);
+			return ;
+		}
 	}
-	sendServerReply(user->getUserSocketFd(), TEST_RPL(user->getNickname(), user->getNickname(), "+l", channelName), -1, DEFAULT);
+	sendServerReply(user->getUserSocketFd(), RPL_ADDMODE(user->getNickname(), user->getNickname(), modeRpl, channelName), -1, DEFAULT);
 }
 
 static void handleUserMode(User *user, std::string channelName, std::vector<std::string> args, int mode, char c)
@@ -152,8 +145,15 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 	ChannelProperties *properties = targetChannel->getProperties();
 	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
 
+	std::string repMode = ":MODE ";
+	if (mode == PLUS)
+		repMode += '+';
+	else
+		repMode += '-';
+	repMode += c;
+
 	if (args.size() < 2){
-		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+		sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, repMode, "Not enough parameters"), -1, DEFAULT);
 		return ;
 	}
 	try {
@@ -167,13 +167,11 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 			targetChannel->nameReplyAll();
 		}
 		sendServerReply(user->getUserSocketFd(), RPL_UMODEIS(user->getNickname(), properties->getUserModes(targetUser->getUniqueId())), -1, DEFAULT);
-		}
+	}
 	catch (std::exception &e) {
 		IrcLogger *logger = IrcLogger::getLogger();
 		logger->log(IrcLogger::ERROR, e.what());
 
-		std::string repMode;
-		repMode += c;
 		repMode += ": ";
 		std::string str = e.what();
 		if (str == "Error: User doesn't have this mode")
@@ -194,25 +192,44 @@ static void handleChannelMode(User *user, std::string channelName, std::vector<s
 {
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
+	std::string modeRpl;
+
+	if (mode == PLUS)
+		modeRpl += '+';
+	if (mode == MINUS)
+		modeRpl += '-';
+	modeRpl += c;
 
 	if (args.size() < 1){
-		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), "MODE"), -1, DEFAULT);
+		sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Not enough parameters"), -1, DEFAULT);
 		return ;
 	}
 
-	std::string modeRpl;
-
 	if (mode == PLUS) {
-		properties->addModeToChannel(user->getUniqueId(), c);
-		modeRpl += "+";
+		try {
+			properties->addModeToChannel(user->getUniqueId(), c);
+		}
+		catch (std::exception &e) {
+			IrcLogger *logger = IrcLogger::getLogger();
+			logger->log(IrcLogger::ERROR, e.what());
+
+			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Channel already has this mode"), -1, DEFAULT);
+			return;
+		}
 	}
 	else if (mode == MINUS) {
-		properties->removeModeToChannel(user->getUniqueId(), c);
-		modeRpl += "-";
+		try {
+			properties->removeModeToChannel(user->getUniqueId(), c);
+		}
+		catch (std::exception &e) {
+			IrcLogger *logger = IrcLogger::getLogger();
+			logger->log(IrcLogger::ERROR, e.what());
+
+			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Channel does not have this mode"), -1, DEFAULT);
+			return;
+		}
 	}
-	modeRpl += c;
-//	sendServerReply(user->getUserSocketFd(), RPL_ADDMODE(user->getNickname(), user->getNickname(), channelName, modeRpl), -1, DEFAULT);
-	sendServerReply(user->getUserSocketFd(), TEST_RPL(user->getNickname(), user->getNickname(), modeRpl, channelName), -1, DEFAULT);
+	sendServerReply(user->getUserSocketFd(), RPL_ADDMODE(user->getNickname(), user->getNickname(), modeRpl, channelName), -1, DEFAULT);
 }
 
 void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)

@@ -208,9 +208,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		{
 //			std::cout << "before if 4" << std::endl;
 
-			sendServerReply(incomingFD, ERR_UNKNOWNCOMMAND(
-				Configuration::getInstance()->getSection("SERVER")->getStringValue("servername", "IRCHEH"),
-				splitted[0]), RED, BOLDR);
+			sendServerReply(incomingFD, ERR_UNKNOWNCOMMAND(currentUser->getNickname(), splitted.front()), RED, BOLDR);
 			return;
 		}
 		//		std::cout << "command found" << std::endl;
@@ -269,7 +267,6 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		}
 
 		User *currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
-//		std::cout << "before execute" << std::endl;
 		Command->execute(currentUser, currentChannel, splitted);
 	}
 }
@@ -310,9 +307,6 @@ void Server::handleIncomingRequest(int incomingFD)
 		return;
 	buffer[size] = '\0';
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
-
-//	std::cout << "buffer: " << buffer << std::endl;
-
 	std::string parse = buffer;
 
 	if (parse.empty())
@@ -325,7 +319,6 @@ void Server::handleIncomingRequest(int incomingFD)
 	}
 
 	if (parse.find("\r\n") != std::string::npos)
-//		std::cout << "Initial buffer has delimiter" << std::endl;
 	if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
 		return ;
 
@@ -336,30 +329,17 @@ void Server::handleIncomingRequest(int incomingFD)
 			if (!parse.empty())
 				user->addToBuffer(parse);
 			parse = user->getReceivedBuffer();
-
-//			std::cout << "in not dangling, parse = " << parse << std::endl;
-//			if (parse.find("\r\n") != std::string::npos)
-//				std::cout << "this non dangling has delimiter" << std::endl;
-
-
 		}
 		catch (std::exception &e)
 		{
 			std::cout << e.what() << std::endl;
 		}
 		if (parse.find("\r\n") != std::string::npos) {
-//			std::cout << "before known client" << std::endl;
 			this->handleKnownClient(incomingFD, parse);
 			user->clearBuffer();
 		}
 		return;
 	}
-
-
-	if (parse.find("\r\n") == std::string::npos) {
-//		std::cout << "no delimiter found" << std::endl;
-	}
-
 	try
 	{
 		this->_danglingUsers.at(incomingFD).fillBuffer(std::string(buffer), incomingFD);
@@ -387,8 +367,6 @@ void Server::handleIncomingRequest(int incomingFD)
 		IrcLogger *logger = IrcLogger::getLogger();
 		logger->log(IrcLogger::ERROR, "An error occurred during user building !");
 		logger->log(IrcLogger::ERROR, exception.what());
-//		close(incomingFD);
-//		this->_danglingUsers.erase(incomingFD);
 	}
 }
 
