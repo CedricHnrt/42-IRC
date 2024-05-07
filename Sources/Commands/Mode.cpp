@@ -158,9 +158,14 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 	}
 	try {
 		if (mode == PLUS)
+		{
 			properties->addModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
-		else if (mode == MINUS)
+			sendServerReply(user->getUserSocketFd(), RPL_ADDMODEUSER(user->getNickname(), targetUser->getNickname(), repMode, channelName), -1, DEFAULT);
+		}
+		else if (mode == MINUS) {
 			properties->removeModeToUser(targetUser->getUniqueId(), user->getUniqueId(), c);
+			sendServerReply(user->getUserSocketFd(), RPL_ADDMODEUSER(user->getNickname(), targetUser->getNickname(), repMode, channelName), -1, DEFAULT);
+		}
 		if (c == 'o') {
 			if (mode == PLUS)
 				sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname(), channelName), -1, DEFAULT);

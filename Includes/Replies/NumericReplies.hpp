@@ -96,6 +96,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 #define ERR_INVALIDMODEGENERAL(client, channel, mode, reason) (":localhost 696 " + client + " #" + channel + " " + mode + " : " + reason + "\r\n")
 #define RPL_ADDMODE(nickname, modifier, mode, channel) (":localhost 324 " + nickname + " #" + channel + " :" + modifier + " set mode " + mode + " on #" + channel + "\r\n")
 #define ERR_ADDMODE(nickname, channel, mode, reason) (":localhost 461 " + nickname + " #" + channel + " :" "MODE " + mode + " error: " + reason + "\r\n")
+#define RPL_ADDMODEUSER(nickname, target, mode, channel) (":localhost 324 " + nickname + " #" + channel + " :" + target + " " + mode + "\r\n")
 #define RPL_ADDVOICE(nickname, username, channel, mode, param) (":" + nickname + "!" + username + "@localhost MODE #" + channel + " " + mode + " " + param + "\r\n")
 
 // MOTD
