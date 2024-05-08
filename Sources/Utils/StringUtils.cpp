@@ -206,7 +206,6 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 //		std::cout << *it << std::endl;
 
 	return result;
-
 }
 
 std::string StringUtils::ltos(long value)

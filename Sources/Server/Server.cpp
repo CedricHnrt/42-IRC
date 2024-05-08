@@ -309,6 +309,8 @@ void Server::handleIncomingRequest(int incomingFD)
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	std::string parse = buffer;
 
+	std::cout << parse << std::endl;
+
 	if (parse.empty())
 	{
 		if (it != this->_danglingUsers.end()) {
