@@ -15,8 +15,8 @@
 #include <poll.h>
 #include <fcntl.h>
 
-#include "../Exceptions/BotBuildException.hpp"
-#include "../Exceptions/BotRunException.hpp"
+#include "BotBuildException.hpp"
+#include "BotRunException.hpp"
 
 class Bot
 {
