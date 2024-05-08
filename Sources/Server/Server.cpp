@@ -192,6 +192,11 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		"NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD)->getNickname());
 
 	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
+
+	std::cout << "splitted: " << std::endl;
+	StringUtils::printvector(splitted);
+	std::cout << std::endl;
+
 	buffer.clear();
 	if (!splitted.empty())
 	{
