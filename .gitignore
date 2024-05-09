@@ -4,7 +4,7 @@
 
 #EXECUTABLE
 ircserv
-ircserv_bonus
+ircserv_bot
 
 #DEPENDENCIES
 *.o
