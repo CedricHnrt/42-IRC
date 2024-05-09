@@ -2,7 +2,7 @@
 // Created by pgoua on 08/05/2024.
 //
 
-#include "../Includes/BotRunException.hpp"
+#include "../../Includes/BotRunException.hpp"
 
 BotRunException::BotRunException(const std::string &error) throw() : message(error) {}
 

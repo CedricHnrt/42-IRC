@@ -20,6 +20,7 @@ _END = \033[0m
 _BOLD = \033[1m
 
 NAME = ircserv
+BONUS_NAME = ircserv_bot
 CC = @g++
 INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Server		\
@@ -37,61 +38,69 @@ C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -O0 -fno-omit-frame
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-FILES =	Server/Server						\
-		Configuration/Configuration			\
-		Configuration/ConfigurationSection	\
-		Exceptions/ChannelCacheException	\
-		Exceptions/ChannelGetException		\
-		Exceptions/ChannelBuildException	\
-		Exceptions/UserBuildException		\
-		Exceptions/UserCacheException		\
-		Exceptions/UserCacheExceptionString	\
-		Exceptions/UserConnectionException	\
-		Exceptions/ConfigurationIOException	\
-		Exceptions/ServerStartingException	\
+FILES =	Server/Server								\
+		Configuration/Configuration					\
+		Configuration/ConfigurationSection			\
+		Exceptions/ChannelCacheException			\
+		Exceptions/ChannelGetException				\
+		Exceptions/ChannelBuildException			\
+		Exceptions/UserBuildException				\
+		Exceptions/UserCacheException				\
+		Exceptions/UserCacheExceptionString			\
+		Exceptions/UserConnectionException			\
+		Exceptions/ConfigurationIOException			\
+		Exceptions/ServerStartingException			\
 		Exceptions/ServerInitializationException	\
-		Utils/PrimitivePredicate			\
-		Utils/IRCPredicate					\
-		Utils/StringUtils					\
-		Utils/IrcLogger						\
-		Utils/Colors						\
-		Utils/FileUtils						\
-		Utils/TimeUtils						\
-		Models/User/User					\
-		Models/User/UserProperties			\
-		Models/Channel/ChannelProperties	\
-		Models/Channel/Channel				\
-		CacheManager/ChannelCacheManager	\
-		CacheManager/UsersCacheManager		\
-		CacheManager/CommandManager			\
-		Builders/UserBuilder				\
-		Builders/ChannelBuilder				\
-		Helpers/UserListHelper				\
-		Replies/NumericReplies				\
-		Commands/ICommand					\
-		Commands/Message					\
-		Commands/Join						\
-		Commands/Part						\
-		Commands/Quit						\
-		Commands/List						\
-		Commands/Who						\
-		Commands/WhoIs						\
-		Commands/Invite						\
-		Commands/Ping						\
-		Commands/Pong						\
-		Commands/Mode           			\
-		Commands/Nick						\
-		Commands/Topic						\
+		Utils/PrimitivePredicate					\
+		Utils/IRCPredicate							\
+		Utils/StringUtils							\
+		Utils/IrcLogger								\
+		Utils/Colors								\
+		Utils/FileUtils								\
+		Utils/TimeUtils								\
+		Models/User/User							\
+		Models/User/UserProperties					\
+		Models/Channel/ChannelProperties			\
+		Models/Channel/Channel						\
+		CacheManager/ChannelCacheManager			\
+		CacheManager/UsersCacheManager				\
+		CacheManager/CommandManager					\
+		Builders/UserBuilder						\
+		Builders/ChannelBuilder						\
+		Helpers/UserListHelper						\
+		Replies/NumericReplies						\
+		Commands/ICommand							\
+		Commands/Message							\
+		Commands/Join								\
+		Commands/Part								\
+		Commands/Quit								\
+		Commands/List								\
+		Commands/Who								\
+		Commands/WhoIs								\
+		Commands/Invite								\
+		Commands/Ping								\
+		Commands/Pong								\
+		Commands/Mode								\
+		Commands/Nick								\
+		Commands/Topic								\
 		Commands/Kick
+
+BONUS_FILES =	main							\
+				Bot								\
+				Exceptions/BotBuildException	\
+				Exceptions/BotRunException
 
 MAIN_FILES =	$(FILES)	\
 				main
 DEBUG_FILES =	$(FILES)	\
 				Tests/Tests
+
 OBJS = $(addsuffix .o, $(addprefix Objects/, $(MAIN_FILES)))
 DPDS = $(addsuffix .d, $(addprefix Objects/, $(MAIN_FILES)))
 DEBUG_OBJS = $(addsuffix .o, $(addprefix Objects/, $(DEBUG_FILES)))
 DEBUG_DPDS = $(addsuffix .d, $(addprefix Objects/, $(DEBUG_FILES)))
+BONUS_OBJS = $(addsuffix .o, $(addprefix Bonus/Objects/, $(BONUS_FILES)))
+BONUS_DPDS = $(addsuffix .d, $(addprefix Bonus/Objects/, $(BONUS_FILES)))
 
 DEBUG = false
 
@@ -99,6 +108,11 @@ $(NAME): $(OBJS)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
 	$(CC) $(OBJS) -o $(NAME)
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
+
+$(BONUS_NAME): $(BONUS_OBJS)
+	$(PRINT) "\n${_YELLOW}Making $(BONUS_NAME)...${_END}"
+	$(CC) $(BONUS_OBJS) -o $(BONUS_NAME)
+	$(PRINT) "${_BOLD}${_GREEN}$(BONUS_NAME) done.\a${_END}"
 
 debug: fclean $(DEBUG_OBJS)
 ifeq ($(DEBUG), true)
@@ -111,7 +125,9 @@ else
 endif
 
 Objects/%.o: Sources/%.cpp Makefile
-	$(DIR) Objects/Builders Objects/Exceptions Objects/Server Objects/Configuration Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils Objects/Helpers Objects/Replies Objects/Commands
+	$(DIR) Objects/Builders Objects/Exceptions Objects/Server Objects/Configuration \
+	Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils \
+	Objects/Helpers Objects/Replies Objects/Commands
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 ifeq ($(DEBUG), true)
 	$(DIR) Objects/Tests
@@ -120,22 +136,38 @@ else
 	$(CC) -c $(C++FLAGS) $< -o $@
 endif
 
-all: $(NAME)
+Bonus/Objects/%.o: Bonus/Sources/%.cpp Makefile
+	$(DIR) Bonus/Objects Bonus/Objects/Exceptions
+	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
+	$(CC) -c $(C++FLAGS) $< -o $@
+
+all: $(NAME) $(BONUS_NAME)
+
+bonus: $(BONUS_NAME)
 
 clean:
-	$(PRINT) "\n${_BOLD}Cleaning Objects...${_END}"
-	$(RM) Objects
-	$(PRINT) "${_BOLD}${_GREEN}Objects cleaned.\a${_END}"
-
-fclean:
+ifneq ($(strip $(wildcard $(OBJS))),)
 	$(PRINT) "\n${_RED}Cleaning Objects...${_END}"
-	$(PRINT) "${_RED}Deleting Objects directory...${_END}"
 	$(RM) Objects
+	$(PRINT) "${_GREEN}Objects cleaned.${_END}"
+endif
+ifneq ($(strip $(wildcard $(BONUS_OBJS))),)
+	$(PRINT) "${_RED}Cleaning Bonus/Objects...${_END}"
+	$(RM) Bonus/Objects
+	$(PRINT) "${_GREEN}Bonus/Objects cleaned.${_END}"
+endif
+
+fclean: clean
+ifeq ($(wildcard $(NAME)), $(NAME))
 	$(PRINT) "${_RED}Deleting $(NAME)...${_END}"
 	$(RM) $(NAME)
-	$(PRINT) "${_GREEN}Objects cleaned.${_END}"
-	$(PRINT) "${_GREEN}Objects directory deleted.${_END}"
-	$(PRINT) "${_GREEN}$(NAME) deleted.\a\n${_END}"
+	$(PRINT) "${_GREEN}$(NAME) deleted.\a${_END}"
+endif
+ifeq ($(wildcard $(BONUS_NAME)), $(BONUS_NAME))
+	$(PRINT) "${_RED}Deleting $(BONUS_NAME)...${_END}"
+	$(RM) $(BONUS_NAME)
+	$(PRINT) "${_GREEN}$(BONUS_NAME) deleted.\a${_END}"
+endif
 
 re: fclean all
 
@@ -145,6 +177,8 @@ exec : all
 val : all
 		valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes ./ircserv 7777 434
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re exec val bonus debug
 
 -include $(DPDS)
+-include $(DEBUG_DPDS)
+-include $(BONUS_DPDS)
