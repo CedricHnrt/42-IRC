@@ -10,6 +10,12 @@
 //#include "../../Includes/User/User.hpp"
 //#include "../../Includes/CacheManager/UsersCacheManager.hpp"
 
+static size_t getTime()
+{
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+}
 
 static std::vector<std::string> split(const std::string &input, int c)
 {
@@ -71,6 +77,7 @@ Bot::Bot(char *port, char *password) throw (BotBuildException)
 
     this->_botPollFd.events = POLLIN;
     this->_botPollFd.fd = clientSocket;
+	this->_lastPing = getTime();
 }
 
 void Bot::botConnect() throw(BotBuildException)
@@ -103,7 +110,7 @@ void Bot::handleRequest(const std::string &request)
 //		User *Target = UsersCacheManager::getInstance()->getFromNickname(targetNick);
 		std::string message = "PRIVMSG ";
 		message += targetNick;
-		message += " :nique ta mere\r\n";
+		message += " :test privmsg\r\n";
 
 		std::cout << "message sent: " << message << std::endl;
 
@@ -118,23 +125,42 @@ void Bot::handleRequest(const std::string &request)
 	return;
 }
 
+//TODO if ctrl c, send quit reply
 void Bot::botUp() throw(BotBuildException)
 {
 	while (1)
 	{
-		if (poll(&this->_botPollFd, 1, -1) == -1) {
-			std::cout << "err on poll" << std::endl;
+		std::cout << "ping" << std::endl;
+		size_t currentTimestamp = getTime();
+		std::cout << "lping: " << this->_lastPing << ", new: " << currentTimestamp << "diff: " << currentTimestamp - this->_lastPing << std::endl;
+		if (getTime() > this->_lastPing + 10000) {
+			this->_lastPing = getTime();
+			std::string pingMsg = "PING LAG7777\r\n";
+			if (send(this->_botPollFd.fd, pingMsg.c_str(), pingMsg.length(), 0) == -1) {
+				std::cout << "crash on send" << std::endl;
+				exit(1);
+			}
 		}
+		int res =poll(&this->_botPollFd, 1, -1);
+		std::cout << "ping3" << std::endl;
+		if (res == -1)
+			std::cout << "err on poll" << std::endl;
 		else if (this->_botPollFd.revents & POLLIN)
 		{
 			char buffer[512];
 			int size = recv(this->_botPollFd.fd, &buffer, 510, 0);
-			if (size == -1)
-				std::cout << "err on recv" << std::endl;
-			if (size == 0)
-			{
+			if (size == -1) {
 				close(this->_botPollFd.fd);
 				std::cout << "connection closed" << std::endl;
+				exit(1);
+				return ;
+
+			}
+			if (size == 0)
+			{
+//				close(this->_botPollFd.fd);
+				std::cout << "connection closed" << std::endl;
+				exit(1);
 				return ;
 			}
 			else {
@@ -151,6 +177,6 @@ void Bot::botUp() throw(BotBuildException)
 			}
 
 		}
-
+		std::cout << "ping2" << std::endl;
 	}
 }

@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <poll.h>
 #include <fcntl.h>
+#include <time.h>
 
 #include "BotBuildException.hpp"
 #include "BotRunException.hpp"
@@ -26,6 +27,7 @@ private:
 	std::string _password;
 	sockaddr_in _serverAddress;
 	pollfd		_botPollFd;
+	size_t		_lastPing;
 
 public:
 	Bot(char *port, char *password) throw (BotBuildException);
