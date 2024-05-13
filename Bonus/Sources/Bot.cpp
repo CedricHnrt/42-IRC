@@ -87,8 +87,10 @@ void Bot::botConnect() throw(BotBuildException)
 	std::cout << "so far so good" << std::endl;
 }
 
-static bool isRequestCorrect(const std::vector<std::string> &request)
+static bool isRequestCorrect(const std::vector<std::string> &request) throw (BotBuildException)
 {
+	if (request[1] == "433")
+		throw (BotBuildException("Nick already taken"));
 	if (request.size() != 4 || request[1] != "PRIVMSG" || request[0][0] != ':' || request[3][0] != ':')
 		return false;
 	return true;
@@ -99,7 +101,6 @@ void Bot::handleRequest(const std::string &request)
 	std::vector<std::string> requestVector = split(request, ' ');
 
 	std::cout << "vector size: " << requestVector.size() << std::endl;
-
 	if (isRequestCorrect(requestVector)) {
 		std::string targetNick = requestVector[0].substr(1, requestVector[0].find('!', 1) - 1);
 		std::cout << "nick: " << targetNick << std::endl;
@@ -118,7 +119,6 @@ void Bot::handleRequest(const std::string &request)
 	else {
 		throw BotRunException("Error: Incorrect request");
 	}
-	return;
 }
 
 static void signalHandler(int signum)
@@ -186,31 +186,25 @@ void Bot::botUp() throw(BotBuildException)
 				close(this->_botPollFd.fd);
 				std::cout << "connection closed" << std::endl;
 				exit(1);
-<<<<<<< HEAD
-				return;
-
-=======
->>>>>>> 7003885482717cf19ab327b7da4812f7d2b97d7c
 			}
 			if (size == 0) {
 //				close(this->_botPollFd.fd);
 				std::cout << "connection closed" << std::endl;
 				exit(1);
-<<<<<<< HEAD
-				return;
-			} else {
-=======
 			}
 			else {
->>>>>>> 7003885482717cf19ab327b7da4812f7d2b97d7c
 				std::string request = buffer;
 				memset(buffer, 0, size);
 				std::cout << "received buffer: " << request << std::endl;
 				try {
 					this->handleRequest(request);
 				}
-				catch (std::exception &e) {
+				catch (const BotRunException &e) {
 					std::cout << e.what() << std::endl;
+				}
+				catch (const BotBuildException &e) {
+					std::cout << e.what() << std::endl;
+					return ;
 				}
 			}
 		}
