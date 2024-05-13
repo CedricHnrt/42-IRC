@@ -1,14 +1,10 @@
-//
-// Created by pgoua on 08/05/2024.
-//
-
 #include "../Includes/Bot.hpp"
 #include <cstring>
 #include <iostream>
 #include <vector>
 #include <algorithm>
-//#include "../../Includes/User/User.hpp"
-//#include "../../Includes/CacheManager/UsersCacheManager.hpp"
+
+bool Bot::botIsUp = false;
 
 static size_t getTime()
 {
@@ -125,10 +121,48 @@ void Bot::handleRequest(const std::string &request)
 	return;
 }
 
-//TODO if ctrl c, send quit reply
+static void signalHandler(int signum)
+{
+	if (signum == SIGINT) {
+		std::cout << "\b\b  \b\b";
+		std::cout << "SIGINT received. Interrupting bot..." << std::endl;
+	}
+	else if (signum == SIGQUIT) {
+		std::cout << "\b\b  \b\b";
+		std::cout << "SIGQUIT received. Interrupting bot..." << std::endl;
+	}
+	else if (signum == SIGTERM) {
+		std::cout << "\b\b  \b\b";
+		std::cout << "SIGTERM received. Interrupting bot..." << std::endl;
+	}
+
+	Bot::botIsUp = false;
+}
+
+void Bot::handleSignals()
+{
+	if (std::signal(SIGINT, signalHandler) == SIG_ERR)
+	{
+		std::cout << "Error in signals handling" << std::endl;
+		botIsUp = false;
+	}
+	if (std::signal(SIGQUIT, signalHandler) == SIG_ERR)
+	{
+		std::cout << "Error in signals handling" << std::endl;
+		botIsUp = false;
+	}
+	if (std::signal(SIGTERM, signalHandler) == SIG_ERR)
+	{
+		std::cout << "Error in signals handling" << std::endl;
+		botIsUp = false;
+	}
+}
+
 void Bot::botUp() throw(BotBuildException)
 {
-	while (1)
+	handleSignals();
+	botIsUp = true;
+	while (botIsUp)
 	{
 		std::cout << "ping" << std::endl;
 		size_t currentTimestamp = getTime();
@@ -141,7 +175,7 @@ void Bot::botUp() throw(BotBuildException)
 				exit(1);
 			}
 		}
-		int res =poll(&this->_botPollFd, 1, -1);
+		int res = poll(&this->_botPollFd, 1, -1);
 		std::cout << "ping3" << std::endl;
 		if (res == -1)
 			std::cout << "err on poll" << std::endl;
@@ -153,15 +187,12 @@ void Bot::botUp() throw(BotBuildException)
 				close(this->_botPollFd.fd);
 				std::cout << "connection closed" << std::endl;
 				exit(1);
-				return ;
-
 			}
 			if (size == 0)
 			{
 //				close(this->_botPollFd.fd);
 				std::cout << "connection closed" << std::endl;
 				exit(1);
-				return ;
 			}
 			else {
 				std::string request = buffer;

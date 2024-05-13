@@ -15,6 +15,7 @@
 #include <poll.h>
 #include <fcntl.h>
 #include <time.h>
+#include <csignal>
 
 #include "BotBuildException.hpp"
 #include "BotRunException.hpp"
@@ -28,6 +29,7 @@ private:
 	sockaddr_in _serverAddress;
 	pollfd		_botPollFd;
 	size_t		_lastPing;
+	bool		_botIsUp;
 
 public:
 	Bot(char *port, char *password) throw (BotBuildException);
@@ -37,6 +39,8 @@ public:
 	std::string getMessage() const;
 	void setMessage(const std::string &data);
 	void handleRequest(const std::string &request);
+	static void handleSignals();
+	static bool botIsUp;
 };
 
 #endif
