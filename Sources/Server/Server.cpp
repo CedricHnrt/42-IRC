@@ -193,9 +193,9 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 
 	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
 
-	std::cout << "splitted: " << std::endl;
-	StringUtils::printvector(splitted);
-	std::cout << std::endl;
+//	std::cout << "splitted: " << std::endl;
+//	StringUtils::printvector(splitted);
+//	std::cout << std::endl;
 
 	buffer.clear();
 	if (!splitted.empty())
@@ -308,8 +308,15 @@ void Server::handleIncomingRequest(int incomingFD)
 	User *user;
 
 	int size = recv(incomingFD, buffer, 512, 0);
-	if (size == -1)
+	if (size == -1) {
+//		this->servUp = false;
 		return;
+	}
+	if (size == 0)
+	{
+		close(incomingFD);
+		return ;
+	}
 	buffer[size] = '\0';
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	std::string parse = buffer;

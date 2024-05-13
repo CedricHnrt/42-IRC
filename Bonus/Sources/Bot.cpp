@@ -145,37 +145,35 @@ void Bot::botUp() throw(BotBuildException)
 		std::cout << "ping3" << std::endl;
 		if (res == -1)
 			std::cout << "err on poll" << std::endl;
-		else if (this->_botPollFd.revents & POLLIN)
-		{
+		else if (this->_botPollFd.revents & POLLIN) {
 			char buffer[512];
 			int size = recv(this->_botPollFd.fd, &buffer, 510, 0);
 			if (size == -1) {
 				close(this->_botPollFd.fd);
 				std::cout << "connection closed" << std::endl;
 				exit(1);
-				return ;
+				return;
 
 			}
-			if (size == 0)
-			{
+			if (size == 0) {
 //				close(this->_botPollFd.fd);
 				std::cout << "connection closed" << std::endl;
 				exit(1);
-				return ;
-			}
-			else {
+				return;
+			} else {
 				std::string request = buffer;
 				memset(buffer, 0, size);
 				std::cout << "received buffer: " << request << std::endl;
 				try {
 					this->handleRequest(request);
 				}
-				catch (std::exception &e)
-				{
+				catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
 				}
 			}
-
+		}
+		else {
+			(void)this;
 		}
 		std::cout << "ping2" << std::endl;
 	}
