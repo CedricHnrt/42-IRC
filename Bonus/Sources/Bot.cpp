@@ -155,7 +155,6 @@ void Bot::botUp() throw(BotBuildException)
 	handleSignals();
 	while (botIsUp)
 	{
-//		std::cout << "lping: " << this->_lastPing << ", new: " << currentTimestamp << "diff: " << currentTimestamp - this->_lastPing << std::endl;
 		if (getTime() > this->_lastPing + 10000) {
 			this->_lastPing = getTime();
 			std::string pingMsg = "PING LAG7777\r\n";
@@ -192,9 +191,6 @@ void Bot::botUp() throw(BotBuildException)
 					return ;
 				}
 			}
-		}
-		else {
-			(void)this;
 		}
 	}
 	std::string quitMessage = "QUIT :Leaving\r\n";
