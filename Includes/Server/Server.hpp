@@ -51,7 +51,6 @@ class Server
 		std::vector<pollfd> _fds;
 
 		std::vector<std::string> _censoredWords;
-		//key = userSocketFd
 		std::map<int, UserBuilder> _danglingUsers;
 
 	public:

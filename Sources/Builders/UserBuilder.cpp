@@ -2,6 +2,7 @@
 
 #include <TimeUtils.hpp>
 #include <csignal>
+#include <unistd.h>
 
 UserBuilder::UserBuilder() : userSocketFd(-1) {}
 

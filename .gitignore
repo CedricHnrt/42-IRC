@@ -4,6 +4,7 @@
 
 #EXECUTABLE
 ircserv
+ircserv_bot
 
 #DEPENDENCIES
 *.o

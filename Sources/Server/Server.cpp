@@ -192,6 +192,11 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		"NickName : " + UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD)->getNickname());
 
 	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
+
+//	std::cout << "splitted: " << std::endl;
+//	StringUtils::printvector(splitted);
+//	std::cout << std::endl;
+
 	buffer.clear();
 	if (!splitted.empty())
 	{
@@ -303,8 +308,15 @@ void Server::handleIncomingRequest(int incomingFD)
 	User *user;
 
 	int size = recv(incomingFD, buffer, 512, 0);
-	if (size == -1)
+	if (size == -1) {
+//		this->servUp = false;
 		return;
+	}
+	if (size == 0)
+	{
+		close(incomingFD);
+		return ;
+	}
 	buffer[size] = '\0';
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	std::string parse = buffer;
@@ -318,9 +330,17 @@ void Server::handleIncomingRequest(int incomingFD)
 		return;
 	}
 
-	if (parse.find("\r\n") != std::string::npos)
-	if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
-		return ;
+	if (!StringUtils::isAscii(parse))
+	{
+		IrcLogger::getLogger()->log(IrcLogger::WARN, "Unsupported characters in buffer");
+		parse.clear();
+		return;
+	}
+
+	if (parse.find("\r\n") != std::string::npos) {
+		if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
+			return;
+	}
 
 	if (it == this->_danglingUsers.end())
 	{
@@ -332,7 +352,8 @@ void Server::handleIncomingRequest(int incomingFD)
 		}
 		catch (std::exception &e)
 		{
-			std::cout << e.what() << std::endl;
+			IrcLogger *logger = IrcLogger::getLogger();
+			logger->log(IrcLogger::ERROR, e.what());
 		}
 		if (parse.find("\r\n") != std::string::npos) {
 			this->handleKnownClient(incomingFD, parse);
