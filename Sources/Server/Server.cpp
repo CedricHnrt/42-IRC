@@ -321,8 +321,6 @@ void Server::handleIncomingRequest(int incomingFD)
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	std::string parse = buffer;
 
-	std::cout << parse << std::endl;
-
 	if (parse.empty())
 	{
 		if (it != this->_danglingUsers.end()) {
@@ -332,9 +330,17 @@ void Server::handleIncomingRequest(int incomingFD)
 		return;
 	}
 
-	if (parse.find("\r\n") != std::string::npos)
-	if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
-		return ;
+	if (!StringUtils::isAscii(parse))
+	{
+		IrcLogger::getLogger()->log(IrcLogger::WARN, "Unsupported characters in buffer");
+		parse.clear();
+		return;
+	}
+
+	if (parse.find("\r\n") != std::string::npos) {
+		if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
+			return;
+	}
 
 	if (it == this->_danglingUsers.end())
 	{
@@ -346,7 +352,8 @@ void Server::handleIncomingRequest(int incomingFD)
 		}
 		catch (std::exception &e)
 		{
-			std::cout << e.what() << std::endl;
+			IrcLogger *logger = IrcLogger::getLogger();
+			logger->log(IrcLogger::ERROR, e.what());
 		}
 		if (parse.find("\r\n") != std::string::npos) {
 			this->handleKnownClient(incomingFD, parse);

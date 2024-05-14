@@ -84,13 +84,13 @@ void Bot::botConnect() throw(BotBuildException)
 	std::string message = "CAP LS 302\nPASS " + this->_password + "\nNICK IRCHEH_BOT\nUSER IRCHEH_BOT 0 * :realname\r\n";
     if (send(this->_botPollFd.fd, message.c_str(), message.length(), 0) == -1)
 		throw (BotBuildException("Error: send failed"));
-	std::cout << "so far so good" << std::endl;
+	std::cout << "BOT IS UP. Ready to handle requests..." << std::endl;
 }
 
 static bool isRequestCorrect(const std::vector<std::string> &request) throw (BotBuildException)
 {
 	if (request[1] == "433")
-		throw (BotBuildException("Nick already taken"));
+		throw (BotBuildException("Error: Nickname 'IRCHEH_BOT' already taken. Exiting..."));
 	if (request.size() != 4 || request[1] != "PRIVMSG" || request[0][0] != ':' || request[3][0] != ':')
 		return false;
 	return true;
@@ -100,21 +100,16 @@ void Bot::handleRequest(const std::string &request)
 {
 	std::vector<std::string> requestVector = split(request, ' ');
 
-	std::cout << "vector size: " << requestVector.size() << std::endl;
 	if (isRequestCorrect(requestVector)) {
 		std::string targetNick = requestVector[0].substr(1, requestVector[0].find('!', 1) - 1);
-		std::cout << "nick: " << targetNick << std::endl;
-//		User *Target = UsersCacheManager::getInstance()->getFromNickname(targetNick);
+		std::cout << "Message received from " << targetNick << std::endl;
 		std::string message = "PRIVMSG ";
 		message += targetNick;
-		message += " :test privmsg\r\n";
-
-		std::cout << "message sent: " << message << std::endl;
-
-//		(send(Target->getUserSocketFd(), message.c_str(), 512, 0) == -1)
+		message += " :I'm IRCHEH_BOT, I don't do much but I exist. Outstanding uwu ?\r\n";
 
 		if (send(this->_botPollFd.fd, message.c_str(), 512, 0) == -1)
 			std::cout << "err on send" << std::endl;
+		std::cout << "Answer successfully sent to " << targetNick << std::endl;
 	}
 	else {
 		throw BotRunException("Error: Incorrect request");
@@ -164,43 +159,37 @@ void Bot::botUp() throw(BotBuildException)
 	botIsUp = true;
 	while (botIsUp)
 	{
-		std::cout << "ping" << std::endl;
-		size_t currentTimestamp = getTime();
-		std::cout << "lping: " << this->_lastPing << ", new: " << currentTimestamp << "diff: " << currentTimestamp - this->_lastPing << std::endl;
+//		std::cout << "lping: " << this->_lastPing << ", new: " << currentTimestamp << "diff: " << currentTimestamp - this->_lastPing << std::endl;
 		if (getTime() > this->_lastPing + 10000) {
 			this->_lastPing = getTime();
 			std::string pingMsg = "PING LAG7777\r\n";
 			if (send(this->_botPollFd.fd, pingMsg.c_str(), pingMsg.length(), 0) == -1) {
-				std::cout << "crash on send" << std::endl;
 				exit(1);
 			}
 		}
-		int res = poll(&this->_botPollFd, 1, -1);
-		std::cout << "ping3" << std::endl;
-		if (res == -1)
-			std::cout << "err on poll" << std::endl;
+		int res = poll(&this->_botPollFd, 1, 100);
+		if (res == -1) {
+			std::cout << "Error: Poll(). Exiting";
+			this->_botIsUp = false;
+		}
 		else if (this->_botPollFd.revents & POLLIN) {
 			char buffer[512];
 			int size = recv(this->_botPollFd.fd, &buffer, 510, 0);
 			if (size == -1) {
 				close(this->_botPollFd.fd);
-				std::cout << "connection closed" << std::endl;
 				exit(1);
 			}
 			if (size == 0) {
-//				close(this->_botPollFd.fd);
-				std::cout << "connection closed" << std::endl;
 				exit(1);
 			}
 			else {
 				std::string request = buffer;
 				memset(buffer, 0, size);
-				std::cout << "received buffer: " << request << std::endl;
 				try {
 					this->handleRequest(request);
 				}
 				catch (const BotRunException &e) {
-					std::cout << e.what() << std::endl;
+					;
 				}
 				catch (const BotBuildException &e) {
 					std::cout << e.what() << std::endl;
@@ -211,6 +200,9 @@ void Bot::botUp() throw(BotBuildException)
 		else {
 			(void)this;
 		}
-		std::cout << "ping2" << std::endl;
+	}
+	std::string quitMessage = "QUIT :Leaving\r\n";
+	if (send(this->_botPollFd.fd, quitMessage.c_str(), quitMessage.length(), 0) == -1) {
+		std::cout << "Error: send() failed" << std::endl;
 	}
 }
