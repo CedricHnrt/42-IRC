@@ -118,19 +118,13 @@ void Bot::handleRequest(const std::string &request)
 
 static void signalHandler(int signum)
 {
-	if (signum == SIGINT) {
-		std::cout << "\b\b  \b\b";
+	std::cout << "\b\b  \b\b";
+	if (signum == SIGINT)
 		std::cout << "SIGINT received. Interrupting bot..." << std::endl;
-	}
-	else if (signum == SIGQUIT) {
-		std::cout << "\b\b  \b\b";
+	else if (signum == SIGQUIT)
 		std::cout << "SIGQUIT received. Interrupting bot..." << std::endl;
-	}
-	else if (signum == SIGTERM) {
-		std::cout << "\b\b  \b\b";
+	else if (signum == SIGTERM)
 		std::cout << "SIGTERM received. Interrupting bot..." << std::endl;
-	}
-
 	Bot::botIsUp = false;
 }
 
@@ -140,11 +134,13 @@ void Bot::handleSignals()
 	{
 		std::cout << "Error in signals handling" << std::endl;
 		botIsUp = false;
+		return;
 	}
 	if (std::signal(SIGQUIT, signalHandler) == SIG_ERR)
 	{
 		std::cout << "Error in signals handling" << std::endl;
 		botIsUp = false;
+		return;
 	}
 	if (std::signal(SIGTERM, signalHandler) == SIG_ERR)
 	{
@@ -155,11 +151,10 @@ void Bot::handleSignals()
 
 void Bot::botUp() throw(BotBuildException)
 {
-	handleSignals();
 	botIsUp = true;
+	handleSignals();
 	while (botIsUp)
 	{
-//		std::cout << "lping: " << this->_lastPing << ", new: " << currentTimestamp << "diff: " << currentTimestamp - this->_lastPing << std::endl;
 		if (getTime() > this->_lastPing + 10000) {
 			this->_lastPing = getTime();
 			std::string pingMsg = "PING LAG7777\r\n";
@@ -168,9 +163,9 @@ void Bot::botUp() throw(BotBuildException)
 			}
 		}
 		int res = poll(&this->_botPollFd, 1, 100);
-		if (res == -1) {
-			std::cout << "Error: Poll(). Exiting";
-			this->_botIsUp = false;
+		if (res == -1 && errno != EINTR) {
+			std::cout << "Error: Poll(). Exiting" << std::endl;
+			botIsUp = false;
 		}
 		else if (this->_botPollFd.revents & POLLIN) {
 			char buffer[512];
@@ -196,9 +191,6 @@ void Bot::botUp() throw(BotBuildException)
 					return ;
 				}
 			}
-		}
-		else {
-			(void)this;
 		}
 	}
 	std::string quitMessage = "QUIT :Leaving\r\n";

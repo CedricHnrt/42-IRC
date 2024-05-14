@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <csignal>
+#include <cerrno>
 
 #include "BotBuildException.hpp"
 #include "BotRunException.hpp"
@@ -29,7 +30,6 @@ private:
 	sockaddr_in _serverAddress;
 	pollfd		_botPollFd;
 	size_t		_lastPing;
-	bool		_botIsUp;
 
 public:
 	Bot(char *port, char *password) throw (BotBuildException);
