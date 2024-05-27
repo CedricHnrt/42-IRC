@@ -6,7 +6,7 @@
 #    By: chonorat <chonorat@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/05 13:40:10 by chonorat          #+#    #+#              #
-#    Updated: 2024/04/15 17:54:19 by chonorat         ###   ########.fr        #
+#    Updated: 2024/05/27 13:47:42 by chonorat         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,7 @@ _BOLD = \033[1m
 
 NAME = ircserv
 BONUS_NAME = ircserv_bot
-CC = @g++
+CC = @c++
 INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Server		\
 			-I ./Includes/Builders		\
@@ -33,12 +33,12 @@ INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Configuration \
 			-I ./Includes/Replies
 
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -g3
-C++DFLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++20 -MD -O0 -fno-omit-frame-pointer
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo
-FILES =	Server/Server								\
+FILES =	main										\
+		Server/Server								\
 		Configuration/Configuration					\
 		Configuration/ConfigurationSection			\
 		Exceptions/ChannelCacheException			\
@@ -90,19 +90,10 @@ BONUS_FILES =	main							\
 				Exceptions/BotBuildException	\
 				Exceptions/BotRunException
 
-MAIN_FILES =	$(FILES)	\
-				main
-DEBUG_FILES =	$(FILES)	\
-				Tests/Tests
-
-OBJS = $(addsuffix .o, $(addprefix Objects/, $(MAIN_FILES)))
-DPDS = $(addsuffix .d, $(addprefix Objects/, $(MAIN_FILES)))
-DEBUG_OBJS = $(addsuffix .o, $(addprefix Objects/, $(DEBUG_FILES)))
-DEBUG_DPDS = $(addsuffix .d, $(addprefix Objects/, $(DEBUG_FILES)))
+OBJS = $(addsuffix .o, $(addprefix Objects/, $(FILES)))
+DPDS = $(addsuffix .d, $(addprefix Objects/, $(FILES)))
 BONUS_OBJS = $(addsuffix .o, $(addprefix Bonus/Objects/, $(BONUS_FILES)))
 BONUS_DPDS = $(addsuffix .d, $(addprefix Bonus/Objects/, $(BONUS_FILES)))
-
-DEBUG = false
 
 $(NAME): $(OBJS)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
@@ -114,27 +105,12 @@ $(BONUS_NAME): $(BONUS_OBJS)
 	$(CC) $(BONUS_OBJS) -o $(BONUS_NAME)
 	$(PRINT) "${_BOLD}${_GREEN}$(BONUS_NAME) done.\a${_END}"
 
-debug: fclean $(DEBUG_OBJS)
-ifeq ($(DEBUG), true)
-	$(PRINT) "\n${_BOLD}${_YELLOW}DEBUG${_END}"
-	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(DEBUG_OBJS) -o $(NAME)
-	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
-else
-	$(PRINT) "${_RED}DEBUG USAGE: make debug DEBUG=true${_END}"
-endif
-
 Objects/%.o: Sources/%.cpp Makefile
 	$(DIR) Objects/Builders Objects/Exceptions Objects/Server Objects/Configuration \
 	Objects/Models/Channel Objects/Models/User Objects/CacheManager Objects/Utils \
 	Objects/Helpers Objects/Replies Objects/Commands
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
-ifeq ($(DEBUG), true)
-	$(DIR) Objects/Tests
-	$(CC) -c $(C++DFLAGS) $< -o $@
-else
 	$(CC) -c $(C++FLAGS) $< -o $@
-endif
 
 Bonus/Objects/%.o: Bonus/Sources/%.cpp Makefile
 	$(DIR) Bonus/Objects Bonus/Objects/Exceptions
@@ -177,8 +153,7 @@ exec : all
 val : all
 		valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes ./ircserv 7777 434
 
-.PHONY: all clean fclean re exec val bonus debug
+.PHONY: all clean fclean re exec val bonus
 
 -include $(DPDS)
--include $(DEBUG_DPDS)
 -include $(BONUS_DPDS)
