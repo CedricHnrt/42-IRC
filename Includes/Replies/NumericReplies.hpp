@@ -35,7 +35,6 @@ enum COLORS
 #define BOLDR "\x02"
 #define ITALIC "\x1D"
 #define UNDERLINE "\x1F"
-#define STRIKETHROUGH "\x1E"
 
 void	sendServerReply(int const client_fd, std::string client_buffer, int color, std::string mode);
 
@@ -44,8 +43,6 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_WELCOME(user_id, nickname) (":localhost 001 " + nickname + " :Welcome to the Internet Relay Network " + user_id + "\r\n")
 # define RPL_YOURHOST(client, servername, version) (":localhost 002 " + client + " :Your host is " + servername + " (localhost), running version " + version + "\r\n")
 # define RPL_CREATED(client, datetime) (":localhost 003 " + client + " :This server was created " + datetime + "\r\n")
-# define RPL_MYINFO(client, servername, version, user_modes, chan_modes, chan_param_modes) (":localhost 004 " + client + " " + servername + " " + version + " " + user_modes + " " + chan_modes + " " + chan_param_modes + "\r\n")
-# define RPL_ISUPPORT(client, tokens) (":localhost 005 " + client + " " + tokens " :are supported by this server\r\n")
 
 # define ERR_REQUESTTIMEOUT(client, server) (":localhost 408 " + client + " " + server + " :Request Timeout.\r\n")
 # define ERR_UNKNOWNCOMMAND(client, command) (":localhost 421 " + client + " " + command + " :Unknown command\r\n")
@@ -73,20 +70,12 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 
 // KILL
 # define ERR_NOPRIVILEGES(client) ("481 " + client + " :Permission Denied - You're not an IRC operator\r\n")
-# define RPL_KILL(user_id, killed, comment) (user_id + " KILL " + killed + " " + comment + "\r\n")
 
 // MODE
 /* user mode */
-#define MODE_USERMSG(client, mode) (":" + client + " MODE " + client + " :" + mode + "\r\n")
-#define ERR_UMODEUNKNOWNFLAG(client) (":localhost 501 " + client + " :Unknown MODE flag\r\n")
-#define ERR_USERSDONTMATCH(client) ("502 " + client + " :Cant change mode for other users\r\n")
 #define RPL_UMODEIS(client, mode) (":localhost 221 " + client + " " + mode + "\r\n")
 /* channel mode */
-#define MODE_CHANNELMSG(channel, mode) (":localhost MODE #" + channel + " " + mode + "\r\n")
-#define MODE_CHANNELMSGWITHPARAM(channel, mode, param) (":localhost MODE #" + channel + " " + mode + " " + param + "\r\n")
 #define RPL_CHANNELMODEIS(client, channel, mode) (":localhost 324 " + client + " #" + channel + " " + mode + "\r\n")
-
-//#define RPL_ADDMODE(client, modifier, channel, mode) (":localhost " + client + " #" + channel + " " + modifier + " set mode " + mode + "\r\n")
 
 #define RPL_CHANNELMODEISWITHKEY(client, channel, mode, password) (":localhost 324 " + client + " #" + channel + " " + mode + " " + password + "\r\n")
 #define ERR_CANNOTSENDTOCHAN(client, channel) (":localhost 404 " + client + " #" + channel + " :Cannot send to channel\r\n")
@@ -97,10 +86,8 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 #define RPL_ADDMODE(nickname, modifier, mode, channel) (":localhost 324 " + nickname + " #" + channel + " :" + modifier + " set mode " + mode + " on #" + channel + "\r\n")
 #define ERR_ADDMODE(nickname, channel, mode, reason) (":localhost 461 " + nickname + " #" + channel + " :" "MODE " + mode + " error: " + reason + "\r\n")
 #define RPL_ADDMODEUSER(nickname, target, mode, channel) (":localhost 324 " + nickname + " #" + channel + " :" + target + " " + mode + "\r\n")
-#define RPL_ADDVOICE(nickname, username, channel, mode, param) (":" + nickname + "!" + username + "@localhost MODE #" + channel + " " + mode + " " + param + "\r\n")
 
 // MOTD
-#define ERR_NOSUCHSERVER(client, servername) (":localhost 402 " + client + " " + servername + " :No such server\r\n")
 #define ERR_NOMOTD(client) (":localhost 422 " + client + " :MOTD File is missing\r\n")
 #define RPL_MOTDSTART(client, servername) (":localhost 375 " + client + " :- " + servername + " Message of the day - \r\n")
 #define RPL_MOTD(client, motd_line) (":localhost 372 " + client + " :" + motd_line + "\r\n")
@@ -112,8 +99,6 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_ENDOFNAMES(client, channel) (":localhost 366 " + client + " #" + channel + " :End of /NAMES list.\r\n")
 
 // NICK
-# define ERR_NONICKNAMEGIVEN(client) (":localhost 431 " + client + " :There is no nickname.\r\n")
-# define ERR_ERRONEUSNICKNAME(client, nickname) (":localhost 432 " + client + " " + nickname + " :Erroneus nickname\r\n")
 # define ERR_NICKNAMEINUSE(client, nickname) (":localhost 433 " + client + " " + nickname + " :Nickname is already in use.\r\n")
 # define RPL_NICK(oclient, uclient, client) (":" + oclient + "!" + uclient + "@localhost NICK " +  client + "\r\n")
 
@@ -121,7 +106,6 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_NOTICE(nick, username, target, message) (":" + nick + "!" + username + "@localhost NOTICE " + target + " " + message + "\r\n")
 
 // OPER
-# define ERR_NOOPERHOST(client) ("491 " + client + " :No O-lines for your host\r\n")
 # define RPL_YOUREOPER(client, channel) (":localhost 381 " + client + " #" + channel + " :You are now operator on channel #" + channel + "\r\n")
 
 // PART
@@ -135,20 +119,14 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 
 // QUIT
 # define RPL_QUIT(user_id, reason) (user_id + " QUIT : " + reason + "\r\n")
-# define RPL_ERROR(user_id, reason) (user_id + " ERROR :" + reason + "\r\n")
 
 // PRIVMSG
 # define ERR_NOSUCHNICK(client, target) (":localhost 401 " + client + " " + target + " :No such nick/channel\r\n")
-# define ERR_NORECIPIENT(client) ("411 " + client + " :No recipient given PRIVMSG\r\n")
-# define ERR_NOTEXTTOSEND(client) ("412 " + client + " :No text to send\r\n")
 # define RPL_PRIVMSG(nick, username, target, message) (":" + nick + "!" + username + "@localhost PRIVMSG " + target + " " + message + "\r\n")
 
 // TOPIC
 # define RPL_TOPIC(client, channel, topic) (":localhost 332 " + client + " #" + channel + " :" + topic + "\r\n")
 # define RPL_NOTOPIC(client, channel) (":localhost 331 " + client + " #" + channel + " :No topic is set\r\n")
-
-// USER
-# define ERR_ALREADYREGISTERED(client) (":localhost 462 " + client + " :You may not reregister.\r\n")
 
 // LIST
 # define RPL_LIST(client, channel, visible, topic) (":localhost 322 " + client + " " + channel + " " + StringUtils::ltos(visible) + " :" + topic + "\r\n")
@@ -159,9 +137,6 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 
 //WHOIS
 # define RPL_WHOISUSER(nickname, username, hostname, realname) (":localhost 311 " + nickname + " " + username + " " + hostname + " * :" + realname + "\r\n")
-# define RPL_WHOISCHANNELS(nickname, channels) (":localhost 319 " + nickname + " :" + channels + "\r\n")
-# define RPL_WHOISSERVER(nickname, servername) (":localhost 312 " + nickname + " " + servername + " :Server's info\r\n")
-# define RPL_WHOISOPERATOR(nickname) (":localhost 313 " + nickname + " :is an IRC operator\r\n")
 # define RPL_ENDOFWHOIS(nickname) (":localhost 318 " + nickname + " :End of WHOIS list\r\n")
 
 //ARGERROR
