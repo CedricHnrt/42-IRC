@@ -191,8 +191,23 @@ void Channel::topicReplyAll()
 {
 	std::vector<User *>::iterator it = this->_usersInChannel.begin();
 	while (it != this->_usersInChannel.end()) {
-		sendServerReply((*it)->getUserSocketFd(), RPL_TOPIC((*it)->getNickname(), this->name, this->topic), -1,
-						DEFAULT);
+		sendServerReply((*it)->getUserSocketFd(), RPL_TOPIC((*it)->getNickname(), this->name, this->getProperties()->getTopic()),
+		GREEN, BOLDR);
+		++it;
+	}
+}
+
+void Channel::modeReplyAll()
+{
+	// std::cout << "modeReplyAll" << std::endl;
+	std::vector<User *> userList = this->_usersInChannel;
+	// std::cout << "list size: " << userList.size() << std::endl;
+	std::string channelModes = this->properties->getChannelModes();
+
+	std::vector<User *>::iterator it = userList.begin();
+
+	while (it != userList.end()) {
+		sendServerReply((*it)->getUserSocketFd(), RPL_CHANNELMODEIS((*it)->getNickname(), this->name, channelModes), -1, DEFAULT);
 		++it;
 	}
 }

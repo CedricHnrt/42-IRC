@@ -14,20 +14,24 @@ Topic::Topic()
 	this->_expectedArgs.push_back(CHANNEL);
 }
 
+bool isTopicValid(std::string topic)
+{
+	if (topic.length() > 100 || !StringUtils::isPrintable(topic))
+	{
+		return false;
+	}
+	return true;
+}
+
 void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
-
-//	for (std::vector<std::string >::iterator it = args.begin() ; it != args.end() ; ++it)
-//		std::cout << *it << std::endl;
-
+	std::cout << "Topic command" << std::endl;
 	(void)channel;
 	if (args.size() < 1)
 	{
 		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), this->_name), -1, DEFAULT);
 		return ;
 	}
-
-//	std::cout << args.size() << std::endl;
 
 	std::string channelName = args[0];
 	StringUtils::trim(channelName, "#");
@@ -48,7 +52,6 @@ void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 	{
 		if (properties->doesChannelHaveMode('t') && !properties->isUserOperator(user->getUniqueId()))
 		{
-//			std::cout << "bro is no op, gtfo here" << std::endl;
 			sendServerReply(user->getUserSocketFd(), ERR_CHANOPRIVSNEEDED(user->getNickname(), currentChannel->getName()), -1, DEFAULT);
 			return ;
 		}
@@ -63,14 +66,21 @@ void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 			}
 		}
 		StringUtils::trim(res, " ");
+		if (!isTopicValid(res))
+		{
+			std::string reply = RPL_PRIVMSG(user->getNickname(), user->getUserName(), user->getNickname(), "Topic is invalid");
+    		sendServerReply(user->getUserSocketFd(), reply, 0, DEFAULT);
+			return ;
+		}
 		try {
 			properties->setTopic(user->getUniqueId(), res);
+			channel->setTopic(res);
+			channel->topicReplyAll();
 		}
 		catch (std::exception &e) {
 			std::cout << e.what() << std::endl;
 		}
-		//TODO: Send reply to all users in a channel
-		sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), currentChannel->getName(), properties->getTopic()), -1, DEFAULT);
+		// sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), currentChannel->getName(), properties->getTopic()), -1, DEFAULT);
 	}
 }
 

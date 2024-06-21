@@ -33,7 +33,7 @@ INCLUDES =	-I ./Includes/				\
 			-I ./Includes/Configuration \
 			-I ./Includes/Replies
 
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++98 -MD -g3
 RM = @rm -rf
 DIR = @mkdir -p
 PRINT = @echo

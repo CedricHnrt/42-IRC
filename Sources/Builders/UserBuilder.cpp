@@ -49,7 +49,7 @@ size_t UserBuilder::getTimeout() const
 }
 
 static bool isValid(std::string str) {
-	if (str.empty() || str.length() > 255)
+	if (str.empty() || str.length() > 100)
 		return false;
 	if (StringUtils::isOnlyWhitespace(str) || !StringUtils::isPrintable(str))
 		return false;
@@ -104,8 +104,6 @@ User *UserBuilder::build() {
 		user->setIpAddr(this->ipAddr);
 	if (this->userSocketFd != -1)
 		user->setUserSocketId(this->userSocketFd);
-	//TODO: FIX NULL POINTER EXCEPTION WHEN PROPERTIES IS NOT SET
-	//user->setProperties(this->properties);
 	user->setLastPingTimestamp(TimeUtils::getCurrentTimeMillis());
 	clearBuilder();
 
@@ -158,7 +156,6 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 
 		if (UsersCacheManager::getInstance()->doesNicknameAlreadyExist(this->nickname)) {
 			sendServerReply(this->userSocketFd, ERR_NICKNAMEINUSE(this->nickname, this->nickname), RED, BOLDR);
-//			throw UserBuildException("Nickname already exists");
 			return false;
 		}
 
@@ -172,25 +169,30 @@ bool UserBuilder::isBuilderComplete() throw (UserBuildException)
 			throw UserBuildException(bannedMessage);
 		}
 
-//		this->connectionInfos.erase(this->connectionInfos.begin());
-//		this->connectionInfos.erase(this->connectionInfos.begin());
-//		this->connectionInfos.erase(this->connectionInfos.begin());
-
 		/*handle username*/
 		std::vector<std::string> username =  StringUtils::split(this->connectionInfos[3], ' ');
+
 		if (username.size() != 5) {
 			return false;
 		}
+
+		// size_t delimiterPosition =  username[4].find("\r\n");
+
 		this->userName = username[1];
 		StringUtils::trim(username[4], " :\n\r");
 		this->realName = username[4];
 
+		// if (delimiterPosition == std::string::npos) {
+		// 	IrcLogger::getLogger()->log(IrcLogger::WARN, "Missing delimiter for User build");
+		// 	return false;
+		// }
 		IrcLogger *logger = IrcLogger::getLogger();
 		logger->log(IrcLogger::DEBUG, "UserBuilder is complete !");
 		logger->log(IrcLogger::DEBUG, "Username: " + this->userName);
 		logger->log(IrcLogger::DEBUG, "Nickname: " + this->nickname);
 		logger->log(IrcLogger::DEBUG, "RealName: " + this->realName);
 		logger->log(IrcLogger::DEBUG, "Password: " + passwordV[1]);
+
 		return true;
 	}
 	return false;

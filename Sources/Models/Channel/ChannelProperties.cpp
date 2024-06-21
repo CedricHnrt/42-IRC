@@ -126,7 +126,6 @@ std::string &ChannelProperties::getTopic()
 
 void ChannelProperties::setTopic(size_t userId, const std::string &newTopic)
 {
-	std::cout << this->userModes.size() << std::endl;
 	if (doesUserHaveMode(userId, OPERATOR))
 		this->topic = newTopic;
 }

@@ -2,13 +2,13 @@
 // Created by pgouasmi on 4/5/24.
 //
 #include "Server.hpp"
-
 #include <algorithm>
-
 #include "CommandManager.hpp"
 #include "TimeUtils.hpp"
 #include <PrimitivePredicate.hpp>
 #include <cmath>
+#include <string.h>
+
 bool Server::servUp = false;
 
 static int parsePort(const std::string &port)
@@ -255,6 +255,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 					{
 						//Wrong argument
 						IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+						sendServerReply(incomingFD, ERR_NOSUCHCHANNEL(currentUser->getNickname(), channelName), RED, BOLDR);
 						currentChannel = NULL;
 						return;
 					}
@@ -270,8 +271,15 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 			//etc...
 			splittedIterator++;
 		}
-
-		User *currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+		User *currentUser;
+		try {
+			currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
+		}
+		catch (UserCacheExceptionString &e)
+		{
+			logger->log(IrcLogger::ERROR, e.what());
+			return ;
+		}
 		Command->execute(currentUser, currentChannel, splitted);
 	}
 }
@@ -318,6 +326,7 @@ void Server::handleIncomingRequest(int incomingFD)
 		return ;
 	}
 	buffer[size] = '\0';
+	std::cout << "new buffer: " << buffer << std::endl;
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	std::string parse = buffer;
 
@@ -332,14 +341,19 @@ void Server::handleIncomingRequest(int incomingFD)
 
 	if (!StringUtils::isAscii(parse))
 	{
-		IrcLogger::getLogger()->log(IrcLogger::WARN, "Unsupported characters in buffer");
+		IrcLogger::getLogger()->log(IrcLogger::WARN, "Unsupported characters in buffer, command ignored.");
 		parse.clear();
 		return;
 	}
 
 	if (parse.find("\r\n") != std::string::npos) {
-		if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n")
+		if (parse.substr(0, 9) == "USERHOST " || parse == "localhost/7777\r\n") {
+			parse.clear();
 			return;
+		}
+	}
+	else {
+		IrcLogger::getLogger()->log(IrcLogger::WARN, "No delimiter found in buffer");
 	}
 
 	if (it == this->_danglingUsers.end())
@@ -356,9 +370,14 @@ void Server::handleIncomingRequest(int incomingFD)
 			logger->log(IrcLogger::ERROR, e.what());
 		}
 		if (parse.find("\r\n") != std::string::npos) {
+			std::cout << "parse: " << parse << std::endl;
 			this->handleKnownClient(incomingFD, parse);
 			user->clearBuffer();
 		}
+		// else
+		// 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
+		bzero(buffer, 512);
+		parse.clear();
 		return;
 	}
 	try
@@ -388,7 +407,9 @@ void Server::handleIncomingRequest(int incomingFD)
 		IrcLogger *logger = IrcLogger::getLogger();
 		logger->log(IrcLogger::ERROR, "An error occurred during user building !");
 		logger->log(IrcLogger::ERROR, exception.what());
+		bzero(buffer, 512);
 	}
+	bzero(buffer, 512);
 }
 
 bool Server::handleNewClient()

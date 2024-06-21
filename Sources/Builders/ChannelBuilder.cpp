@@ -3,6 +3,7 @@
 #include <StringUtils.hpp>
 #include <ChannelExceptions.hpp>
 #include "Channel.hpp"
+#include "IrcLogger.hpp"
 
 ChannelBuilder& ChannelBuilder::setName(const std::string& name) {
 	this->name = name;
@@ -25,14 +26,26 @@ ChannelBuilder& ChannelBuilder::setProperties(const ChannelProperties& propertie
 	return *this;
 }
 
-#include <iostream>
-static bool isValid(bool authorizeEmpty, std::string str) {
-	if ((!authorizeEmpty && str.empty()) || str.length() > 255) {
-		std::cout << "first if KO" << std::endl;
+static bool isChannelNameValid(bool authorizeEmpty, std::string str) {
+	if ((!authorizeEmpty && str.empty()) || str.length() > 100) {
+		IrcLogger::getLogger()->log(IrcLogger::ERROR, "ChannelBuilder: Channel name is empty or too long");
 		return false;
 	}
 	if ((!authorizeEmpty && StringUtils::isOnlyWhitespace(str)) || (!authorizeEmpty && !StringUtils::isPrintable(str))) {
-		std::cout << "second if KO" << std::endl;
+		IrcLogger::getLogger()->log(IrcLogger::ERROR, "ChannelBuilder: Channel name contains only whitespaces or has non printable characters");
+		return false;
+	}
+	return true;
+}
+
+// #include <iostream>
+static bool isChannelPasswordValid(bool authorizeEmpty, std::string str) {
+	if ((!authorizeEmpty && str.empty()) || str.length() > 100) {
+		IrcLogger::getLogger()->log(IrcLogger::ERROR, "ChannelBuilder: Channel password is empty or too long");
+		return false;
+	}
+	if ((!authorizeEmpty && StringUtils::isOnlyWhitespace(str)) || (!authorizeEmpty && !StringUtils::isPrintable(str))) {
+		IrcLogger::getLogger()->log(IrcLogger::ERROR, "ChannelBuilder: Channel password contains only whitespaces or has non printable characters");
 		return false;
 	}
 	return true;
@@ -53,9 +66,9 @@ Channel *ChannelBuilder::build() {
 
 	//TODO: FIX NULL POINTER EXCEPTION WHEN PROPERTIES IS NOT SET
 	//TODO: ADD GOOD EXCEPTIONS
-	if (!isValid(false, this->name))
+	if (!isChannelNameValid(false, this->name))
 		clearBuilder();
-	if (!isValid(true, this->topic) || !isValid(true, this->password))
+	if (!isChannelPasswordValid(true, this->password))
 		clearBuilder();
 
 	Channel* channel = new Channel();
