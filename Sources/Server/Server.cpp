@@ -223,6 +223,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		if (ExpectedArgs.size() > splitted.size())
 		{
 			//Not enough arguments were provided
+			sendServerReply(incomingFD, ERR_NEEDMOREPARAMS(currentUser->getNickname(), Command->getName()), RED, BOLDR);
 			return;
 		}
 

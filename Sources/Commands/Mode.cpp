@@ -30,6 +30,7 @@ static void handleBanMode(User *user, std::string channelName, std::vector<std::
 		{
 			std::string message = "You've been banned from #" + channelName;
 			sendServerReply(targetUser->getUserSocketFd(), RPL_NOTICE(targetUser->getNickname(), targetUser->getUserName(), user->getNickname(), message), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_ADDMODEUSER(user->getNickname(), targetUser->getNickname(), "+b", channelName), -1, DEFAULT);
 			properties->addUserToBannedUsers(targetUser->getUniqueId());
 		}
 		else
@@ -108,7 +109,7 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 
 		char *pEnd;
 		double newLimit = strtod(args[1].c_str(), &pEnd);
-		if (newLimit > INT_MAX)
+		if (newLimit > 100)
 		{
 			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Limit is too high"), -1, DEFAULT);
 			return ;
@@ -121,7 +122,9 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 		catch (std::exception &e) {
 			IrcLogger *logger = IrcLogger::getLogger();
 			logger->log(IrcLogger::INFO, e.what());
-			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Channel already has this mode"), -1, DEFAULT);
+			properties->setUserLimit(static_cast<int>(newLimit));
+			properties->setUserLimitStatus(true);
+//			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Channel already has this mode"), -1, DEFAULT);
 			return ;
 		}
 	}
@@ -177,7 +180,7 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 				sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname(), channelName), -1, DEFAULT);
 			targetChannel->nameReplyAll();
 		}
-		sendServerReply(user->getUserSocketFd(), RPL_UMODEIS(user->getNickname(), properties->getUserModes(targetUser->getUniqueId())), -1, DEFAULT);
+		sendServerReply(targetUser->getUserSocketFd(), RPL_ADDMODEUSER(targetUser->getNickname(), targetUser->getNickname(), repMode, channelName), -1, DEFAULT);
 	}
 	catch (std::exception &e) {
 		IrcLogger *logger = IrcLogger::getLogger();
@@ -394,7 +397,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			{
 				try {
 					handleBanMode(user, channelNew, *it, mode);
-					hasModification = true;
 				}
 				catch (const UserCacheExceptionString &e) {
 					sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEGENERAL(user->getNickname(), channelNew, (*it)[0], "No such user"), -1, DEFAULT);

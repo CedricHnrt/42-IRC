@@ -40,7 +40,7 @@ void Kick::execute(User *user, Channel *channel, std::vector<std::string> args)
 	ChannelProperties *properties = channel->getProperties();
 
 	if (args.size() > 2)
-		reason = args[3];
+		reason = args[2];
 
 	try {
 		userToKick = channel->getUserByNickname(userNickname);
@@ -58,12 +58,9 @@ void Kick::execute(User *user, Channel *channel, std::vector<std::string> args)
 		return ;
 	}
 	channel->removeUserFromChannel(userToKick);
-	std::cout << "after remove" << std::endl;
-	sendServerReply(userToKick->getUserSocketFd(), RPL_NOTICE(userToKick->getNickname(), userToKick->getUserName(), user->getNickname(), "You've been kicked"), -1, DEFAULT);
+	sendServerReply(userToKick->getUserSocketFd(), RPL_NOTICE(userToKick->getNickname(), userToKick->getUserName(), user->getNickname(), reason), -1, DEFAULT);
 	std::string reason2 = "you've been kicked out of #" + channel->getName();
 	sendServerReply(userToKick->getUserSocketFd(), RPL_PART(user_id(userToKick->getNickname(), userToKick->getUserName()), channel->getName(), reason2), -1, DEFAULT);
 	kickReplyServer(channel, userToKick, reason);
-	std::cout << "after reply 1" << std::endl;
 	channel->nameReplyAll();
-	std::cout << "after reply 2" << std::endl;
 }

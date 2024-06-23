@@ -68,7 +68,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define ERR_INVITEONLYCHAN(nickname, channel) (":localhost 473 " + nickname + " #" + channel + " :Cannot join channel (+i)\r\n")
 
 // KICK
-# define ERR_USERNOTINCHANNEL(client, nickname, channel) (":server 441 " + client + " " + nickname + " #" + channel + " :is not on that channel\r\n")
+# define ERR_USERNOTINCHANNEL(client, nickname, channel) (":localhost 441 " + client + " #" + channel + " " + nickname + " :is not on that channel\r\n")
 # define RPL_KICK(user_id, channel, kicked, reason) (user_id + " KICK #" + channel + " " + kicked + " " + reason + "\r\n")
 
 // KILL
@@ -156,6 +156,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 
 //WHO
 # define RPL_WHOREPLY(channel, callerUsername, onChannelUsername) (":localhost 352 " + callerUsername + " #" + channel + " " + onChannelUsername)
+# define RPL_ENDOFWHO(client) (":localhost 315 " + client + " :End of WHO list.\r\n")
 
 //WHOIS
 # define RPL_WHOISUSER(nickname, username, hostname, realname) (":localhost 311 " + nickname + " " + username + " " + hostname + " * :" + realname + "\r\n")
