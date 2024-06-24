@@ -25,7 +25,7 @@ bool isTopicValid(std::string topic)
 
 void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
-	std::cout << "Topic command" << std::endl;
+	// std::cout << "Topic command" << std::endl;
 	(void)channel;
 	if (args.size() < 1)
 	{
@@ -78,7 +78,7 @@ void Topic::execute(User *user, Channel *channel, std::vector<std::string> args)
 			channel->topicReplyAll();
 		}
 		catch (std::exception &e) {
-			std::cout << e.what() << std::endl;
+			IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 		}
 		// sendServerReply(user->getUserSocketFd(), RPL_TOPIC(user->getNickname(), currentChannel->getName(), properties->getTopic()), -1, DEFAULT);
 	}

@@ -155,7 +155,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), -1, DEFAULT);
 			sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", newChannel->getName(),newChannel->getUserList()), -1, DEFAULT);
 			//[3]
-			std::cout << "users on channel: " << newChannel->getChannelsUsers().size() << std::endl;
+			// std::cout << "users on channel: " << newChannel->getChannelsUsers().size() << std::endl;
 		}
 	}
 	//[2]

@@ -17,7 +17,7 @@ Who::Who()
 #include <iostream>
 void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
-	std::cout << "Who::execute" << std::endl;
+	// std::cout << "Who::execute" << std::endl;
 	(void) channel;
 
 	std::string ChannelName = args.front();
@@ -36,7 +36,7 @@ void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 			currentChannel->getUserByNickname(user->getNickname());
 			std::vector<User *> userList = currentChannel->getChannelsUsers();
 
-			std::cout << "before for" << std::endl;
+			// std::cout << "before for" << std::endl;
 			for (std::vector<User *>::iterator it = userList.begin() ; it != userList.end() ; ++it)
 			{
 //				if (*it != user)

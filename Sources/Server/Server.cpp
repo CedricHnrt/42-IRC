@@ -327,7 +327,7 @@ void Server::handleIncomingRequest(int incomingFD)
 		return ;
 	}
 	buffer[size] = '\0';
-	std::cout << "new buffer: " << buffer << std::endl;
+	// std::cout << "new buffer: " << buffer << std::endl;
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	std::string parse = buffer;
 
@@ -371,7 +371,7 @@ void Server::handleIncomingRequest(int incomingFD)
 			logger->log(IrcLogger::ERROR, e.what());
 		}
 		if (parse.find("\r\n") != std::string::npos) {
-			std::cout << "parse: " << parse << std::endl;
+			// std::cout << "parse: " << parse << std::endl;
 			this->handleKnownClient(incomingFD, parse);
 			user->clearBuffer();
 		}
