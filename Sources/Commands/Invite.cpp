@@ -19,69 +19,72 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 {
 	(void) channel;
 
-	ChannelCacheManager *ChanManager = ChannelCacheManager::getInstance();
-	UsersCacheManager *userManager = UsersCacheManager::getInstance();
-	ChannelProperties *properties;
-	Channel *channelP;
-	User *invitedUserP;
-	IrcLogger *logger = IrcLogger::getLogger();
-
-	std::string invitedUser = args[0];
-	std::string channelHash = args[1];
-
-	if (channelHash[0] != '#')
-	{
-		logger->log(IrcLogger::ERROR, ("/invite: Error: Wrong usage:" + this->_usage));
-		sendServerReply(user->getUserSocketFd(), ERR_ARG(user->getNickname(), this->_name, this->_usage), RED, BOLDR);
-		return ;
-	}
-
-	std::string channelName = channelHash;
-	StringUtils::trim(channelName, "#");
-
 	try {
-		channelP = ChanManager->getFromCacheString(channelName);
-	}
-	catch (ChannelCacheException &e)
-	{
-		logger->log(IrcLogger::ERROR, ("/invite: Error: " + user->getNickname() + "is not on channel " + channelName));
-		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channelName), RED, BOLDR);
-		return ;
-	}
+		ChannelCacheManager *ChanManager = ChannelCacheManager::getInstance();
+		UsersCacheManager *userManager = UsersCacheManager::getInstance();
+		ChannelProperties *properties;
+		Channel *channelP;
+		User *invitedUserP;
+		IrcLogger *logger = IrcLogger::getLogger();
 
-	properties = channelP->getProperties();
+		std::string invitedUser = args[0];
+		std::string channelHash = args[1];
+
+		if (channelHash[0] != '#')
+		{
+			logger->log(IrcLogger::ERROR, ("/invite: Error: Wrong usage:" + this->_usage));
+			sendServerReply(user->getUserSocketFd(), ERR_ARG(user->getNickname(), this->_name, this->_usage), RED, BOLDR);
+			return ;
+		}
+
+		std::string channelName = channelHash;
+		StringUtils::trim(channelName, "#");
+
+		try {
+			channelP = ChanManager->getFromCacheString(channelName);
+		}
+		catch (ChannelCacheException &e)
+		{
+			logger->log(IrcLogger::ERROR, ("/invite: Error: " + user->getNickname() + "is not on channel " + channelName));
+			sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channelName), RED, BOLDR);
+			return ;
+		}
+
+		properties = channelP->getProperties();
 
 
-	if (!properties->isUserOperator(user->getUniqueId()))
-	{
-//		std::cout << "KO 1" << std::endl;
-		sendServerReply(user->getUserSocketFd(), ERR_NOPRIVILEGES(user->getNickname()), -1, DEFAULT);
-		return ;
+// 		if (!properties->isUserOperator(user->getUniqueId()))
+// 		{
+// //			std::cout << "KO 1" << std::endl;
+// 			sendServerReply(user->getUserSocketFd(), ERR_NOPRIVILEGES(user->getNickname()), -1, DEFAULT);
+// 			return ;
+// 		}
+
+		if (!userManager->doesNicknameAlreadyExist(invitedUser))
+		{
+			logger->log(IrcLogger::ERROR, ("/invite: Error: " + invitedUser + ": no such user"));
+			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), invitedUser), RED, BOLDR);
+			return ;
+		}
+		if (!ChanManager->doesChannelExist(channelName))
+		{
+			logger->log(IrcLogger::ERROR, ("/invite: Error: " + channelName + ": no such channel"));
+			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), channelName), RED, BOLDR);
+			return ;
+		}
+		if (channelP->isUserInChannel(invitedUser))
+		{
+			logger->log(IrcLogger::ERROR, ("/invite: Error: " + invitedUser + " is already on channel " + channelName));
+			sendServerReply(user->getUserSocketFd(), ERR_USERONCHANNEL(user->getNickname(), invitedUser, channelName), RED, BOLDR);
+			return ;
+		}
+		invitedUserP = userManager->getFromNickname(invitedUser);
+		sendServerReply(user->getUserSocketFd(), RPL_INVITING(user_id(user->getNickname(), user->getUserName()), user->getNickname(), invitedUser, channelName), -1, DEFAULT);
+		sendServerReply(invitedUserP->getUserSocketFd(), RPL_INVITE(user_id(user->getNickname(), user->getUserName()), invitedUserP->getNickname(), channelName), -1, DEFAULT);
+
+		properties->addToInvitedUsers(invitedUserP->getUniqueId());
 	}
-
-	if (!userManager->doesNicknameAlreadyExist(invitedUser))
-	{
-		logger->log(IrcLogger::ERROR, ("/invite: Error: " + invitedUser + ": no such user"));
-		return ;
+	catch (std::exception &e) {
+		IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 	}
-	if (!ChanManager->doesChannelExist(channelName))
-	{
-		logger->log(IrcLogger::ERROR, ("/invite: Error: " + channelName + ": no such channel"));
-		sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), channelName), RED, BOLDR);
-		return ;
-	}
-	if (channelP->isUserInChannel(invitedUser))
-	{
-		logger->log(IrcLogger::ERROR, ("/invite: Error: " + invitedUser + " is already on channel " + channelName));
-		sendServerReply(user->getUserSocketFd(), ERR_USERONCHANNEL(user->getNickname(), invitedUser, channelName), RED, BOLDR);
-		return ;
-	}
-	std::cout << "so far so good" << std::endl;
-	invitedUserP = userManager->getFromNickname(invitedUser);
-	sendServerReply(user->getUserSocketFd(), RPL_INVITING(user_id(user->getNickname(), user->getUserName()), user->getNickname(), invitedUser, channelName), -1, DEFAULT);
-	sendServerReply(invitedUserP->getUserSocketFd(), RPL_INVITE(user_id(user->getNickname(), user->getUserName()), invitedUserP->getNickname(), channelName), -1, DEFAULT);
-
-	properties->addToInvitedUsers(invitedUserP->getUniqueId());
-
-	std::cout << "end of invite" << std::endl;
 }

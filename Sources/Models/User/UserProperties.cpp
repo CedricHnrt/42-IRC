@@ -15,16 +15,6 @@ bool UserProperties::getAway() const
 	return isAway;
 }
 
-//void UserProperties::joinChannel(Channel channel)
-//{
-//
-//}
-
-//void UserProperties::leaveChannel(Channel channel)
-//{
-//
-//}
-
 void UserProperties::addPermission(std::string permission)
 {
 	if (hasPermission(permission))

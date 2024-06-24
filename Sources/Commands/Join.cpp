@@ -105,7 +105,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 					existingChannel->addUserToChannel(user);
 					sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getNickname(), user->getUserName()),
 																	  existingChannel->getName()), -1, DEFAULT);
-					if (existingChannel->getTopic().empty())
+					if (!existingChannel->getTopic().empty())
 						sendServerReply(user->getUserSocketFd(),
 										RPL_TOPIC(user->getNickname(), existingChannel->getName(),
 												  properties->getTopic()), GREEN, BOLDR);
@@ -128,7 +128,6 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 		}
 		else
 		{
-			std::cout << "new channel" << std::endl;
 			//[3]
 			//create new channel
 			Builder.setName(channelName);
@@ -156,6 +155,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), -1, DEFAULT);
 			sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", newChannel->getName(),newChannel->getUserList()), -1, DEFAULT);
 			//[3]
+			// std::cout << "users on channel: " << newChannel->getChannelsUsers().size() << std::endl;
 		}
 	}
 	//[2]

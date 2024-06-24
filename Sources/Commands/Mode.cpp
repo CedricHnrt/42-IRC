@@ -18,18 +18,23 @@ static void handleBanMode(User *user, std::string channelName, std::vector<std::
 {
 	(void)user;
 
+	std::cout << "handleBanMode" << std::endl;
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
 	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
 
 	if (mode == PLUS)
 	{
+		std::cout << "BAN" << std::endl;
 		if (targetChannel->isUserInChannel(targetUser->getNickname()))
 		{
 			std::string message = "You've been banned from #" + channelName;
 			sendServerReply(targetUser->getUserSocketFd(), RPL_NOTICE(targetUser->getNickname(), targetUser->getUserName(), user->getNickname(), message), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_ADDMODEUSER(user->getNickname(), targetUser->getNickname(), "+b", channelName), -1, DEFAULT);
 			properties->addUserToBannedUsers(targetUser->getUniqueId());
 		}
+		else
+			sendServerReply(user->getUserSocketFd(), ERR_USERNOTINCHANNEL(user->getNickname(), targetUser->getNickname(), channelName), -1, DEFAULT);
 	}
 	else
 	{
@@ -40,6 +45,8 @@ static void handleBanMode(User *user, std::string channelName, std::vector<std::
 									   message), -1, DEFAULT);
 			properties->removeUserFromBannedUsers(targetUser->getUniqueId());
 		}
+		else
+			sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEGENERAL(user->getNickname(), channelName, "b", "this user is not banned"), -1, DEFAULT);
 	}
 
 }
@@ -102,7 +109,7 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 
 		char *pEnd;
 		double newLimit = strtod(args[1].c_str(), &pEnd);
-		if (newLimit > INT_MAX)
+		if (newLimit > 100)
 		{
 			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Limit is too high"), -1, DEFAULT);
 			return ;
@@ -115,7 +122,9 @@ static void handleLimitMode(User *user, std::string channelName, std::vector<std
 		catch (std::exception &e) {
 			IrcLogger *logger = IrcLogger::getLogger();
 			logger->log(IrcLogger::INFO, e.what());
-			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Channel already has this mode"), -1, DEFAULT);
+			properties->setUserLimit(static_cast<int>(newLimit));
+			properties->setUserLimitStatus(true);
+//			sendServerReply(user->getUserSocketFd(), ERR_ADDMODE(user->getNickname(), channelName, modeRpl, "Channel already has this mode"), -1, DEFAULT);
 			return ;
 		}
 	}
@@ -171,7 +180,7 @@ static void handleUserMode(User *user, std::string channelName, std::vector<std:
 				sendServerReply(targetUser->getUserSocketFd(), RPL_YOUREOPER(targetUser->getNickname(), channelName), -1, DEFAULT);
 			targetChannel->nameReplyAll();
 		}
-		sendServerReply(user->getUserSocketFd(), RPL_UMODEIS(user->getNickname(), properties->getUserModes(targetUser->getUniqueId())), -1, DEFAULT);
+		sendServerReply(targetUser->getUserSocketFd(), RPL_ADDMODEUSER(targetUser->getNickname(), targetUser->getNickname(), repMode, channelName), -1, DEFAULT);
 	}
 	catch (std::exception &e) {
 		IrcLogger *logger = IrcLogger::getLogger();
@@ -237,8 +246,19 @@ static void handleChannelMode(User *user, std::string channelName, std::vector<s
 	sendServerReply(user->getUserSocketFd(), RPL_ADDMODE(user->getNickname(), user->getNickname(), modeRpl, channelName), -1, DEFAULT);
 }
 
+static bool isAValidModeChar(char c)
+{
+	std::string validChars = "ovqabklmt+-";
+	if (validChars.find(c) != std::string::npos)
+		return true;
+	return false;
+}
+
 void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
+	// std::cout << "Mode::execute" << std::endl;
+	
+
 	(void) channel;
 	(void) user;
 
@@ -246,6 +266,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	Channel *targetChannel;
 
 	if (args[0][0] != '#') {
+		// std::cout << "Mode::execute: ERR_NEEDMOREPARAMS" << std::endl;
 		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), this->_name), -1, DEFAULT);
 		return;
 	}
@@ -256,9 +277,12 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	try {
 		targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
+		// std::cout << "users on channel: " << targetChannel->getChannelsUsers().size() << std::endl;
 	}
 	catch (const std::exception &e) {
+		std::cout << e.what() << std::endl;
 		sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), channelNew), -1, DEFAULT);
+		// std::cout << "RETUNINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG" << std::endl;
 		return;
 	}
 	ChannelProperties *properties = targetChannel->getProperties();
@@ -266,6 +290,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	if (properties->isUserOnChannel(user->getUniqueId()) == false)
 	{
+		// std::cout << "Mode::execute: ERR_NOTONCHANNEL" << std::endl;
 		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channelNew), -1, DEFAULT);
 		return ;
 	}
@@ -285,8 +310,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 		sendServerReply(user->getUserSocketFd(), ERR_CHANOPRIVSNEEDED(user->getNickname(), channelNew), -1, DEFAULT);
 		return ;
 	}
-
-
 
 	bool New = true;
 
@@ -333,11 +356,17 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	std::string userModes = "ovq";
 	std::string channelModes = "ti";
 
+	bool hasModification = false;
 	for (std::vector<std::vector<std::string> >::iterator it = argV.begin() ; it != argV.end() ; ++it)
 	{
 		int mode = 42;
 		for (std::string::iterator sIt = (*it)[0].begin() ; sIt != (*it)[0].end() ; ++sIt)
 		{
+			if (isAValidModeChar(*sIt) == false)
+			{
+				sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEGENERAL(user->getNickname(), channelNew, *sIt, "Invalid mode"), RED, BOLDR);
+				continue ;
+			}
 			if (*sIt == '+')
 				mode = PLUS;
 			if (*sIt == '-')
@@ -346,9 +375,10 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			{
 				try {
 					handleKeyMode(user, channelNew, *it, mode);
+					hasModification = true;
 				}
 				catch (std::exception &e) {
-					sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), targetChannel->getName()), -1, DEFAULT);
+					sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEGENERAL(user->getNickname(), channelNew, (*it)[0], "Wrong usage"), -1, DEFAULT);
 				}
 			}
 			if (mode == 42)
@@ -357,6 +387,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			{
 				try {
 					handleLimitMode(user, channelNew, *it, mode);
+					hasModification = true;
 				}
 				catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
@@ -367,8 +398,12 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 				try {
 					handleBanMode(user, channelNew, *it, mode);
 				}
-				catch (std::exception &e) {
-					std::cout << e.what() << std::endl;
+				catch (const UserCacheExceptionString &e) {
+					sendServerReply(user->getUserSocketFd(), ERR_INVALIDMODEGENERAL(user->getNickname(), channelNew, (*it)[0], "No such user"), -1, DEFAULT);
+				}
+				catch (const std::exception &e) {
+					IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
+					// std::cout << e.what() << std::endl;
 				}
 			}
 			else if (userModes.find(*sIt) != std::string::npos) {
@@ -383,6 +418,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			else if (channelModes.find(*sIt) != std::string::npos) {
 				try {
 					handleChannelMode(user, channelNew, *it, mode, *sIt);
+					hasModification = true;
 				}
 				catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
@@ -390,8 +426,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 			}
 		}
 	}
-//	if (!properties->doesChannelHaveMode('k'))
-//		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEIS(user->getNickname(), targetChannel->getName(), properties->getChannelModes()), -1, DEFAULT);
-//	else
-//		sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), targetChannel->getName(), properties->getChannelModes(), properties->getPassword()), -1, DEFAULT);
+	if (hasModification)
+		targetChannel->modeReplyAll();
 }

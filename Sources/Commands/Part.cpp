@@ -41,7 +41,7 @@ void Part::execute(User *user, Channel *channel, std::vector<std::string> args)
 					 UserPredicateNickname(user->getNickname())) == channel->getChannelsUsers().end()) {
 		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channel->getName()), -1,
 						DEFAULT);
-		std::cout << "in part if" << std::endl;
+		// std::cout << "in part if" << std::endl;
 		return;
 	}
 

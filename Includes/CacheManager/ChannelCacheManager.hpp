@@ -5,7 +5,7 @@
 	#include "ChannelExceptions.hpp"
 	#include <list>
 
-	class ChannelCacheManager
+	class 	ChannelCacheManager
 	{
 		private:
 			static ChannelCacheManager* instance;

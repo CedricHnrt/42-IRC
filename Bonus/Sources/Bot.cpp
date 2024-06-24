@@ -169,6 +169,7 @@ void Bot::botUp() throw(BotBuildException)
 		}
 		else if (this->_botPollFd.revents & POLLIN) {
 			char buffer[512];
+			bzero(buffer, 512);
 			int size = recv(this->_botPollFd.fd, &buffer, 510, 0);
 			if (size == -1) {
 				close(this->_botPollFd.fd);

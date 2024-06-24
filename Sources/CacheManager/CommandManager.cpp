@@ -32,6 +32,7 @@ CommandManager::CommandManager()
 	this->_commandsMap["PRIVMSG"] = new Message();
 	this->_commandsMap["MSG"] = new Message();
 	this->_commandsMap["WHO"] = new Who();
+	this->_commandsMap["who"] = new Who();
 	this->_commandsMap["WHOIS"] = new WhoIs();
 	this->_commandsMap["whois"] = new WhoIs();
 	this->_commandsMap["INVITE"] = new Invite();

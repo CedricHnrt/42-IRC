@@ -47,11 +47,14 @@ void Nick::execute(User *user, Channel *channel, std::vector<std::string> args)
 		for (std::vector<Channel *>::iterator it = inChannels.begin(); it != inChannels.end(); it++)
 		{
 			Channel *channel = *it;
-			if (channel->getProperties()->doesUserHaveMode(user->getUniqueId(), 'b'))
-			{
-				newNickIsOk = false;
-				break;
+			try {
+				if (channel->getProperties()->doesUserHaveMode(user->getUniqueId(), 'b')) {
+					newNickIsOk = false;
+					break;
+				}
 			}
+			catch (ChannelGetException &ignored)
+			{}
 		}
 	}
 
@@ -68,4 +71,9 @@ void Nick::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	sendServerReply(user->getUserSocketFd(), RPL_NICK(user->getNickname(), user->getUserName(), newNick), -1, DEFAULT);
 	user->setNickname(newNick);
+	std::vector<Channel *> inChannels = user->getChannelList();
+	for (std::vector<Channel *>::iterator it = inChannels.begin(); it != inChannels.end(); it++)
+	{
+		(*it)->nameReplyAll();
+	}
 }

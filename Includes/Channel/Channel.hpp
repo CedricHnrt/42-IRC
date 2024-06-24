@@ -42,13 +42,14 @@
 			void whoReplyAll();
 			void quitReplyAll(User *leftUser, const std::string &message);
 			void topicReplyAll();
+			void setTopic(const std::string& topic);
+			void modeReplyAll();
 
 			~Channel();
 		private:
 			friend class ChannelCacheManager;
 			friend class ChannelBuilder;
 			void setName(const std::string& name);
-			void setTopic(const std::string& topic);
 			void setPassword(const std::string& password);
 			void setUniqueId(size_t uniqueId);
 			void setProperties(ChannelProperties *properties);

@@ -15,11 +15,12 @@
 class CommandManager {
 
 private:
+	CommandManager();
+
 	static CommandManager *instance;
 	std::map<std::string, ICommand *> _commandsMap;
 
 public:
-	CommandManager();
 	~CommandManager();
 	static CommandManager *getInstance();
 	ICommand *getCommand(const std::string &key) const;

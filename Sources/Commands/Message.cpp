@@ -81,18 +81,25 @@ void Message::execute(User *user, Channel *channel, std::vector<std::string> arg
 	}
 	else //private message
 	{
-		try {
-			User *Recipient = UsersCacheManager::getInstance()->getFromNickname(recipient);
-			sendServerReply(Recipient->getUserSocketFd(),
-							RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1, DEFAULT);
-		}
-		catch (UserCacheExceptionString &exception) {
-			sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), -1, DEFAULT);
-			IrcLogger *logger = IrcLogger::getLogger();
-			logger->log(IrcLogger::ERROR, "An error occurred during message sending !");
-			logger->log(IrcLogger::ERROR, exception.what());
-			std::string tmp = "Nickname: ";
-			logger->log(IrcLogger::ERROR, tmp.append(exception.getValue()));
+		std::vector<std::string> recipients = StringUtils::split(recipient, ',');
+		for (std::vector<std::string>::iterator it = recipients.begin(); it != recipients.end(); ++it) {
+			recipient = *it;
+			StringUtils::trim(recipient, ",");
+			try {
+				User *Recipient = UsersCacheManager::getInstance()->getFromNickname(recipient);
+				sendServerReply(Recipient->getUserSocketFd(),
+								RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1, DEFAULT);
+				// sendServerReply(user->getUserSocketFd(),
+				// 				RPL_PRIVMSG(user->getNickname(), user->getUserName(), recipient, message), -1, DEFAULT);
+			}
+			catch (UserCacheExceptionString &exception) {
+				sendServerReply(user->getUserSocketFd(), ERR_NOSUCHNICK(user->getNickname(), recipient), -1, DEFAULT);
+				IrcLogger *logger = IrcLogger::getLogger();
+				logger->log(IrcLogger::ERROR, "An error occurred during message sending !");
+				logger->log(IrcLogger::ERROR, exception.what());
+				std::string tmp = "Nickname: ";
+				logger->log(IrcLogger::ERROR, tmp.append(exception.getValue()));
+			}
 		}
 	}
 }

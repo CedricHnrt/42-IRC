@@ -32,7 +32,6 @@ static void kickReplyServer(Channel *channel, User *userToKick, std::string reas
 void Kick::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void)user;
-	(void)channel;
 
 	std::string userNickname = args[1];
 	std::string reason = "";
@@ -41,12 +40,12 @@ void Kick::execute(User *user, Channel *channel, std::vector<std::string> args)
 	ChannelProperties *properties = channel->getProperties();
 
 	if (args.size() > 2)
-		reason = args[3];
+		reason = args[2];
 
 	try {
 		userToKick = channel->getUserByNickname(userNickname);
 	}
-	catch (const UserCacheExceptionString &e)
+	catch (const ChannelGetException &e)
 	{
 		logger->log(IrcLogger::ERROR, e.what());
 		sendServerReply(user->getUserSocketFd(), ERR_USERNOTINCHANNEL(user->getNickname(), userNickname, channel->getName()), -1, DEFAULT);
@@ -58,16 +57,10 @@ void Kick::execute(User *user, Channel *channel, std::vector<std::string> args)
 		sendServerReply(user->getUserSocketFd(), ERR_CHANOPRIVSNEEDED(user->getNickname(), channel->getName()), -1, DEFAULT);
 		return ;
 	}
-
-//	properties->addUserToBannedUsers(userToKick->getUniqueId());
-//	std::cout << "before" << std::endl;
 	channel->removeUserFromChannel(userToKick);
-//	std::cout << "after remove" << std::endl;
-//	sendServerReply(userToKick->getUserSocketFd(), RPL_NOTICE(userToKick->getNickname(), userToKick->getUserName(), user->getNickname(), "You've been kicked"), -1, DEFAULT);
+	sendServerReply(userToKick->getUserSocketFd(), RPL_NOTICE(userToKick->getNickname(), userToKick->getUserName(), user->getNickname(), reason), -1, DEFAULT);
 	std::string reason2 = "you've been kicked out of #" + channel->getName();
 	sendServerReply(userToKick->getUserSocketFd(), RPL_PART(user_id(userToKick->getNickname(), userToKick->getUserName()), channel->getName(), reason2), -1, DEFAULT);
 	kickReplyServer(channel, userToKick, reason);
-//	std::cout << "after reply 1" << std::endl;
 	channel->nameReplyAll();
-//	std::cout << "after reply 2" << std::endl;
 }
