@@ -72,7 +72,7 @@ void	sendServerReply(int const client_fd, std::string client_buffer, int color, 
 # define RPL_KICK(user_id, channel, kicked, reason) (user_id + " KICK #" + channel + " " + kicked + " " + reason + "\r\n")
 
 // KILL
-# define ERR_NOPRIVILEGES(client) ("481 " + client + " :Permission Denied - You're not an IRC operator\r\n")
+# define ERR_NOPRIVILEGES(client) (":localhost 481 " + client + " :Permission Denied - You're not an IRC operator\r\n")
 # define RPL_KILL(user_id, killed, comment) (user_id + " KILL " + killed + " " + comment + "\r\n")
 
 // MODE
