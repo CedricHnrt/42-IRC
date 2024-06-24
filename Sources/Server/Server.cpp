@@ -204,7 +204,7 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		{
 			splitted.front().erase(0, 1);
 			StringUtils::toUpper(splitted.front());
-			std::cout << splitted[0] << std::endl;
+			// std::cout << splitted[0] << std::endl;
 		}
 		//	std::cout << "splitted[0] = " << splitted.front() << std::endl;
 		CommandManager *CManager = CommandManager::getInstance();
