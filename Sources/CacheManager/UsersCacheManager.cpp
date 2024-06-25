@@ -22,6 +22,7 @@
 #include <TimeUtils.hpp>
 #include <unistd.h>
 #include "ChannelCacheManager.hpp"
+#include "Server.hpp"
 
 UsersCacheManager* UsersCacheManager::instance = NULL;
 
@@ -69,7 +70,7 @@ bool UsersCacheManager::doesNicknameAlreadyExist(const std::string &nickname) co
 	return std::find_if(this->users.begin(), this->users.end(), UserPredicateNickname(nickname)) == this->users.end() ? false : true;
 }
 
-void UsersCacheManager::deleteTimeoutUsers(std::string serverName)
+void UsersCacheManager::deleteTimeoutUsers(std::string serverName, Server &serv)
 {
 	size_t currentTimestamp = TimeUtils::getCurrentTimeMillis();
 	std::list<User *> cachedUsers = getCache();
@@ -95,6 +96,7 @@ void UsersCacheManager::deleteTimeoutUsers(std::string serverName)
 				sendServerReply(userFd, ERR_REQUESTTIMEOUT(StringUtils::ltos(userFd), serverName), RED,BOLDR);
 				close(userFd);
 				channelList = user->getChannelList();
+				serv.removePollFd(userFd);
 				for (std::vector<Channel *>::iterator it = channelList.begin() ; it != channelList.end() ; ++it) {
 					(*it)->removeUserFromChannel(user);
 					(*it)->quitReplyAll(user, "Timeout");

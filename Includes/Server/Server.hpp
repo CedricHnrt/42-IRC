@@ -67,6 +67,7 @@ class Server
 		void closeOpenedSockets();
 		void sigHandler();
 		bool serverIsRunning();
+		void removePollFd(int fd);
 };
 
 

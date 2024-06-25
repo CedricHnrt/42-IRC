@@ -8,6 +8,7 @@
 #include <PrimitivePredicate.hpp>
 #include <cmath>
 #include <string.h>
+#include <NumericReplies.hpp>
 
 bool Server::servUp = false;
 
@@ -131,7 +132,7 @@ void Server::serverUp() throw (ServerStartingException)
 	{
 		if (poll(&this->_fds[0], this->_fds.size(), -1) == -1)
 			continue;
-		UsersCacheManager::getInstance()->deleteTimeoutUsers(serverName);
+		UsersCacheManager::getInstance()->deleteTimeoutUsers(serverName, *this);
 		const size_t size = this->_fds.size();
 		for (size_t i = 0; i < size; i++)
 		{
@@ -142,7 +143,6 @@ void Server::serverUp() throw (ServerStartingException)
 			else
 				this->handleIncomingRequest(this->_fds[i].fd);
 		}
-//		this->removeTimeoutDanglingUsers();
 	}
 	closeOpenedSockets();
 }
@@ -152,13 +152,9 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 	if (buffer.empty())
 		return;
 
-
-//	std::cout << "in handle known client, buffer =" << buffer << std::endl;
-
 	IrcLogger *logger = IrcLogger::getLogger();
 	User *currentUser;
 
-//	std::cout << "before try 1" << std::endl;
 	try
 	{
 		currentUser = UsersCacheManager::getInstance()->getFromCacheSocketFD(incomingFD);
@@ -169,21 +165,16 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		return ;
 	}
 
-
-//	std::cout << "before if 2" << std::endl;
-
 	currentUser->addToBuffer(buffer);
 	if (currentUser->isBufferValid() == WAITING) {
 		return;
 	}
-//	std::cout << "before if 3" << std::endl;
+
 	if (currentUser->isBufferValid() == KO)
 	{
 		currentUser->clearBuffer();
 		return ;
 	}
-//	buffer = currentUser->getReceivedBuffer();
-//	currentUser->clearBuffer();
 
 	StringUtils::trim(buffer, " \r\n");
 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
@@ -193,10 +184,6 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 
 	std::vector<std::string> splitted = StringUtils::split(buffer, ' ');
 
-//	std::cout << "splitted: " << std::endl;
-//	StringUtils::printvector(splitted);
-//	std::cout << std::endl;
-
 	buffer.clear();
 	if (!splitted.empty())
 	{
@@ -204,19 +191,14 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 		{
 			splitted.front().erase(0, 1);
 			StringUtils::toUpper(splitted.front());
-			// std::cout << splitted[0] << std::endl;
 		}
-		//	std::cout << "splitted[0] = " << splitted.front() << std::endl;
 		CommandManager *CManager = CommandManager::getInstance();
 		ICommand *Command = CManager->getCommand(splitted.front());
 		if (!Command)
 		{
-//			std::cout << "before if 4" << std::endl;
-
 			sendServerReply(incomingFD, ERR_UNKNOWNCOMMAND(currentUser->getNickname(), splitted.front()), RED, BOLDR);
 			return;
 		}
-		//		std::cout << "command found" << std::endl;
 		splitted.erase(splitted.begin());
 		std::vector<ArgumentsType> ExpectedArgs = Command->getArgs();
 
@@ -243,7 +225,6 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 			}
 			if (*ExpectedIt == CHANNEL)
 			{
-//				std::cout << "before if 5" << std::endl;
 				if ((*splittedIterator)[0] == '#')
 				{
 					std::string channelName = *splittedIterator;
@@ -263,7 +244,6 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 				}
 				else
 				{
-//					std::cout << "before if 6" << std::endl;
 					//Wrong argument
 					currentChannel = NULL;
 					return;
@@ -282,6 +262,11 @@ void Server::handleKnownClient(int incomingFD, std::string buffer)
 			return ;
 		}
 		Command->execute(currentUser, currentChannel, splitted);
+		if (Command->getName() == "QUIT")
+		{
+			close(incomingFD);
+			this->removePollFd(incomingFD);
+		}
 	}
 }
 
@@ -310,7 +295,18 @@ static void sendMessageOfTheDay(const User &user)
 	sendServerReply(user.getUserSocketFd(), RPL_ENDOFMOTD(user.getNickname()), GREEN, ITALIC);
 }
 
-//TODO: check isbufferonlyASCII
+void Server::removePollFd(int fd)
+{
+	for (std::vector<pollfd>::iterator it = this->_fds.begin(); it != this->_fds.end(); it++)
+	{
+		if (it->fd == fd)
+		{
+			this->_fds.erase(it);
+			break;
+		}
+	}
+}
+
 void Server::handleIncomingRequest(int incomingFD)
 {
 	char buffer[512];
@@ -318,16 +314,17 @@ void Server::handleIncomingRequest(int incomingFD)
 
 	int size = recv(incomingFD, buffer, 512, 0);
 	if (size == -1) {
-//		this->servUp = false;
+		close(incomingFD);
+		this->removePollFd(incomingFD);
 		return;
 	}
 	if (size == 0)
 	{
 		close(incomingFD);
+		this->removePollFd(incomingFD);
 		return ;
 	}
 	buffer[size] = '\0';
-	// std::cout << "new buffer: " << buffer << std::endl;
 	std::map<int, UserBuilder>::iterator it = this->_danglingUsers.find(incomingFD);
 	std::string parse = buffer;
 
@@ -371,12 +368,9 @@ void Server::handleIncomingRequest(int incomingFD)
 			logger->log(IrcLogger::ERROR, e.what());
 		}
 		if (parse.find("\r\n") != std::string::npos) {
-			// std::cout << "parse: " << parse << std::endl;
 			this->handleKnownClient(incomingFD, parse);
 			user->clearBuffer();
 		}
-		// else
-		// 	IrcLogger::getLogger()->log(IrcLogger::INFO, "Known client");
 		bzero(buffer, 512);
 		parse.clear();
 		return;

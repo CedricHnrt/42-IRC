@@ -3,10 +3,14 @@
 
 	#include "User.hpp"
 	#include "UserExceptions.hpp"
+	
 
 //	#include "Channel.hpp"
 	#include <list>
 
+
+	class Server;
+	
 	class UsersCacheManager
 	{
 		private:
@@ -24,7 +28,7 @@
 			User* getFromNickname(std::string &nickname) throw (UserCacheExceptionString);
 			bool doesNicknameAlreadyExist(const std::string &nickname) const;
 			void deleteFromCache(size_t uniqueId) throw(UserCacheException);
-			void deleteTimeoutUsers(std::string serverName);
+			void deleteTimeoutUsers(std::string serverName, Server &serv);
 			std::list<User *> getCache();
 			size_t getUniqueIdCounter() const;
 			static UsersCacheManager* getInstance();
