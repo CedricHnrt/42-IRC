@@ -10,14 +10,12 @@ Who::Who()
 	this->_description = "Displays all users in a channel";
 	this->_permissionLevel = 0;
 	this->_usage = "/who #<channel>";
-
 	this->_expectedArgs.push_back(CHANNEL);
 }
 
 #include <iostream>
 void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
-	// std::cout << "Who::execute" << std::endl;
 	(void) channel;
 
 	std::string ChannelName = args.front();
@@ -36,10 +34,8 @@ void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 			currentChannel->getUserByNickname(user->getNickname());
 			std::vector<User *> userList = currentChannel->getChannelsUsers();
 
-			// std::cout << "before for" << std::endl;
 			for (std::vector<User *>::iterator it = userList.begin() ; it != userList.end() ; ++it)
 			{
-//				if (*it != user)
 				sendServerReply(user->getUserSocketFd(), RPL_WHOREPLY(ChannelName, user->getNickname(), (*it)->getUserName()), -1, DEFAULT);
 			}
 			sendServerReply(user->getUserSocketFd(), RPL_ENDOFWHO(user->getNickname()), -1, DEFAULT);

@@ -45,6 +45,7 @@ void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 //			sendQuitMessageToChannel(*it, user, StringUtils::getMessage(args));
 			(*it)->quitReplyAll(user, StringUtils::getMessage(args));
 		}
+
 	}
 	catch (UserCacheException &exception) {
 		IrcLogger::getLogger()->log(IrcLogger::ERROR, "An error occurred during user quit command !");

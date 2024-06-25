@@ -47,7 +47,6 @@ bool UserPredicateFD::operator () (User *user)
 
 bool UserPredicateFD::operator == (int userId)
 {
-	// std::cout << "fd: " << this->socketFD << std::endl;
 	return userId == this->socketFD;
 }
 

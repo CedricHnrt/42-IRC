@@ -141,7 +141,6 @@ void StringUtils::replaceAll(std::string &line, const std::string &key, const st
 
 std::vector<std::string> StringUtils::split(const std::string &input, int c)
 {
-//	std::cout << "in split" << std::endl;
 
 	std::vector<std::string> result;
 	if (input.empty())
@@ -202,8 +201,6 @@ std::vector<std::string> StringUtils::split(const std::string &input, int c)
 	{
 		StringUtils::trim(*it, "\r\n ");
 	}
-//	for (std::vector<std::string >::iterator it = result.begin() ; it != result.end() ; ++it)
-//		std::cout << *it << std::endl;
 
 	return result;
 }

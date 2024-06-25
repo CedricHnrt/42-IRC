@@ -1,5 +1,6 @@
 #include "Channel.hpp"
 #include "ChannelProperties.hpp"
+#include "IrcLogger.hpp"
 
 #include "User.hpp"
 
@@ -145,6 +146,10 @@ void Channel::nameReplyAll()
 
 void Channel::nameReplyAllExceptCaller(const std::string &callerName)
 {
+    if (this->properties == NULL) {
+        IrcLogger::getLogger()->log(IrcLogger::ERROR, "Channel does not exist anymore   ");
+        return;
+    }
 	ChannelProperties *properties = this->getProperties();
 	std::map<size_t, std::string> map = properties->getMap();
 

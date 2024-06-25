@@ -52,14 +52,6 @@ void Invite::execute(User *user, Channel *channel, std::vector<std::string> args
 
 		properties = channelP->getProperties();
 
-
-// 		if (!properties->isUserOperator(user->getUniqueId()))
-// 		{
-// //			std::cout << "KO 1" << std::endl;
-// 			sendServerReply(user->getUserSocketFd(), ERR_NOPRIVILEGES(user->getNickname()), -1, DEFAULT);
-// 			return ;
-// 		}
-
 		if (!userManager->doesNicknameAlreadyExist(invitedUser))
 		{
 			logger->log(IrcLogger::ERROR, ("/invite: Error: " + invitedUser + ": no such user"));

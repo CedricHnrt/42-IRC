@@ -18,14 +18,12 @@ static void handleBanMode(User *user, std::string channelName, std::vector<std::
 {
 	(void)user;
 
-	std::cout << "handleBanMode" << std::endl;
 	Channel *targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelName);
 	ChannelProperties *properties = targetChannel->getProperties();
 	User *targetUser = UsersCacheManager::getInstance()->getFromNickname(args[1]);
 
 	if (mode == PLUS)
 	{
-		std::cout << "BAN" << std::endl;
 		if (targetChannel->isUserInChannel(targetUser->getNickname()))
 		{
 			std::string message = "You've been banned from #" + channelName;
@@ -256,7 +254,6 @@ static bool isAValidModeChar(char c)
 
 void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
-	// std::cout << "Mode::execute" << std::endl;
 	
 
 	(void) channel;
@@ -266,7 +263,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 	Channel *targetChannel;
 
 	if (args[0][0] != '#') {
-		// std::cout << "Mode::execute: ERR_NEEDMOREPARAMS" << std::endl;
 		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getNickname(), this->_name), -1, DEFAULT);
 		return;
 	}
@@ -277,12 +273,10 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	try {
 		targetChannel = ChannelCacheManager::getInstance()->getFromCacheString(channelNew);
-		// std::cout << "users on channel: " << targetChannel->getChannelsUsers().size() << std::endl;
 	}
 	catch (const std::exception &e) {
-		std::cout << e.what() << std::endl;
+	    IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 		sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), channelNew), -1, DEFAULT);
-		// std::cout << "RETUNINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG" << std::endl;
 		return;
 	}
 	ChannelProperties *properties = targetChannel->getProperties();
@@ -290,7 +284,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 
 	if (properties->isUserOnChannel(user->getUniqueId()) == false)
 	{
-		// std::cout << "Mode::execute: ERR_NOTONCHANNEL" << std::endl;
 		sendServerReply(user->getUserSocketFd(), ERR_NOTONCHANNEL(user->getNickname(), channelNew), -1, DEFAULT);
 		return ;
 	}
@@ -390,7 +383,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 					hasModification = true;
 				}
 				catch (std::exception &e) {
-					std::cout << e.what() << std::endl;
+				    IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 				}
 			}
 			else if (*sIt == 'b')
@@ -403,7 +396,6 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 				}
 				catch (const std::exception &e) {
 					IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
-					// std::cout << e.what() << std::endl;
 				}
 			}
 			else if (userModes.find(*sIt) != std::string::npos) {
@@ -412,7 +404,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 				}
 				catch (UserCacheExceptionString &e) {
 					sendServerReply(user->getUserSocketFd(), ERR_USERNOTINCHANNEL(user->getNickname(), args[1], channelNew), -1, DEFAULT);
-					std::cout << e.what() << std::endl;
+				    IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 				}
 			}
 			else if (channelModes.find(*sIt) != std::string::npos) {
@@ -421,7 +413,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 					hasModification = true;
 				}
 				catch (std::exception &e) {
-					std::cout << e.what() << std::endl;
+				    IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 				}
 			}
 		}
