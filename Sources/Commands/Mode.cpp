@@ -280,9 +280,9 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 		// std::cout << "users on channel: " << targetChannel->getChannelsUsers().size() << std::endl;
 	}
 	catch (const std::exception &e) {
-		std::cout << e.what() << std::endl;
+		IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 		sendServerReply(user->getUserSocketFd(), ERR_NOSUCHCHANNEL(user->getNickname(), channelNew), -1, DEFAULT);
-		// std::cout << "RETUNINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG" << std::endl;
+		std::cout << "RETUNINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG" << std::endl;
 		return;
 	}
 	ChannelProperties *properties = targetChannel->getProperties();
@@ -295,8 +295,10 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 		return ;
 	}
 
+	std::cout << "args size: " << args.size() << std::endl;
 	if (args.size() == 0)
 	{
+		std::cout << "Mode::execute: RPL_CHANNELMODEIS" << std::endl;
 		if (properties->isPasswordSet() == true)
 			sendServerReply(user->getUserSocketFd(), RPL_CHANNELMODEISWITHKEY(user->getNickname(), channelNew, properties->getChannelModes(), properties->getPassword()), -1, DEFAULT);
 		else
@@ -412,7 +414,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 				}
 				catch (UserCacheExceptionString &e) {
 					sendServerReply(user->getUserSocketFd(), ERR_USERNOTINCHANNEL(user->getNickname(), args[1], channelNew), -1, DEFAULT);
-					std::cout << e.what() << std::endl;
+					IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 				}
 			}
 			else if (channelModes.find(*sIt) != std::string::npos) {
@@ -421,7 +423,7 @@ void Mode::execute(User *user, Channel *channel, std::vector<std::string> args)
 					hasModification = true;
 				}
 				catch (std::exception &e) {
-					std::cout << e.what() << std::endl;
+					IrcLogger::getLogger()->log(IrcLogger::ERROR, e.what());
 				}
 			}
 		}

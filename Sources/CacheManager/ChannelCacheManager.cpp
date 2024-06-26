@@ -46,6 +46,7 @@ void ChannelCacheManager::deleteFromCache(size_t channelId) throw (ChannelCacheE
 	std::list<Channel *>::iterator iterator = std::find_if(channels.begin(), channels.end(),  ChannelPredicate(channelId));
 	if (iterator != channels.end())
 	{
+		delete *iterator;
 		channels.erase(iterator);
 		return ;
 	}

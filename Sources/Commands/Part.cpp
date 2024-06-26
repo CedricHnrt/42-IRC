@@ -11,20 +11,21 @@ Part::Part()
 	this->_expectedArgs.push_back(STRING);
 }
 
-void Part::sendPartMessageToChan(User *user, Channel *channel, const std::string &reason)
+int Part::sendPartMessageToChan(User *user, Channel *channel, const std::string &reason)
 {
 	std::vector<User *> userList = channel->getChannelsUsers();
 	if (userList.empty())
 	{
 		try {
 			ChannelCacheManager::getInstance()->deleteFromCache(channel->getUniqueId());
-			delete channel;
+			channel = NULL;
+			return 1;
 		}
 		catch (ChannelCacheException &exception) {
 			IrcLogger *logger = IrcLogger::getLogger();
 			logger->log(IrcLogger::ERROR, exception.what());
+			return 0;
 		}
-		return;
 	}
 	else {
 		for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
@@ -33,6 +34,7 @@ void Part::sendPartMessageToChan(User *user, Channel *channel, const std::string
 							DEFAULT);
 		}
 	}
+	return 0;
 }
 
 void Part::execute(User *user, Channel *channel, std::vector<std::string> args)
@@ -55,8 +57,9 @@ void Part::execute(User *user, Channel *channel, std::vector<std::string> args)
 						RPL_PART(user_id(user->getNickname(), user->getUserName()), channel->getName(), reason), -1,
 						DEFAULT);
 		channel->removeUserFromChannel(user);
-		sendPartMessageToChan(user, channel, reason);
-		channel->nameReplyAllExceptCaller(user->getNickname());
+		int res = sendPartMessageToChan(user, channel, reason);
+		if (res == 0)
+			channel->nameReplyAllExceptCaller(user->getNickname());
 	}
 	catch (ChannelCacheException &exception) {
 		IrcLogger *logger = IrcLogger::getLogger();

@@ -138,6 +138,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				newChannel = Builder.build();
 				newChannel->addUserToChannel(user);
 				ChanManager->addToCache(newChannel);
+				std::cout << "new channel created, name: " << newChannel->getName() << std::endl;
 			}
 			catch (std::exception &e)
 			{

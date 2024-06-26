@@ -8,7 +8,7 @@ class Part : public ICommand
 	public :
 		Part();
 		void execute(User *user, Channel *channel, std::vector<std::string>args);
-		void sendPartMessageToChan(User *user, Channel *channel, const std::string& message);
+		int sendPartMessageToChan(User *user, Channel *channel, const std::string& message);
 };
 
 #endif //IRC_PART_HPP

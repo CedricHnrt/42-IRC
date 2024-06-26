@@ -313,6 +313,7 @@ void Server::handleIncomingRequest(int incomingFD)
 	User *user;
 
 	int size = recv(incomingFD, buffer, 512, 0);
+	std::cout << "buffer: \"" << buffer << "\'" << std::endl;
 	if (size == -1) {
 		close(incomingFD);
 		this->removePollFd(incomingFD);

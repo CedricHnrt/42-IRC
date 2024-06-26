@@ -50,6 +50,7 @@ enum BUFFERSTATUS {
 			std::string &getReceivedBuffer();
 			int isBufferValid() const;
 			void clearBuffer();
+			void removeChannelFromList(size_t uid);
 
 		private:
 			friend class UserBuilder;

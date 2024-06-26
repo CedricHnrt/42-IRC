@@ -1,5 +1,6 @@
 #include "Channel.hpp"
 #include "ChannelProperties.hpp"
+#include "ChannelCacheManager.hpp"
 
 #include "User.hpp"
 
@@ -111,6 +112,7 @@ void Channel::removeUserFromChannel(User *user) {
 	if (it != this->_usersInChannel.end()) {
 		this->_usersInChannel.erase(it);
 		this->properties->getMap().erase(user->getUniqueId());
+		user->removeChannelFromList(this->uniqueId);
 	}
 }
 
@@ -174,17 +176,23 @@ void Channel::joinReplyAll(const std::string &newUser)
 	}
 }
 
-void Channel::quitReplyAll(User *leftUser, const std::string &message)
+int Channel::quitReplyAll(User *leftUser, const std::string &message)
 {
 	std::vector<User *> userList = this->getChannelsUsers();
+	// ChannelCacheManager *Manager = ChannelCacheManager::getInstance();
 	if (userList.empty()) {
-			delete this;
+			// Manager->deleteFromCache(this->getUniqueId());
+			return 1;
 	}
-	for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
-		sendServerReply((*it)->getUserSocketFd(),
-						RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
-						-1, DEFAULT);
+	else
+	{
+		for (std::vector<User *>::iterator it = userList.begin(); it != userList.end(); it++) {
+			sendServerReply((*it)->getUserSocketFd(),
+							RPL_QUIT(user_id(leftUser->getNickname(), leftUser->getUserName()), message),
+							-1, DEFAULT);
+		}
 	}
+	return 0;
 }
 
 void Channel::topicReplyAll()

@@ -132,5 +132,17 @@ void User::clearBuffer()
 	this->receivedBuffer.clear();
 }
 
+void User::removeChannelFromList(size_t uid)
+{
+	std::vector<Channel *>::iterator it = this->channelList.begin();
+	while (it != this->channelList.end()) {
+		if ((*it)->getUniqueId() == uid) {
+			this->channelList.erase(it);
+			return;
+		}
+		++it;
+	}
+}
+
 
 

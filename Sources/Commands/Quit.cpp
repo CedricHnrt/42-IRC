@@ -32,19 +32,28 @@ Quit::Quit()
 void Quit::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
 	(void) channel;
+	std::vector<size_t> channelsTodelete;
 	try {
 		std::vector<Channel *> channelList = user->getChannelList();
-		if (channelList.empty()) {
-			UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
-			UsersCacheManager::getInstance()->addToLeftCache(user);
-			return;
-		}
-		for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); it++) {
+		for (std::vector<Channel *>::iterator it = channelList.begin(); it != channelList.end(); ++it) {
 			(*it)->nameReplyAllExceptCaller(user->getNickname());
 			(*it)->removeUserFromChannel(user);
 //			sendQuitMessageToChannel(*it, user, StringUtils::getMessage(args));
-			(*it)->quitReplyAll(user, StringUtils::getMessage(args));
+			int res = (*it)->quitReplyAll(user, StringUtils::getMessage(args));
+			if (res == 1) {
+				channelsTodelete.push_back((*it)->getUniqueId());
+			}
+			for (std::vector<size_t>::iterator it = channelsTodelete.begin(); it != channelsTodelete.end(); ++it) {
+				try {
+					ChannelCacheManager::getInstance()->deleteFromCache(*it);
+				}
+				catch (ChannelCacheException &exception) {
+					// IrcLogger::getLogger()->log(IrcLogger::ERROR, exception.what());
+				}
+			}
 		}
+		UsersCacheManager::getInstance()->deleteFromCache(user->getUniqueId());
+		UsersCacheManager::getInstance()->addToLeftCache(user);
 	}
 	catch (UserCacheException &exception) {
 		IrcLogger::getLogger()->log(IrcLogger::ERROR, "An error occurred during user quit command !");

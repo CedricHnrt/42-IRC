@@ -40,7 +40,7 @@
 			void nameReplyAllExceptCaller(const std::string &callerName);
 			void joinReplyAll(const std::string &newUser);
 			void whoReplyAll();
-			void quitReplyAll(User *leftUser, const std::string &message);
+			int quitReplyAll(User *leftUser, const std::string &message);
 			void topicReplyAll();
 			void setTopic(const std::string& topic);
 			void modeReplyAll();
