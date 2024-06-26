@@ -3,6 +3,7 @@
 //
 
 #include "Who.hpp"
+#include <unistd.h>
 
 Who::Who()
 {
@@ -17,6 +18,7 @@ Who::Who()
 #include <iostream>
 void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 {
+	usleep(100);
 	// std::cout << "Who::execute" << std::endl;
 	(void) channel;
 
@@ -54,8 +56,8 @@ void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 	}
 	catch (ChannelCacheException &e)
 	{
-		IrcLogger *logger = IrcLogger::getLogger();
-		logger->log(IrcLogger::ERROR, e.what());
+		// IrcLogger *logger = IrcLogger::getLogger();
+		// logger->log(IrcLogger::ERROR, e.what());
 		return ;
 	}
 }
