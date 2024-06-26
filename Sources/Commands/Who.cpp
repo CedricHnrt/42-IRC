@@ -20,7 +20,7 @@ void Who::execute(User *user, Channel *channel, std::vector<std::string> args)
 	// std::cout << "Who::execute" << std::endl;
 	(void) channel;
 
-	if (args.size() < 2)
+	if (args.size() < 1)
 	{
 		sendServerReply(user->getUserSocketFd(), ERR_NEEDMOREPARAMS(user->getUserName(), this->_name), -1, DEFAULT);
 		return ;

@@ -138,7 +138,7 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 				newChannel = Builder.build();
 				newChannel->addUserToChannel(user);
 				ChanManager->addToCache(newChannel);
-				std::cout << "new channel created, name: " << newChannel->getName() << std::endl;
+				// std::cout << "new channel created, name: " << newChannel->getName() << std::endl;
 			}
 			catch (std::exception &e)
 			{
@@ -153,11 +153,14 @@ void Join::execute(User *user, Channel *channel, std::vector<std::string>args)
 			properties->setPasswordStatus(false);
 			user->addChannelToList(newChannel);
 			sendServerReply(user->getUserSocketFd(), RPL_JOIN(user_id(user->getNickname(), user->getUserName()), newChannel->getName()), -1, DEFAULT);
-			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), ChanManager->getCache().front()->getName()), -1, DEFAULT);
+			sendServerReply(user->getUserSocketFd(), RPL_NOTOPIC(user->getUserName(), newChannel->getName()), GREEN, DEFAULT);
 			sendServerReply(user->getUserSocketFd(), RPL_NAMREPLY(user->getNickname(), "<@|*=|:|>", newChannel->getName(),newChannel->getUserList()), -1, DEFAULT);
 			//[3]
 			// std::cout << "users on channel: " << newChannel->getChannelsUsers().size() << std::endl;
 		}
+		// std::list<Channel *> cache = ChanManager->getCache();
+		// for (std::list<Channel *>::iterator it = cache.begin() ; it != cache.end() ; ++it)
+		// 	std::cout << "channel name: " << (*it)->getName() << std::endl;
 	}
 	//[2]
 }
